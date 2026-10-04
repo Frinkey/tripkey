@@ -165,20 +165,6 @@ input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=c
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
 (()=>{'use strict';
-/* ================= Constantes & utilitaires globaux ================= */
-const OTM_API_KEY = '5ae2e3f221c38a28845f05b60d69059f50b8de59fa1d8bd95d907662';
-let OTM_ERRORS = [];
-
-// Intercepte les erreurs globales pour le diagnostic technique
-window.addEventListener('error', function(e) {
-    OTM_ERRORS.push('✕ JS Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
-    if(typeof renderDiscover === 'function' && typeof tabNow !== 'undefined' && tabNow === 'discover') renderDiscover();
-});
-window.addEventListener('unhandledrejection', function(e) {
-    OTM_ERRORS.push('✕ Promise Rejection: ' + (e.reason && e.reason.stack ? e.reason.stack : String(e.reason)));
-    if(typeof renderDiscover === 'function' && typeof tabNow !== 'undefined' && tabNow === 'discover') renderDiscover();
-});
-
 /* ================= Internationalisation (i18n) ================= */
 const I18N={
   fr:{
@@ -232,6 +218,58 @@ const I18N={
     months_short:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
     cat_names:{v:'Sight',a:'Activity',f:'Food',n:'Nightlife'},
     slots:{m:'Morning',a:'Afternoon',s:'Sunset',e:'Evening'}
+  },
+  es:{
+    code:'es',dir:'ltr',name:'Español',flag:'🇪🇸',
+    nav_map:'Mapa',nav_plan:'Itinerario',nav_places:'Lugares',nav_explore:'Explorar',nav_trip:'Viaje',nav_assistant:'IA',
+    filters_down:'Filtros ▾',filters_up:'Filtros ▴',
+    welcome_desc:'Planifica cualquier viaje en un mapa interactivo: lugares, días, reservas y presupuesto. Cada viaje empieza en blanco.',
+    create_first_trip:'Crear mi primer viaje',import_backup:'Importar copia',
+    hide_planned:'Ocultar programados',hide_unplaced:'Ocultar sin ubicar',unplaced_btn:'📍 {n} sin ubicar',
+    empty_day:'Sin visitas previstas — añade actividades desde el mapa o Explorar.',
+    explore_title:'Explorar {dest}',explore_source:'Estilo de recomendaciones',
+    explore_wiki:'🏛 Lo imprescindible',explore_osm:'🎡 Ocio y actividades',
+    search_placeholder:'Buscar actividad en {dest}…',find:'Buscar',
+    cat_all:'✨ Ver todo',cat_attraction:'🎡 Parques y atracciones',cat_culture:'🏛 Patrimonio y museos',cat_nature:'🌿 Naturaleza y vistas',cat_food:'🍽 Gastronomía local',
+    itinerary:'Ruta',read_more:'Leer resumen completo',open_web:'Abrir sitio web ↗',book_ticket:'Reservar entradas',
+    view_details:'Ver ficha',remove_trip:'Quitar del viaje',add_places:'Guardar en mis lugares',
+    about_title:'Acerca de {name}:',no_info:'No hay información adicional disponible.',
+    loading_ideas:'⏳ Buscando las mejores ideas para {dest}…',no_ideas:'No se encontraron sugerencias. Prueba con otro filtro o término.',
+    saved_places:'Lugares guardados y deseos',search_places:'Buscar lugares o notas…',add_btn:'＋ Añadir',bulk_btn:'En lote',
+    filter_all:'Todos',filter_fav:'♥ Favoritos',filter_unp:'📍 Por ubicar',
+    filter_v:'🏛 Visitas',filter_a:'⚡ Actividades',filter_f:'🍽 Restaurantes',filter_n:'🎭 Ocio nocturno',
+    to_place_title:'Por ubicar en el mapa ({n})',on_map_title:'En el mapa ({n})',all_geolocated:'Todos tus lugares están geolocalizados.',
+    no_place_found:'Ningún lugar coincide con la búsqueda.',empty_places_book:'Tu cuaderno de viaje está vacío. Añade lugares o descubre en Explorar.',
+    days_short:['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],
+    months_short:['ene.','feb.','mar.','abr.','may.','jun.','jul.','ago.','sep.','oct.','nov.','dic.'],
+    cat_names:{v:'Visita',a:'Actividad',f:'Restaurante',n:'Ocio nocturno'},
+    slots:{m:'Mañana',a:'Tarde',s:'Atardecer',e:'Noche'}
+  },
+  ar:{
+    code:'ar',dir:'rtl',name:'العربية',flag:'🇸🇦',
+    nav_map:'الخريطة',nav_plan:'البرنامج',nav_places:'الأماكن',nav_explore:'استكشف',nav_trip:'الرحلة',nav_assistant:'ذكاء',
+    filters_down:'التصنيفات ▾',filters_up:'التصنيفات ▴',
+    welcome_desc:'خطط لأي رحلة على خريطة تفاعلية: أماكنك، أيامك، حجوزاتك وميزانيتك.',
+    create_first_trip:'إنشاء رحلتي الأولى',import_backup:'استيراد نسخة احتياطية',
+    hide_planned:'إخفاء المجدولة',hide_unplaced:'إخفاء غير المحددة',unplaced_btn:'📍 {n} بدون موقع',
+    empty_day:'لا توجد زيارات مقررة — أضف من الخريطة أو من تبويب استكشف.',
+    explore_title:'استكشف {dest}',explore_source:'نوع الاقتراحات',
+    explore_wiki:'🏛 أبرز المعالم والثقافة',explore_osm:'🎡 أنشطة وترفيه',
+    search_placeholder:'ابحث عن نشاط في {dest}…',find:'بحث',
+    cat_all:'✨ عرض الكل',cat_attraction:'🎡 مدن الملاهي والترفيه',cat_culture:'🏛 التراث والمتاحف',cat_nature:'🌿 الطبيعة والإطلالات',cat_food:'🍽 أطعمة وتذوق',
+    itinerary:'الاتجاهات',read_more:'قراءة الملخص الكامل',open_web:'فتح الموقع الأصلي ↗',book_ticket:'حجز تذاكر',
+    view_details:'عرض التفاصيل',remove_trip:'إزالة من الرحلة',add_places:'حفظ في قائمة الأماكن',
+    about_title:'حول {name}:',no_info:'لا توجد معلومات إضافية متوفرة.',
+    loading_ideas:'⏳ جاري اختيار أفضل الاقتراحات لـ {dest}…',no_ideas:'لم يتم العثور على اقتراحات. حاول تغيير الفلتر أو كلمة البحث.',
+    saved_places:'أماكني ورغباتي',search_places:'بحث في الأماكن أو الملاحظات…',add_btn:'＋ إضافة',bulk_btn:'بالجملة',
+    filter_all:'الكل',filter_fav:'♥ المفضلة',filter_unp:'📍 بانتظار التحديد',
+    filter_v:'🏛 زيارات',filter_a:'⚡ أنشطة',filter_f:'🍽 مطاعم',filter_n:'🎭 سهرات',
+    to_place_title:'بانتظار التحديد على الخريطة ({n})',on_map_title:'على الخريطة ({n})',all_geolocated:'تم تحديد موقع جميع الأماكن.',
+    no_place_found:'لا توجد نتائج مطابقة.',empty_places_book:'دفتر رحلتك فارغ. أضف أماكنك أو استكشف من الدليل.',
+    days_short:['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'],
+    months_short:['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],
+    cat_names:{v:'زيارة',a:'نشاط',f:'مطاعم',n:'سهرة'},
+    slots:{m:'صباحاً',a:'ظهراً',s:'غروب',e:'مساءً'}
   }
 };
 
@@ -263,6 +301,10 @@ function applyLang(lang){
     loadDiscover(true);
   }
 }
+
+/* ================= Constantes & utilitaires ================= */
+const OTM_API_KEY = '5ae2e3f221c38a28845f05b60d69059f50b8de59fa1d8bd95d907662';
+let OTM_ERRORS = [];
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const K='tripkit_v1',KL='egmap26d',KT='tripkit_theme',MAXD=60;
@@ -342,10 +384,6 @@ let discType='all',discList=[],discLoading=false;
 let listSearchQuery='',listFilterCat='all';
 let curGallery=[],curGalIdx=0;
 
-// Variables pour la pagination OpenTripMap
-let otmPlaces = [];
-let otmOffset = 0;
-
 const curTrip=()=>DB.trips.find(t=>t.id===DB.cur)||null;
 const cal=()=>S.cals.find(c=>c.id===S.cur)||S.cals[0],get=id=>S.acts.find(a=>a.id===id),dayO=()=>{const c=cal();return c.days[Math.min(day,c.days.length-1)]};
 const dayDate=i=>addDays(pISO(S.start)||new Date(),i),dl=i=>{const d=dayDate(i);return I18N[curLang].days_short[d.getDay()]+' '+d.getDate()+' '+I18N[curLang].months_short[d.getMonth()]};
@@ -412,123 +450,114 @@ const legTxt=l=>(l.w?'🚶 ':'🚗 ')+fmtMin(l.min)+' · '+fmtKm(l.km);
 
 /* ================= Sources de Découverte ================= */
 
-async function fetchOtmRadius(center, dest, type='all', query='') {
-  let lat = center && center[0], lng = center && center[1];
-  if(!lat || !lng){
-    try{
-      OTM_ERRORS.push("Recherche coordonnées pour : " + dest);
-      const geo = await geocodeDest(dest);
-      if(geo && geo[0]){ lat = geo[0].lat; lng = geo[0].lng; OTM_ERRORS.push(`✓ Trouvé : ${lat}, ${lng}`); }
-      else { OTM_ERRORS.push("✕ Coordonnées introuvables pour cette destination."); return []; }
-    } catch(e){
-      OTM_ERRORS.push("✕ Erreur de géocodage : " + (e.stack || String(e))); return [];
-    }
-  }
+let otmRawPlaces = [];
+let otmOffset = 0;
 
-  let kinds = 'interesting_places';
-  if (type === 'attraction') { kinds = 'amusements,sport'; }
-  else if (type === 'culture') { kinds = 'cultural,historic,architecture'; }
-  else if (type === 'nature') { kinds = 'natural,nature_reserves'; }
-  else if (type === 'food') { kinds = 'foods'; }
+async function fetchOtmActivities(center, dest, type='all', query='', loadMore=false) {
+  let catMapping = 'v';
+  if (type === 'attraction') { catMapping = 'a'; }
+  else if (type === 'culture') { catMapping = 'v'; }
+  else if (type === 'nature') { catMapping = 'a'; }
+  else if (type === 'food') { catMapping = 'f'; }
 
-  try {
-    const lang = 'en'; // OTM Radius expect 'en'
-    
-    // On recupère jusqu'à 100 lieux pour avoir de la marge pour trier et filtrer
-    const radiusUrl = `https://api.opentripmap.com/0.1/${lang}/places/radius?radius=15000&lon=${lng}&lat=${lat}&kinds=${kinds}&rate=1&format=geojson&limit=100&apikey=${OTM_API_KEY}`;
-    
-    OTM_ERRORS.push(`Requête Radius (15km) : ${kinds}`);
+  const lang = 'en'; // OTM accepte en/ru
 
-    const r = await fetchT(radiusUrl, 8000);
-    if (!r.ok) {
-        OTM_ERRORS.push(`✕ Erreur HTTP ${r.status} (Radius API)`);
-        return [];
-    }
-    
-    const data = await r.json();
-    let places = (data && data.features) ? data.features.map(f => f.properties) : [];
-    
-    places = places.filter(p => p.name && p.name.trim() !== '');
+  if (!loadMore) {
+    OTM_ERRORS = [];
+    otmRawPlaces = [];
+    otmOffset = 0;
 
-    if (query) {
-      const qNorm = query.toLowerCase().trim();
-      places = places.filter(p => p.name.toLowerCase().includes(qNorm));
-    }
-
-    // TRI PAR POPULARITÉ ! (Les lieux 'rate' = 3 ou 2 d'abord, ce sont eux qui ont des photos)
-    places.sort((a, b) => {
-       const rA = a.rate || 0;
-       const rB = b.rate || 0;
-       if (rA !== rB) return rB - rA; // décroissant
-       return (a.dist || 0) - (b.dist || 0); // puis par distance
-    });
-
-    OTM_ERRORS.push(`Tri par popularité appliqué sur ${places.length} résultats bruts.`);
-    return places;
-  } catch (e) {
-    OTM_ERRORS.push("✕ Erreur d'exécution (Radius) : " + (e.stack || String(e)));
-    return [];
-  }
-}
-
-async function loadMoreOtm() {
-    discLoading = true;
-    renderDiscover();
-
-    const xidLang = ['fr','en','es','ar','de','ru','it','pt'].includes(curLang) ? curLang : 'en';
-    const batch = otmPlaces.slice(otmOffset, otmOffset + 10);
-    
-    let catMapping = 'v';
-    if (discType === 'attraction') catMapping = 'a';
-    else if (discType === 'culture') catMapping = 'v';
-    else if (discType === 'nature') catMapping = 'a';
-    else if (discType === 'food') catMapping = 'f';
-
-    let successCount = 0;
-    
-    for (const p of batch) {
-      try {
-        const detailUrl = `https://api.opentripmap.com/0.1/${xidLang}/places/xid/${p.xid}?apikey=${OTM_API_KEY}`;
-        const res = await fetchT(detailUrl, 4000);
-        
-        if (res.ok) {
-          const details = await res.json();
-          
-          let actualCat = catMapping;
-          if (discType === 'all' && p.kinds) {
-              if (p.kinds.includes('foods')) actualCat = 'f';
-              else if (p.kinds.includes('amusements')||p.kinds.includes('sport')||p.kinds.includes('nature')) actualCat = 'a';
-          }
-
-          // Priorité aux images hautes def puis aux miniatures
-          let thumbUrl = null;
-          if (details.image) thumbUrl = details.image;
-          else if (details.preview && details.preview.source) thumbUrl = details.preview.source;
-
-          discList.push({
-            id: 'otm-' + p.xid,
-            name: details.name || p.name,
-            desc: (details.wikipedia_extracts && details.wikipedia_extracts.text) || (details.info && details.info.descr) || p.kinds.replace(/_/g, ', '),
-            lat: details.point.lat,
-            lng: details.point.lon,
-            cat: actualCat,
-            source: 'OpenTripMap',
-            sourceUrl: details.wikipedia || details.url || `https://opentripmap.com/en/card/${p.xid}`,
-            bookingUrl: details.url || null,
-            thumb: thumbUrl,
-            pageTitle: details.name || p.name
-          });
-          successCount++;
-        }
-      } catch (e) {
-          OTM_ERRORS.push(`✕ Exception détail (${p.xid}): ${e.stack || String(e)}`);
+    let lat = center && center[0], lng = center && center[1];
+    if(!lat || !lng){
+      try{
+        OTM_ERRORS.push("Recherche coordonnées pour : " + dest);
+        const geo = await geocodeDest(dest);
+        if(geo && geo[0]){ lat = geo[0].lat; lng = geo[0].lng; OTM_ERRORS.push(`✓ Trouvé : ${lat}, ${lng}`); }
+        else { OTM_ERRORS.push("✕ Coordonnées introuvables pour cette destination."); return []; }
+      } catch(e){
+        OTM_ERRORS.push("✕ Erreur de géocodage : " + e.message); return [];
       }
     }
 
-    OTM_ERRORS.push(`Page chargée : ${successCount} nouveaux lieux détaillés.`);
-    otmOffset += 10;
-    discLoading = false;
-    renderDiscover();
+    let kinds = 'interesting_places';
+    if (type === 'attraction') { kinds = 'amusements,sport'; }
+    else if (type === 'culture') { kinds = 'cultural,historic,architecture'; }
+    else if (type === 'nature') { kinds = 'natural,nature_reserves'; }
+    else if (type === 'food') { kinds = 'foods'; }
+
+    try {
+      // Limite augmentée à 50 pour avoir de quoi paginer
+      const radiusUrl = `https://api.opentripmap.com/0.1/${lang}/places/radius?radius=15000&lon=${lng}&lat=${lat}&kinds=${kinds}&rate=1&format=geojson&limit=50&apikey=${OTM_API_KEY}`;
+      OTM_ERRORS.push(`Requête Radius (15km) : ${kinds}`);
+
+      const r = await fetchT(radiusUrl, 8000);
+      if (!r.ok) {
+          OTM_ERRORS.push(`✕ Erreur HTTP ${r.status} (Radius API)`);
+          const txt = await r.text();
+          OTM_ERRORS.push(`Détails: ${txt.substring(0, 150)}`);
+          return [];
+      }
+      
+      const data = await r.json();
+      let places = (data && data.features) ? data.features.map(f => f.properties) : [];
+      OTM_ERRORS.push(`Lieux bruts trouvés : ${places.length}`);
+
+      places = places.filter(p => p.name && p.name.trim() !== '');
+
+      if (query) {
+        const qNorm = query.toLowerCase().trim();
+        places = places.filter(p => p.name.toLowerCase().includes(qNorm));
+        OTM_ERRORS.push(`Après filtre ("${query}") : ${places.length}`);
+      }
+      
+      otmRawPlaces = places;
+    } catch (e) {
+      OTM_ERRORS.push("✕ Erreur générale : " + e.message);
+      return [];
+    }
+  }
+
+  const detailedPlaces = [];
+  let successCount = 0;
+  let failCount = 0;
+  
+  // On récupère uniquement le lot de 10 suivant
+  const batch = otmRawPlaces.slice(otmOffset, otmOffset + 10);
+
+  for (const p of batch) {
+    try {
+      const detailUrl = `https://api.opentripmap.com/0.1/${lang}/places/xid/${p.xid}?apikey=${OTM_API_KEY}`;
+      const res = await fetchT(detailUrl, 4000);
+      
+      if (res.ok) {
+        const details = await res.json();
+        detailedPlaces.push({
+          id: 'otm-' + p.xid,
+          name: details.name || p.name,
+          desc: (details.wikipedia_extracts && details.wikipedia_extracts.text) || (details.info && details.info.descr) || p.kinds.replace(/_/g, ' '),
+          lat: details.point.lat,
+          lng: details.point.lon,
+          cat: catMapping,
+          source: 'OpenTripMap',
+          sourceUrl: details.wikipedia || details.url || `https://opentripmap.com/en/card/${p.xid}`,
+          bookingUrl: details.url || null,
+          thumb: details.preview ? details.preview.source : null,
+          pageTitle: details.name || p.name
+        });
+        successCount++;
+      } else {
+        failCount++;
+        if(failCount === 1) OTM_ERRORS.push(`✕ Erreur HTTP ${res.status} (fiche xid:${p.xid})`);
+      }
+    } catch (e) {
+      failCount++;
+      if(failCount === 1) OTM_ERRORS.push(`✕ Exception détail: ${e.message}`);
+    }
+  }
+  
+  otmOffset += 10;
+  OTM_ERRORS.push(`Lot n°${otmOffset/10} chargé : ${successCount} succès, ${failCount} échecs.`);
+  return detailedPlaces;
 }
 
 /* ================= Visionneuse Galerie (Lightbox) ================= */
@@ -681,7 +710,7 @@ async function doGeo(){const st=$('#gst');if(!st)return;const q=$('#en').value.t
 function pickGeo(i){const r=GR[+i];if(!r||!$('#ell'))return;$('#ell').value=r.lat+', '+r.lng;if(!$('#en').value.trim())$('#en').value=r.short;$('#gres').innerHTML='';$('#gst').textContent='✓ Emplacement sélectionné'}
 function bulkSheet(){sheet(`<h2 style="font-size:22px;margin-top:0">Ajouter plusieurs lieux</h2><p class="empty">Colle une adresse ou un nom par ligne. Les emplacements sont reconnus automatiquement.</p>
   <textarea id="bl" rows="8" autocapitalize="off" placeholder="Musée d'art moderne https://maps.app.goo.gl/…&#10;Restaurant Le Belvédère"></textarea>
-  <select id="bc">${Object.entries(I18N[curLang].cat_names).map(([k,v])=>`<option value="${k}" ${k===a.c?'selected':''}>${v}</option>`).join('')}</select><div id="bst" class="gst"></div>
+  <select id="bc">${Object.entries(I18N[curLang].cat_names).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select><div id="bst" class="gst"></div>
   <div class="row" style="padding:0"><button class="btn g" data-bulkgo>Ajouter tout</button><button class="btn s" data-close>Annuler</button></div>`)}
 async function bulkGo(){if(bulkBusy)return;const lines=$('#bl').value.split('\n').map(x=>x.trim()).filter(Boolean);if(!lines.length){toast('Colle au moins une ligne');return}
   bulkBusy=true;const cat=$('#bc').value,out=[];let found=0;
@@ -796,20 +825,23 @@ function renderList(){
 }
 
 /* ================= Onglet Explorer ================= */
-async function loadDiscover(force=false,query=''){
+async function loadDiscover(force=false, query='', loadMore=false){
   if(!S)return;
-  if(discList.length&&!force&&!query)return;
+  if(!loadMore && discList.length && !force && !query)return;
   
   discLoading=true; 
   renderDiscover();
   
-  OTM_ERRORS = []; 
-  otmPlaces = await fetchOtmRadius(S.center, S.dest, discType, query);
-  otmOffset = 0;
-  discList = [];
-
-  discLoading = false; 
-  await loadMoreOtm();
+  const newPlaces = await fetchOtmActivities(S.center, S.dest, discType, query, loadMore);
+  
+  if (loadMore) {
+    discList.push(...newPlaces);
+  } else {
+    discList = newPlaces;
+  }
+  
+  discLoading=false; 
+  renderDiscover();
 }
 
 function findExistingAct(item){
@@ -834,15 +866,15 @@ function renderDiscover(){
   <div class="row" style="padding-bottom:12px">${types.map(([k,l])=>`<button class="chip ${discType===k?'on':''}" data-disctype="${k}">${l}</button>`).join('')}</div>`;
 
   if (OTM_ERRORS && OTM_ERRORS.length > 0) {
-     h += `<details class="note" style="border-color:var(--bad); background:var(--sf);">
-           <summary><b style="color:var(--bad)">Logs de diagnostic (OTM)</b></summary>
-           <ul style="margin:5px 0 0; padding-left:20px; font-size:11px; color:var(--mu); max-height:250px; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; line-height:1.4; display:block; word-break:break-word; white-space:pre-wrap;">
+     h += `<div class="note" style="border-color:var(--bad); background:var(--sf); max-height:200px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
+           <b style="color:var(--bad)">Logs de diagnostic (OTM) :</b>
+           <ul style="margin:5px 0 0; padding-left:20px; font-size:12px; color:var(--mu); line-height:1.5;">
              ${OTM_ERRORS.map(err => `<li>${esc(err)}</li>`).join('')}
            </ul>
-           </details>`;
+           </div>`;
   }
 
-  if(!discList.length && discLoading){
+  if(discLoading && !discList.length){
     h+=`<div class="empty" style="text-align:center;padding:40px 0">${t('loading_ideas',{dest:esc(S.dest)})}</div>`;
   } else if(!discList.length && !discLoading){
     h+=`<div class="note" style="cursor:default">${t('no_ideas')}</div>`;
@@ -884,10 +916,14 @@ function renderDiscover(){
         </div>
       </div>`;
     }).join('')+`</div>`;
-
-    if(otmOffset < otmPlaces.length) {
-      if(discLoading) h += `<div class="empty" style="text-align:center;padding:20px 0">⏳ Chargement...</div>`;
-      else h += `<button class="btn s" style="width:100%;margin-top:10px;margin-bottom:20px;" data-otmmore>Charger plus d'idées (${otmOffset}/${otmPlaces.length})</button>`;
+    
+    // Bouton de pagination (si on a encore des lieux bruts à charger)
+    if (otmOffset < otmRawPlaces.length) {
+      if(discLoading) {
+         h += `<button class="btn s" style="width:100%;margin-top:10px;" disabled>Chargement...</button>`;
+      } else {
+         h += `<button class="btn s" data-otmmore style="width:100%;margin-top:10px;">Charger plus d'idées (${otmRawPlaces.length - otmOffset} restantes)</button>`;
+      }
     }
   }
   $('#discover').innerHTML=h;
@@ -1178,8 +1214,8 @@ function onClick(e){
   
   if(d.disctype){discType=d.disctype;loadDiscover(true);return}
   if('discsearch' in d){const q=($('#discq')||{}).value||'';loadDiscover(true,q);return}
+  if('otmmore' in d){const q=($('#discq')||{}).value||'';loadDiscover(true,q,true);return}
   if(d.adddisc!==undefined){addActivityFromDisc(+d.adddisc);return}
-  if('otmmore' in d){loadMoreOtm();return;}
   if(d.theme){setTheme(d.theme);return}
   if(d.sub){infoSub=d.sub;renderInfo();return}
   if('edittrip' in d){tripForm(S.id);return}
