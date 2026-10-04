@@ -797,7 +797,7 @@ function infoRes(){const l=[...S.res].sort((a,b)=>(a.date||'9999').localeCompare
   return`<button class="btn g" data-addres style="width:100%;margin-bottom:10px">＋ Enregistrer une réservation</button>`+(l.map(r=>`<div class="card" data-resid="${r.id}"><span style="font-size:22px">${RT[r.k][1]}</span><div class="nm"><b>${esc(r.t)}</b><small>${r.date?fmtD(pISO(r.date))+(r.time?' · '+r.time:''):'Non datée'}${r.ref?' · Confirmation : '+esc(r.ref):''}</small></div>${r.url?`<a class="btn s sm" target="_blank" rel="noopener" href="${esc(r.url)}">Voir mon billet</a>`:''}</div>`).join('')||'<div class="empty">Retrouvez au même endroit vos billets de train, réservations d’hôtel, vols et tickets.</div>')}
 function resSheet(id){const r=id?S.res.find(x=>x.id===id):{k:'f',t:'',date:S.start,time:'',ref:'',url:'',note:''};if(!r)return;
   sheet(`<h2 style="font-size:22px;margin-top:0">${id?'Modifier ma réservation':'Nouvelle réservation'}</h2>
-  <select id="rk">${Object.entries(RT).map(([k,v])=>`<option value="${k}" ${k===r.k?'selected':''}>${v[1]}${v[0]}</option>`).join('')}</select>
+  <select id="rk">${Object.entries(RT).map(([k,v])=>`<option value="${k}" ${k===r.k?'selected':''}>${v[1]} ${v[0]}</option>`).join('')}</select>
   <input id="rt" placeholder="Description (ex : Vol aller, Nuit d'hôtel)" value="${esc(r.t)}">
   <div class="two"><div><label class="lb">Date</label><input id="rd" type="date" value="${esc(r.date)}"></div><div><label class="lb">Heure</label><input id="rh" type="time" style="width:100%;margin:4px 0 10px;padding:13px" value="${esc(r.time)}"></div></div>
   <input id="rr" placeholder="Numéro de réservation / dossier" value="${esc(r.ref)}"><input id="ru" inputmode="url" autocapitalize="off" placeholder="Lien vers la confirmation" value="${esc(r.url)}"><textarea id="rn" rows="3" placeholder="Informations complémentaires">${esc(r.note)}</textarea>
@@ -820,13 +820,13 @@ function infoBudget(){const B=budgetData();let h=`<div class="card blk"><small>T
   h+=`<h3>Toutes vos dépenses (${S.exp.length})</h3>`+(S.exp.map(x=>`<div class="card" data-expid="${x.id}"><span style="font-size:22px">${EXC[x.cat][1]}</span><div class="nm"><b>${esc(x.t)}</b><small>${EXC[x.cat][0]} · ${x.day==null?'Général':esc(dl(x.day))}${x.by?' · Payé par '+esc((S.people.find(p=>p.id===x.by)||{}).name||''):''}</small></div><b>${fm(x.amt)}</b></div>`).join('')||'<div class="empty">Aucune dépense pour l’instant.</div>');return h}
 expSheet=(id)=>{const x=id?S.exp.find(e=>e.id===id):{t:'',amt:'',cat:'f',day:Math.min(day,S.n-1),by:null};if(!x)return;
   sheet(`<h2 style="font-size:22px;margin-top:0">${id?'Modifier la dépense':'Nouvelle dépense'}</h2><input id="xt" placeholder="Motif (ex : Restaurant, Entrées musée)" value="${esc(x.t)}">
-  <div class="two"><div><label class="lb">Montant (${esc(S.money)})</label><input id="xa" inputmode="decimal" placeholder="0" value="${x.amt}"></div><div><label class="lb">Catégorie</label><select id="xc">${Object.entries(EXC).map(([k,v])=>`<option value="${k}" ${k===x.cat?'selected':''}>${v[1]}${v[0]}</option>`).join('')}</select></div></div>
+  <div class="two"><div><label class="lb">Montant (${esc(S.money)})</label><input id="xa" inputmode="decimal" placeholder="0" value="${x.amt}"></div><div><label class="lb">Catégorie</label><select id="xc">${Object.entries(EXC).map(([k,v])=>`<option value="${k}" ${k===x.cat?'selected':''}>${v[1]} ${v[0]}</option>`).join('')}</select></div></div>
   <label class="lb">Jour concerné</label><select id="xd"><option value="">Dépense générale</option>${cal().days.map((_,i)=>`<option value="${i}" ${x.day===i?'selected':''}>${esc(dl(i))}</option>`).join('')}</select>
   <label class="lb">Qui a payé ?</label><select id="xb"><option value="">Non précisé</option>${S.people.map(p=>`<option value="${p.id}" ${x.by===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select>
   <div class="row wrap" style="margin-top:6px"><button class="btn" data-saveexp="${id||''}">Enregistrer</button>${id?`<button class="btn r" data-delexp="${id}">Supprimer</button>`:''}</div>`)}
 const TPL={valise:['Ma valise',['Papiers d’identité et passeport','Cartes bancaires & un peu d’espèces','Chargeurs et batterie nomade','Adaptateur de prise international','Trousse médicale de secours','Trousse de toilette','Tenues adaptées à la saison','Crème solaire et lunettes de soleil']],docs:['Documents indispensables',['Passeport à jour','Billets de transport confirmés','Attestation d’assistance voyage','Réservations d’hébergement','Permis de conduire']],avant:['Avant le départ',['Avertir sa banque pour les paiements','Télécharger les plans hors-ligne','Faire le point sur la santé et vaccins','Préparer un peu de monnaie locale','Vérifier les billets coupe-file']]};
 function infoLists(){return(S.lists.map(l=>{const dn=l.items.filter(i=>i.done).length;return`<div class="card blk"><div class="sp" style="margin-bottom:6px"><b style="flex:1;font-size:17px">${esc(l.name)}</b><small style="color:var(--mu)">${dn}/${l.items.length}</small><button class="btn s sm" data-dellist="${l.id}" aria-label="Supprimer la liste">✕</button></div>${l.items.length?`<div class="bar"><i style="width:${dn/l.items.length*100}%"></i></div>`:''}
-    ${l.items.map(i=>`<div class="ck ${i.done?'done':''}"><button class="t" data-chk="${l.id}\vert{}${i.id}"><span class="bx">${i.done?'✓':''}</span><span class="tx">${esc(i.t)}</span></button><button class="btn s sm" data-delli="${l.id}\vert{}${i.id}" aria-label="Retirer">✕</button></div>`).join('')}
+    ${l.items.map(i=>`<div class="ck ${i.done?'done':''}"><button class="t" data-chk="${l.id}|${i.id}"><span class="bx">${i.done?'✓':''}</span><span class="tx">${esc(i.t)}</span></button><button class="btn s sm" data-delli="${l.id}|${i.id}" aria-label="Retirer">✕</button></div>`).join('')}
     <div class="sp" style="margin-top:8px"><input id="li-${l.id}" data-li="${l.id}" placeholder="Ajouter une chose à penser…"><button class="btn s" data-addli="${l.id}">＋</button></div></div>`}).join('')||'<div class="empty">Préparez vos check-lists : valise, formalités ou préparatifs.</div>')+
   `<h3>Nouvelle check-list</h3><div class="row wrap"><button class="btn s" data-newlist="">＋ Liste personnalisée</button>${Object.entries(TPL).map(([k,v])=>`<button class="btn s" data-newlist="${k}">＋ Modèle « ${v[0]} »</button>`).join('')}</div>`}
 function tripText(){const L=[`${S.flag} ${S.name} — ${rangeLbl(S)}`,`📍 ${S.dest}`,''];
@@ -880,7 +880,7 @@ function tripForm(id){
 }
 
 async function saveTrip(id){
-  const name=$('#tn').value.trim(),dest=$('#td').value.trim()||name,flag=$('#tf').value.trim()\vert{}\vert{}'🌍',money=$('#tc').value.trim()||'€',a=pISO($('#ts').value),b=pISO($('#te').value);
+  const name=$('#tn').value.trim(),dest=$('#td').value.trim()||name,flag=$('#tf').value.trim()||'🌍',money=$('#tc').value.trim()||'€',a=pISO($('#ts').value),b=pISO($('#te').value);
   if(!name)return toast('Donnez un nom à votre voyage');if(!a||!b)return toast('Renseignez les deux dates');
   const n=Math.round((b-a)/864e5)+1;if(n<1)return toast('La date de départ doit être après l’arrivée');if(n>MAXD)return toast('Maximum '+MAXD+' jours');
   const start=toISO(a);
@@ -939,4 +939,190 @@ function localAI(text){const q=NF(text),n=dayFrom(text),a=findAct(text),D=cal().
   if(/resume|planning|journee|programme|que fait/.test(q)){const l=dayEntries(n).map(e=>e.k==='act'?`${e.t} ${esc(e.a.n)}`:e.k==='note'?`${e.t} 📝 ${esc(e.it.note)}`:`${e.r.time||'—'} ${RT[e.r.k][1]} ${esc(e.r.t)}`);return{h:`<b>Au programme le ${dl(n)}</b>${D.hotel?' — 🏨 '+esc(D.hotel):''}<br>`+(l.join('<br>')||'Journée libre.')}}
   return{h:'Demandez-moi simplement : « ajoute … au jour 2 », « que faire ce soir ? », « optimise ma journée », ou « résumé de mon séjour ».'}}
 async function cloudAI(){const acts=S.acts.map(a=>({id:a.id,n:a.n,c:CT[a.c],s:a.s.join(''),lat:a.lat,lng:a.lng,prix:a.price,h:a.hrs,min:a.d}));const days=cal().days.map((d,i)=>({jour:i+1,date:dl(i),hotel:d.hotel,items:d.items.filter(x=>x.aid).map(x=>({id:x.aid,t:x.t}))}));
-  const sys='Tu es l’assistant de voyage bienveillant pour : '+S.name+' ('+S.dest+', '+rangeLbl(S)+'). Réponds en français clair et naturel, sans jargon technique. Utilise uniquement les lieux fournis (id). Propose des plannings équilibrés. Pour proposer des changements, termine par ```actions [{"op":"add"|"remove","id":"…","day":1-'+S.n+',"time":"HH:MM"}] 
+  const sys='Tu es l’assistant de voyage bienveillant pour : '+S.name+' ('+S.dest+', '+rangeLbl(S)+'). Réponds en français clair et naturel, sans jargon technique. Utilise uniquement les lieux fournis (id). Propose des plannings équilibrés. Pour proposer des changements, termine par ```actions [{"op":"add"|"remove","id":"…","day":1-'+S.n+',"time":"HH:MM"}] ```. Jour actuel : '+(day+1)+'. Données : '+JSON.stringify({acts,days});
+  const hist=AIM.filter(m=>m.t).slice(-8).map(m=>({role:m.r==='u'?'user':'assistant',content:m.t}));
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':aiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-5-5',max_tokens:900,system:sys,messages:hist})});
+  const j=await r.json();if(!r.ok)throw Error(j.error&&j.error.message||('HTTP '+r.status));return(j.content||[]).map(c=>c.text||'').join('')}
+function bubble(m,i){let h=m.h!=null?m.h:esc(m.t).replace(/\n/g,'<br>').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');if(m.ops&&m.ops.length)h+=`<br><button class="mini" data-aiapply="${i}">✓ Appliquer ${m.ops.length} suggestion(s)</button>`;return`<div class="bub ${m.r}">${h}</div>`}
+function addMsg(m){AIM.push(m);const el=$('#msgs');if(el){el.insertAdjacentHTML('beforeend',bubble(m,AIM.length-1));$('#ai').scrollTo(0,1e6)}}
+function dropTmp(){while(AIM.length&&AIM[AIM.length-1].tmp)AIM.pop();$$('.bub.tmp').forEach(b=>b.remove())}
+async function aiSend(text){text=(text||'').trim();if(!text||aiBusy)return;addMsg({r:'u',t:text});const q=$('#aiq');if(q)q.value='';
+  if(!aiKey()){addMsg({r:'a',...localAI(text)});return}
+  aiBusy=true;addMsg({r:'a',h:'…',tmp:1});{const bs=$$('.bub');if(bs.length)bs[bs.length-1].classList.add('tmp')}
+  try{const out=await cloudAI();dropTmp();let ops=[];const m=out.match(/```actions\s*([\s\S]*?)```/);if(m){try{ops=JSON.parse(m[1])}catch(e){}}addMsg({r:'a',t:out.replace(/```actions[\s\S]*?```/,'').trim(),ops})}
+  catch(e){dropTmp();addMsg({r:'a',h:'Assistant momentanément indisponible. Voici une réponse locale :<br>'+localAI(text).h})}
+  aiBusy=false}
+function applyOps(ops){undo.push(snap());if(undo.length>25)undo.shift();redo=[];let n=0;
+  for(const o of ops){const d=cal().days[(+o.day||0)-1],a=get(o.id);if(!d||!a)continue;
+    if(o.op==='add'&&!d.items.some(i=>i.aid===o.id)){d.items.push({id:uid(),aid:o.id,t:/^\d\d:\d\d$/.test(o.time||'')?o.time:(SL[a.s[0]]?SL[a.s[0]][1]:'15:00')});n++}
+    else if(o.op==='remove'){d.items=d.items.filter(i=>i.aid!==o.id);n++}}
+  save();refresh();return n}
+function renderAI(){const k=aiKey();$('#ai').innerHTML=`<h2>Votre assistant</h2><div id="msgs">${AIM.map(bubble).join('')}</div>
+  <div class="row" style="padding:6px 0">${['Idées pour ce soir','Activités du matin','Résumé de ma journée','Optimiser mon trajet'].map(t=>`<button class="chip" data-ask="${t}">${t}</button>`).join('')}</div>
+  <div class="aibar"><input id="aiq" placeholder="Posez une question sur votre séjour…" autocomplete="off"><button class="btn" data-send>Demander</button></div>
+  <details class="note" style="margin-top:12px;cursor:default"><summary><b>Connexion IA personnalisée ${k?'(activée)':'(optionnelle)'}</b></summary><p style="font-size:14px">Sans configuration, l’assistant intégré répond directement sur vos lieux et vos distances. Pour des conseils touristiques libres sur mesure, vous pouvez connecter votre propre clé Anthropic.</p><input id="aik" type="password" placeholder="sk-ant-…" value="${esc(k)}"><button class="btn s" data-aisave>Enregistrer</button> <button class="btn s" data-aiclear>Retirer</button></details>`;$('#ai').scrollTo(0,1e6)}
+
+/* ================= Navigation & clics ================= */
+function tab(t){tabNow=t;$('#dock').classList.toggle('hide',t!=='map');$('#top').style.display=t==='map'?'':'none';
+  $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));['plan','list','discover','info','ai'].forEach(p=>$('#'+p).classList.toggle('on',p===t));
+  $('#new').style.display=t==='map'?'':'none';$('#unp').style.display=t==='map'&&S&&unp().length?'':'none';
+  if(!S)return;if(t==='plan')renderPlan();if(t==='list')renderList();if(t==='discover')loadDiscover();if(t==='info')renderInfo();if(t==='ai')renderAI();
+  if(t==='map')setTimeout(()=>{map.invalidateSize();drawMap()},60)}
+function refresh(){if(!S)return;bars();drawMap();if(tabNow==='plan')renderPlan();if(tabNow==='list')renderList();if(tabNow==='discover')renderDiscover();if(tabNow==='info')renderInfo()}
+
+document.addEventListener('click',e=>{try{onClick(e)}catch(err){console.error(err);toast('Erreur : '+err.message)}});
+const CLK='button,[data-open],[data-geopick],[data-trip],[data-note],[data-item],[data-resid],[data-expid],[data-destll],[data-opnegal],#sheet';
+const num=v=>{const x=parseFloat(String(v).replace(',','.').replace(/\s/g,''));return Number.isFinite(x)?x:NaN};
+
+function onClick(e){
+  if(e.target.closest('a'))return;
+  const sug=e.target.closest('[data-destll]');
+  if(sug){
+    const d=sug.dataset;
+    const inp=$('#td');if(inp)inp.value=d.destname;
+    const [la,lo]=d.destll.split(',');
+    lastChosenCoords=[+la,+lo];
+    const list=$('#td-sug');if(list){list.style.display='none';list.innerHTML=''}
+    return;
+  }
+  const t=e.target.closest(CLK);if(!t)return;const d=t.dataset;
+  if(t.id==='sheet'){if(e.target===t)close();return}
+  if(t.id==='themebtn'){setTheme(resolved()==='dark'?'light':'dark');return}
+  if(t.id==='filtertoggle'){filterOpen=!filterOpen;bars();return}
+  if(t.id==='new'){if(!S)return;addSheet();return}
+  if(t.id==='brand'){tripsSheet();return}
+  if(t.id==='unp'){sheet(`<h2 style="font-size:20px;margin-top:0">Lieux à positionner</h2><p class="empty">Choisissez un lieu pour lui associer une position sur la carte.</p>${unp().map(a=>`<div class="near" data-open="${a.id}"><div><b>${esc(a.n)}</b><small>${CT[a.c]} · ${a.s.map(x=>SL[x]?SL[x][0]:'').join(', ')}</small></div><span>›</span></div>`).join('')}`);return}
+  if(t.id==='undo'){if(undo.length){redo.push(snap());restore(undo.pop());save();refresh()}return}
+  if(t.id==='redo'){if(redo.length){undo.push(snap());restore(redo.pop());save();refresh()}return}
+  if(t.id==='gal-close'){closeGallery();return}
+  if(t.id==='gal-prev'){if(curGallery.length){curGalIdx=(curGalIdx-1+curGallery.length)%curGallery.length;updateGalUI()}return}
+  if(t.id==='gal-next'){if(curGallery.length){curGalIdx=(curGalIdx+1)%curGallery.length;updateGalUI()}return}
+  if(d.opnegal!==undefined){
+    const item=discList[+d.opnegal];
+    if(item)openGallery(item.pageTitle||item.name,item.thumb,item.name);
+    return;
+  }
+  if(d.deldisc){
+    removeActivityFromDiscover(d.deldisc);
+    return;
+  }
+  if(d.listfilter){listFilterCat=d.listfilter;renderList();return}
+  if(d.t){tab(d.t);return}
+  if('close' in d){close();return}
+  if('newtrip' in d){tripForm();return}
+  if('trips' in d){tripsSheet();return}
+  if(d.trip){if(d.trip!==DB.cur)setTrip(d.trip);close();return}
+  if(d.savetrip!==undefined){saveTrip(d.savetrip);return}
+  if(!S)return;
+  if(d.discengine){discEngine=d.discengine;loadDiscover(true);return}
+  if(d.disctype){discType=d.disctype;loadDiscover(true);return}
+  if('discsearch' in d){const q=($('#discq')||{}).value||'';loadDiscover(true,q);return}
+  if(d.addwiki!==undefined){addActivityFromWiki(+d.addwiki);return}
+  if(d.theme){setTheme(d.theme);return}
+  if(d.sub){infoSub=d.sub;renderInfo();return}
+  if('edittrip' in d){tripForm(S.id);return}
+  if('deltrip' in d){deleteTrip();return}
+  if('addlink' in d){editSheet(null,true);return}
+  if('addman' in d){editSheet();return}
+  if(d.spick!==undefined){const[i,m]=d.spick.split('|');addFromSearch(+i,m==='day');return}
+  if(d.note!==undefined){noteSheet(d.note);return}
+  if(d.savenote!==undefined){const ti=$('#nt').value.trim(),b=$('#nb').value.trim();if(!ti&&!b){toast('La note est vide');return}const id=d.savenote;mut(()=>{if(id){const n=S.notes.find(x=>x.id===id);if(n){n.t=ti;n.b=b}}else S.notes.push({id:uid(),t:ti,b})});close();return}
+  if(d.delnote){if(confirm('Supprimer cette note ?')){mut(()=>{S.notes=S.notes.filter(x=>x.id!==d.delnote)});close()}return}
+  if('addperson' in d){const v=$('#pn').value.trim();if(!v){toast('Indiquez un prénom');return}if(S.people.length>=12){toast('12 personnes maximum');return}mut(()=>{S.people.push({id:uid(),name:v.slice(0,30)})});return}
+  if(d.delperson){const p=S.people.find(x=>x.id===d.delperson);if(p&&confirm('Retirer '+p.name+' ?'))mut(()=>{S.people=S.people.filter(x=>x.id!==d.delperson);S.exp.forEach(x=>{if(x.by===d.delperson)x.by=null})});return}
+  if('addres' in d){resSheet();return}
+  if(d.resid){resSheet(d.resid);return}
+  if(d.saveres!==undefined){const ti=$('#rt').value.trim();if(!ti){toast('Titre requis');return}const id=d.saveres,o={k:$('#rk').value,t:ti,date:$('#rd').value,time:$('#rh').value,ref:$('#rr').value.trim(),url:$('#ru').value.trim(),note:$('#rn').value.trim()};
+    if(o.url&&!/^https?:\/\//i.test(o.url))o.url='https://'+o.url;
+    mut(()=>{if(id){const r=S.res.find(x=>x.id===id);if(r)Object.assign(r,o)}else S.res.push({id:uid(),...o})});close();toast('✓ Réservation enregistrée');return}
+  if(d.delres){if(confirm('Supprimer cette réservation ?')){mut(()=>{S.res=S.res.filter(x=>x.id!==d.delres)});close()}return}
+  if('addexp' in d){expSheet();return}
+  if(d.expid){expSheet(d.expid);return}
+  if(d.saveexp!==undefined){const a=num($('#xa').value);if(!(a>0)){toast('Montant invalide');return}const ti=$('#xt').value.trim()||EXC[$('#xc').value][0],id=d.saveexp,dd=$('#xd').value,o={t:ti,amt:Math.round(a*100)/100,cat:$('#xc').value,day:dd===''?null:+dd,by:$('#xb').value||null};
+    mut(()=>{if(id){const x=S.exp.find(z=>z.id===id);if(x)Object.assign(x,o)}else S.exp.push({id:uid(),...o})});close();toast('✓ Dépense enregistrée');return}
+  if(d.delexp){mut(()=>{S.exp=S.exp.filter(x=>x.id!==d.delexp)});close();return}
+  if('setbudget' in d){const v=prompt('Budget total pour ce voyage ('+S.money+') — laisser vide pour désactiver',S.budget||'');if(v===null)return;const a=num(v);mut(()=>{S.budget=a>0?a:null});return}
+  if(d.newlist!==undefined){const tp=TPL[d.newlist];let name=tp?tp[0]:prompt('Nom de votre liste ?');if(!name||!name.trim())return;mut(()=>{S.lists.push({id:uid(),name:name.trim(),items:(tp?tp[1]:[]).map(x=>({id:uid(),t:x,done:false}))})});return}
+  if(d.dellist){if(confirm('Supprimer cette liste ?'))mut(()=>{S.lists=S.lists.filter(l=>l.id!==d.dellist)});return}
+  if(d.chk){const[l,i]=d.chk.split('|');mut(()=>{const it=(S.lists.find(x=>x.id===l)||{items:[]}).items.find(x=>x.id===i);if(it)it.done=!it.done});return}
+  if(d.delli){const[l,i]=d.delli.split('|');mut(()=>{const ls=S.lists.find(x=>x.id===l);if(ls)ls.items=ls.items.filter(x=>x.id!==i)});return}
+  if(d.addli){const inp=document.getElementById('li-'+d.addli),v=inp?inp.value.trim():'';if(!v)return;mut(()=>{const ls=S.lists.find(x=>x.id===d.addli);if(ls)ls.items.push({id:uid(),t:v.slice(0,120),done:false})});setTimeout(()=>{const n=document.getElementById('li-'+d.addli);if(n)n.focus()},30);return}
+  if('share' in d){shareTrip();return}
+  if('print' in d){printTrip();return}
+  if(d.mv){const[i,s]=d.mv.split('|');swapItem(i,+s);return}
+  if(d.item){itemSheet(d.item);return}
+  if(d.mvto){const[i,k]=d.mvto.split('|');moveItem(i,+k);return}
+  if(d.saveitem){const f=findItem(d.saveitem);if(!f)return;const tv=$('#itt').value,tx=$('#itx');mut(()=>{if(/^\d\d:\d\d$/.test(tv))f.it.t=tv;if(tx&&typeof f.it.note==='string')f.it.note=tx.value.trim()||f.it.note});close();return}
+  if(d.addnote!==undefined){const n=prompt('Texte de votre note ?');if(n&&n.trim()){const i=+d.addnote;mut(()=>{const last=dayEntries(i).pop();cal().days[i].items.push({id:uid(),note:n.trim(),t:last?mt(Math.min(1380,tm(last.t)+30)):'09:00'})})}return}
+  if(d.autofill!==undefined){const i=+d.autofill;let ch=[];mut(()=>{ch=autofill(i)});toast(ch.length?'✨ '+ch.length+' visite(s) ajoutée(s) à votre journée':'Aucun lieu libre à suggérer pour ce jour');return}
+  if(d.optim!==undefined){const i=+d.optim;if(cal().days[i].items.filter(x=>x.aid).length<2){toast('Il faut au moins deux visites pour optimiser');return}let r;mut(()=>{r=optimizeDay(i)});const g=r?r.before-r.after:0;toast(g>0.05?'⇄ Trajets réduits d’environ '+fmtKm(g):'⇄ Le trajet est déjà optimal');return}
+  if('resolve' in d){doResolve();return}
+  if('geo' in d){doGeo();return}
+  if(d.geopick!==undefined){pickGeo(d.geopick);return}
+  if('bulk' in d){bulkSheet();return}
+  if('bulkgo' in d){bulkGo();return}
+  if(d.day!==undefined){day=Math.min(+d.day,S.n-1);bars();drawMap();if('go' in d)tab('map');return}
+  if(d.send!==undefined){aiSend($('#aiq').value);return}
+  if(d.ask){aiSend(d.ask);return}
+  if(d.aiadd){const[i,n]=d.aiadd.split('|');addAt(i,+n);toast('Ajouté au '+dl(+n));addMsg({r:'a',h:'✓ « '+esc(get(i).n)+' » a été ajouté au '+dl(+n)});return}
+  if(d.aiapply){const m=AIM[+d.aiapply];const c=applyOps(m.ops||[]);m.ops=[];toast(c+' modification(s) enregistrée(s)');renderAI();return}
+  if('aisave' in d){try{localStorage.setItem(K+'_ai',$('#aik').value.trim())}catch(e){}toast('Assistant connecté');renderAI();return}
+  if('aiclear' in d){try{localStorage.removeItem(K+'_ai');localStorage.removeItem(KL+'_ai')}catch(e){}renderAI();toast('Connexion retirée');return}
+  if(d.tg){if(d.tg==='o')hideO=!hideO;else hideU=!hideU;bars();drawMap();return}
+  if(d.s){fs.has(d.s)?fs.delete(d.s):fs.add(d.s);bars();drawMap();fit();return}
+  if(d.c){fc.has(d.c)?fc.delete(d.c):fc.add(d.c);bars();drawMap();fit();return}
+  if(d.rmday){mut(()=>{const dd=dayO();dd.items=dd.items.filter(i=>i.aid!==d.rmday)});close();toast('Retiré de votre journée');return}
+  if(d.add){addToDay(d.add);const a=get(d.add);if(a&&a.lat!=null)nearSheet(d.add);else close();return}
+  if(d.add2){addToDay(d.add2);nearSheet(d.add2);return}
+  if(d.open){actSheet(d.open);return}
+  if(d.edit){editSheet(d.edit);return}
+  if('newact' in d){addSheet();return}
+  if(d.rate){const[i,n]=d.rate.split('|');mut(()=>{get(i).rate=get(i).rate==+n?0:+n});actSheet(i);return}
+  if(d.fav){mut(()=>{get(d.fav).fav=!get(d.fav).fav});actSheet(d.fav);return}
+  if(d.save!==undefined){const r=readForm(d.save);if(r){close();toast('Enregistré')}return}
+  if(d.place!==undefined){let id=d.place;if($('#en')){const r=readForm(id||'');if(!r)return;id=r.id}placing=id;close();tab('map');toast('Touchez la carte à l’endroit souhaité');return}
+  if(d.del){if(confirm('Supprimer ce lieu de votre carnet ?')){mut(()=>{S.acts=S.acts.filter(a=>a.id!==d.del);S.cals.forEach(c=>c.days.forEach(x=>x.items=x.items.filter(i=>i.aid!==d.del)))});close()}return}
+  if(d.rm){mut(()=>cal().days.forEach(x=>x.items=x.items.filter(i=>i.id!==d.rm)));close();return}
+  if(d.cal){S.cur=d.cal;day=Math.min(day,S.n-1);save();refresh();return}
+  if('newcal' in d){const n=prompt('Nom de ce nouveau planning ?');if(n&&n.trim())mut(()=>{const c=mkCal(n.trim(),S.n);S.cals.push(c);S.cur=c.id});return}
+  if('ren' in d){const n=prompt('Renommer le planning',cal().name);if(n&&n.trim())mut(()=>{cal().name=n.trim()});return}
+  if('dup' in d){mut(()=>{const c=JSON.parse(JSON.stringify(cal()));c.id=uid();c.name+=' (copie)';c.days.forEach(x=>x.items.forEach(i=>i.id=uid()));S.cals.push(c);S.cur=c.id});return}
+  if('delcal' in d){if(S.cals.length<2){toast('Conservez au moins un planning');return}if(confirm('Supprimer ce planning ?'))mut(()=>{S.cals=S.cals.filter(c=>c.id!==S.cur);S.cur=S.cals[0].id});return}
+  if(d.export){doExport(d.export==='all');return}}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeGallery();return}
+  if(e.key==='ArrowLeft'&&$('#gallery-modal').classList.contains('on')){
+    if(curGallery.length){curGalIdx=(curGalIdx-1+curGallery.length)%curGallery.length;updateGalUI()}return;
+  }
+  if(e.key==='ArrowRight'&&$('#gallery-modal').classList.contains('on')){
+    if(curGallery.length){curGalIdx=(curGalIdx+1)%curGallery.length;updateGalUI()}return;
+  }
+  if(e.key!=='Enter')return;
+  if(e.target.id==='aiq'){e.preventDefault();aiSend(e.target.value)}
+  else if(e.target.id==='discq'){e.preventDefault();loadDiscover(true,e.target.value)}
+  else if(e.target.dataset&&e.target.dataset.li){e.preventDefault();const b=document.querySelector(`[data-addli="${e.target.dataset.li}"]`);if(b)b.click()}
+  else if(e.target.id==='pn'){e.preventDefault();const b=$('[data-addperson]');if(b)b.click()}
+  else if(e.target.id==='sq'){e.preventDefault();clearTimeout(sqT);runSearch()}});
+
+document.addEventListener('change',e=>{const t=e.target,d=t.dataset;
+  if(d.time&&S){mut(()=>cal().days.forEach(x=>x.items.forEach(i=>{if(i.id===d.time&&t.value)i.t=t.value})))}
+  else if(d.hotel!==undefined&&S){mut(()=>{cal().days[+d.hotel].hotel=t.value})}
+  else if('imp' in d&&t.files[0]){doImport(t.files[0]);t.value=''}});
+
+let rt;
+document.addEventListener('input',e=>{const id=e.target.id;
+  if(id==='ema'){clearTimeout(rt);const v=e.target.value.trim();if(/^https?:\/\//i.test(v)||parseGPS(v))rt=setTimeout(doResolve,450)}
+  else if(id==='sq'){clearTimeout(sqT);sqT=setTimeout(runSearch,650)}});
+
+window.addEventListener('pagehide',save);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
+
+/* ================= Démarrage ================= */
+const boot=loadDB();DB=boot.db;S=curTrip();AIM=aiWelcome();applyTheme();
+try{localStorage.setItem(K+'_t','1');localStorage.removeItem(K+'_t')}catch(e){setTimeout(()=>toast('⚠ Pensez à exporter régulièrement votre sauvegarde'),800)}
+initMap();show();
+if(!S)setTimeout(tripForm,300);
+window.__tp={get DB(){return DB},get S(){return S},parseGPS,fromHtml,nameFromUrl,norm,resolveLink,budgetData,leg,tripText,optimizeDay,dayEntries,get themePref(){return themePref}};
+})();
+</script></body></html>
