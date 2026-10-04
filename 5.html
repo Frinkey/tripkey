@@ -671,7 +671,7 @@ function renderList(){
   }
 }
 
-/* ================= Onglet Explorer (avec icônes compactes) ================= */
+/* ================= Onglet Explorer ================= */
 async function loadDiscover(force=false,query=''){
   if(!S)return;
   if(discList.length&&!force&&!query)return;
@@ -818,7 +818,7 @@ function infoBudget(){const B=budgetData();let h=`<div class="card blk"><small>T
   if(S.people.length>=2&&Object.keys(B.paid).length)h+=`<h3>Équilibre des comptes</h3><div class="card blk">${S.people.map(p=>`<div class="kv"><span>${esc(p.name)} a réglé</span><span>${fm(B.paid[p.id]||0)}</span></div>`).join('')}<hr style="border:0;border-top:1px solid var(--ln)">${B.settle.length?B.settle.map(s=>`<div class="kv"><span>${esc(s.from)} rembourse à ${esc(s.to)}</span><span>${fm(s.a)}</span></div>`).join(''):'<div class="kv"><span>Tout le monde est à l’équilibre ✓</span><span></span></div>'}<small>Calcul automatique à parts égales pour les dépenses partagées.</small></div>`;
   else if(S.people.length<2)h+=`<div class="note" style="cursor:default"><b>Voyage à plusieurs ?</b><br>Ajoutez vos amis dans l’onglet « Aperçu » pour suivre facilement les dépenses communes.</div>`;
   h+=`<h3>Toutes vos dépenses (${S.exp.length})</h3>`+(S.exp.map(x=>`<div class="card" data-expid="${x.id}"><span style="font-size:22px">${EXC[x.cat][1]}</span><div class="nm"><b>${esc(x.t)}</b><small>${EXC[x.cat][0]} · ${x.day==null?'Général':esc(dl(x.day))}${x.by?' · Payé par '+esc((S.people.find(p=>p.id===x.by)||{}).name||''):''}</small></div><b>${fm(x.amt)}</b></div>`).join('')||'<div class="empty">Aucune dépense pour l’instant.</div>');return h}
-expSheet=(id)=>{const x=id?S.exp.find(e=>e.id===id):{t:'',amt:'',cat:'f',day:Math.min(day,S.n-1),by:null};if(!x)return;
+function expSheet(id){const x=id?S.exp.find(e=>e.id===id):{t:'',amt:'',cat:'f',day:Math.min(day,S.n-1),by:null};if(!x)return;
   sheet(`<h2 style="font-size:22px;margin-top:0">${id?'Modifier la dépense':'Nouvelle dépense'}</h2><input id="xt" placeholder="Motif (ex : Restaurant, Entrées musée)" value="${esc(x.t)}">
   <div class="two"><div><label class="lb">Montant (${esc(S.money)})</label><input id="xa" inputmode="decimal" placeholder="0" value="${x.amt}"></div><div><label class="lb">Catégorie</label><select id="xc">${Object.entries(EXC).map(([k,v])=>`<option value="${k}" ${k===x.cat?'selected':''}>${v[1]} ${v[0]}</option>`).join('')}</select></div></div>
   <label class="lb">Jour concerné</label><select id="xd"><option value="">Dépense générale</option>${cal().days.map((_,i)=>`<option value="${i}" ${x.day===i?'selected':''}>${esc(dl(i))}</option>`).join('')}</select>
