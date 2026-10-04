@@ -1418,7 +1418,7 @@ function onClick(e){
   if(d.day!==undefined){day=Math.min(+d.day,S.n-1);bars();drawMap();if('go' in d)tab('map');return}
   if(d.send!==undefined){aiSend($('#aiq').value);return}
   if(d.ask){aiSend(d.ask);return}
-  if(d.aiadd){const[i,n]=d.aiadd.split('|');addAt(i,+n);toast('Ajouté au '+dl(+n));addMsg({r:'a',h:'✓ « '+esc(get(i).n)+' » a été ajouté au '+dl(+n)});return}
+  if(d.aiadd){const[i,n]=d.aiadd.split('|');addAt(i,+n);toast('Ajouté au '+dl(+n));addMsg({r:'a',h:'✓ '+esc(get(i).n)+' ajouté'});return}
   if(d.aiapply){const m=AIM[+d.aiapply];const c=applyOps(m.ops||[]);m.ops=[];toast(c+' modification(s) enregistrée(s)');renderAI();return}
   if('aisave' in d){try{localStorage.setItem(K+'_ai',$('#aik').value.trim())}catch(e){}toast('Assistant connecté');renderAI();return}
   if('aiclear' in d){try{localStorage.removeItem(K+'_ai');localStorage.removeItem(KL+'_ai')}catch(e){}renderAI();toast('Connexion retirée');return}
@@ -1445,10 +1445,7 @@ function onClick(e){
   if(d.export){doExport(d.export==='all');return}}
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    closeGallery();
-    return;
-  }
+  if(e.key==='Escape'){closeGallery();return}
   if(e.key==='ArrowLeft'&&$('#gallery-modal').classList.contains('on')){
     if(curGallery.length){curGalIdx=(curGalIdx-1+curGallery.length)%curGallery.length;updateGalUI()}return;
   }
