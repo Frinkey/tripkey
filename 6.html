@@ -35,13 +35,17 @@ button{font-family:inherit}
 #tl{display:flex;gap:8px;overflow-x:auto;padding:0 12px 10px;scrollbar-width:none}#tl::-webkit-scrollbar{display:none}
 .tk{flex:none;min-width:150px;max-width:220px;border-radius:16px;padding:9px 12px;background:var(--sf);border:1px solid var(--ln);border-inline-start:4px solid var(--c,var(--gold));box-shadow:var(--shs);cursor:pointer}.tk b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tk small{color:var(--mu);font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tk.ghost{border:1px dashed var(--ln);border-inline-start:1px dashed var(--ln);color:var(--mu);font-size:14px;min-width:240px;white-space:normal;background:transparent;box-shadow:none;cursor:default}
-#nav{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));z-index:700;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:22px;overflow-x:auto;scrollbar-width:none}
+
+#nav-container{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));z-index:700;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:22px}
+#nav{display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
 #nav::-webkit-scrollbar{display:none}
-#nav button{flex:none;border:0;background:none;border-radius:14px;padding:6px 10px;font:700 11px ui-rounded,system-ui;color:var(--mu);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;white-space:nowrap}
+#nav button{flex:none;border:0;background:none;border-radius:14px;padding:6px 12px;font:700 11px ui-rounded,system-ui;color:var(--mu);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;white-space:nowrap}
 #nav svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 #nav button.on{color:var(--accTx);background:var(--acc)}
-#nav .ib{width:34px;height:34px;padding:0;justify-content:center;color:var(--tx);background:var(--sf2);font-size:15px;border-radius:50%}
-#nav .ib:disabled{opacity:.3}#nav .sep{width:1px;height:24px;background:var(--ln);margin:0 2px;flex:none}
+#nav-actions{display:flex;align-items:center;gap:4px;flex:none;padding-inline-start:4px;border-inline-start:1px solid var(--ln)}
+.ib{flex:none;width:34px;height:34px;padding:0;display:flex;align-items:center;justify-content:center;color:var(--tx);background:var(--sf2);font-size:14px;border-radius:50%;border:0;cursor:pointer}
+.ib:disabled{opacity:.3}
+
 .sw{flex:none;display:flex;align-items:center;gap:8px;border:1px solid var(--ln);background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:999px;padding:6px 12px 6px 8px;font:600 13px ui-rounded,system-ui;color:var(--tx);box-shadow:var(--shs);cursor:pointer}
 .sw i{width:30px;height:18px;border-radius:9px;background:var(--ln);position:relative;transition:.2s}.sw i:after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0004;transition:.2s}
 .sw.on i{background:var(--acc)}.sw.on i:after{left:14px}
@@ -126,20 +130,24 @@ input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=c
 <button class="btn" id="new" aria-label="Ajouter un lieu">＋</button><button class="btn s glass" id="unp" style="display:none"></button>
 <div class="pane" id="plan"></div><div class="pane" id="list"></div><div class="pane" id="discover"></div><div class="pane" id="community"></div><div class="pane" id="info"></div><div class="pane" id="ai"></div>
 <div id="dock" class="glass"><div id="days"></div><div id="tl"></div></div>
-<div id="nav" class="glass">
-  <button data-t="map" class="on"><svg viewBox="0 0 24 24"><path d="M9 4 3 6.5V20l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span data-i18n="nav_map">Carte</span></button>
-  <button data-t="plan"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg><span data-i18n="nav_plan">Planning</span></button>
-  <button data-t="list"><svg viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><span data-i18n="nav_places">Lieux</span></button>
-  <button data-t="discover"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg><span data-i18n="nav_explore">Explorer</span></button>
-  <button data-t="community"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-i18n="nav_community">Communauté</span></button>
-  <button data-t="info"><svg viewBox="0 0 24 24"><rect x="3.5" y="7" width="17" height="12.5" rx="3"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3.5 12.5h17"/></svg><span data-i18n="nav_trip">Voyage</span></button>
-  <button data-t="ai"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16v4M17 18h4"/></svg><span data-i18n="nav_assistant">IA</span></button>
-  <span class="sep"></span>
-  <button class="ib" id="langbtn" title="Langue">🇫🇷</button>
-  <button class="ib" id="themebtn" title="Thème"></button>
-  <span class="sep"></span>
-  <button class="ib" id="undo" aria-label="Annuler"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+
+<div id="nav-container" class="glass">
+  <div id="nav">
+    <button data-t="map" class="on"><svg viewBox="0 0 24 24"><path d="M9 4 3 6.5V20l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span data-i18n="nav_map">Carte</span></button>
+    <button data-t="plan"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg><span data-i18n="nav_plan">Planning</span></button>
+    <button data-t="list"><svg viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><span data-i18n="nav_places">Lieux</span></button>
+    <button data-t="discover"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg><span data-i18n="nav_explore">Explorer</span></button>
+    <button data-t="community"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-i18n="nav_community">Communauté</span></button>
+    <button data-t="info"><svg viewBox="0 0 24 24"><rect x="3.5" y="7" width="17" height="12.5" rx="3"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3.5 12.5h17"/></svg><span data-i18n="nav_trip">Voyage</span></button>
+    <button data-t="ai"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16v4M17 18h4"/></svg><span data-i18n="nav_assistant">IA</span></button>
+  </div>
+  <div id="nav-actions">
+    <button class="ib" id="langbtn" title="Langue">🇫🇷</button>
+    <button class="ib" id="themebtn" title="Thème"></button>
+    <button class="ib" id="undo" title="Annuler"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+  </div>
 </div>
+
 <div class="pane" id="welcome"><div class="hero"><h2>🌍 Trip Planner</h2><p data-i18n="welcome_desc">Planifie n’importe quel voyage sur une carte : tes lieux, tes journées, tes réservations et ton budget. Chaque destination démarre vierge.</p><button class="btn g" data-newtrip data-i18n="create_first_trip">Créer mon premier voyage</button><label class="btn s"><span data-i18n="import_backup">Importer une sauvegarde</span><input type="file" data-imp accept="application/json" hidden></label></div></div>
 <div id="sheet"></div><div id="toast"></div>
 
@@ -369,7 +377,7 @@ function fromLegacy(j,o){return norm(Object.assign({id:uid(),name:'Voyage import
 function loadDB(){
   let raw=null;try{raw=localStorage.getItem(K)}catch(e){}
   if(raw){try{const j=JSON.parse(raw);if(j&&Array.isArray(j.trips)){j.trips=j.trips.map(norm).filter(Boolean);if(!j.trips.some(t=>t.id===j.cur))j.cur=j.trips[0]?j.trips[0].id:'';return{db:j}}}
-    catch(e){try{localStorage.setItem(K+'_corrupt',raw)}catch(_){}}}
+    catch(e){try{localStorage.setItem(K+'_corrupt',raw)}catch(err){}}}
   try{const r=localStorage.getItem(KL);
     if(r){const j=JSON.parse(r);if(j&&Array.isArray(j.acts)&&Array.isArray(j.cals)&&j.cals.length){
       const t=fromLegacy(j,{id:'egypt-2026',name:'Égypte 2026',flag:'🇪🇬',dest:'Le Caire, Égypte',start:'2026-12-01',n:8,center:[30.04,31.24],zoom:11,money:'EGP',notes:[]});
@@ -949,6 +957,90 @@ function removeActivityFromDiscover(actId){
   });
   renderDiscover();
   toast('Activité retirée');
+}
+
+/* ================= Onglet Communauté ================= */
+async function fetchCommunityTrips(){
+  communityLoading=true;renderCommunity();
+  try{
+    const r=await fetchT('https://api.jsonbin.v3.b/v3/b/670000000000000000000000/latest');
+    if(r.ok){
+      const j=await r.json();
+      communityTrips=Array.isArray(j.record)?j.record:[];
+    }
+  }catch(e){
+    communityTrips=[
+      {id:'comm-1',name:'Le Caire & Gizeh Essentiel',flag:'🇪🇬',dest:'Le Caire',n:5,acts:[
+        {id:'c1',n:'Pyramides de Gizeh',c:'v',lat:29.979,lng:31.134,price:'700 EGP',d:150},
+        {id:'c2',n:'Khan el-Khalili',c:'v',lat:30.047,lng:31.262,price:'Gratuit',d:120}
+      ]}
+    ];
+  }
+  communityLoading=false;renderCommunity();
+}
+
+async function publishCurrentTrip(){
+  if(!S)return;
+  toast('⏳ Publication…');
+  try{
+    communityTrips.push(JSON.parse(JSON.stringify(S)));
+    toast('✓ Publié avec succès !');
+    renderCommunity();
+  }catch(e){toast('Erreur de publication')}
+}
+
+function renderCommunity(){
+  if(tabNow!=='community')return;
+  $('#community').innerHTML=`<h2>${t('community_title')}</h2>
+  <p style="color:var(--mu);font-size:14px;margin-bottom:16px">${t('community_desc')}</p>
+  <button class="btn g" data-publishtrip style="width:100%;margin-bottom:16px">${t('publish_trip')}</button>
+  <h3>${t('shared_trips')}</h3>`+
+  (communityLoading?`<div class="empty">⏳ Chargement…</div>`:
+   (communityTrips.length?communityTrips.map((trip,idx)=>`
+    <div class="card blk" style="margin-bottom:14px;padding:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <b>${esc(trip.flag)} ${esc(trip.name)} (${esc(trip.dest)})</b>
+        <button class="btn s sm" data-viewcomm="${idx}">👁 Étapes (${trip.acts.length})</button>
+      </div>
+    </div>`).join(''):`<div class="empty">Aucun voyage partagé.</div>`));
+}
+
+function viewCommunityTrip(idx){
+  const trip=communityTrips[idx];
+  if(!trip)return;
+  sheet(`<h2 style="font-size:20px;margin-top:0">${esc(trip.flag)} ${esc(trip.name)}</h2>
+  <p style="color:var(--mu)">Destination : ${esc(trip.dest)} · ${trip.acts.length} activités</p>
+  <div style="max-height:50vh;overflow-y:auto;margin:12px 0">
+    ${trip.acts.map((a,ai)=>`<div class="ck"><button class="t" data-togglecommact="${idx}|${ai}"><span class="bx" id="comm-bx-${idx}-${ai}">+</span><span class="tx"><b>${esc(a.n)}</b> <small>(${CT[a.c]||a.c})</small></span></button></div>`).join('')}
+  </div>
+  <button class="btn g" data-importcommacts="${idx}" style="width:100%">${t('import_acts')}</button>`);
+}
+
+let selectedCommActs=new Set();
+function toggleCommAct(tripIdx,actIdx){
+  const k=`${tripIdx}-${actIdx}`;
+  if(selectedCommActs.has(k))selectedCommActs.delete(k);else selectedCommActs.add(k);
+  const bx=$(`#comm-bx-${tripIdx}-${actIdx}`);
+  if(bx){bx.textContent=selectedCommActs.has(k)?'✓':'+';bx.style.background=selectedCommActs.has(k)?'var(--acc)':'';}
+}
+
+function importCommActs(tripIdx){
+  const trip=communityTrips[tripIdx];
+  if(!trip)return;
+  let added=0;
+  mut(()=>{
+    trip.acts.forEach((a,ai)=>{
+      if(selectedCommActs.has(`${tripIdx}-${ai}`)){
+        const newAct=X(a.n,a.c,a.s,{lat:a.lat,lng:a.lng,price:a.price,hrs:a.hrs,note:a.note,src:'Communauté'});
+        S.acts.push(newAct);
+        added++;
+      }
+    });
+  });
+  selectedCommActs.clear();
+  close();
+  toast(`✓ ${added} activité(s) importée(s) !`);
+  afterPos();
 }
 
 /* ================= Onglet Voyage ================= */
