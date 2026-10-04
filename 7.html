@@ -36,7 +36,7 @@ button{font-family:inherit}
 .tk{flex:none;min-width:150px;max-width:220px;border-radius:16px;padding:9px 12px;background:var(--sf);border:1px solid var(--ln);border-inline-start:4px solid var(--c,var(--gold));box-shadow:var(--shs);cursor:pointer}.tk b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tk small{color:var(--mu);font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tk.ghost{border:1px dashed var(--ln);border-inline-start:1px dashed var(--ln);color:var(--mu);font-size:14px;min-width:240px;white-space:normal;background:transparent;box-shadow:none;cursor:default}
 
-/* Barre de navigation horizontale avec indicateur de défilement visuel */
+/* Barre de navigation horizontale avec scroll fluide et indicateurs visuels */
 #nav-container{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));z-index:700;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:22px;background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:var(--sh);border:1px solid var(--ln);background-image:linear-gradient(90deg,var(--bg),transparent 12%,transparent 88%,var(--bg))}
 #nav{display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
 #nav::-webkit-scrollbar{display:none}
@@ -368,7 +368,7 @@ function fromLegacy(j,o){return norm(Object.assign({id:uid(),name:'Voyage import
 function loadDB(){
   let raw=null;try{raw=localStorage.getItem(K)}catch(e){}
   if(raw){try{const j=JSON.parse(raw);if(j&&Array.isArray(j.trips)){j.trips=j.trips.map(norm).filter(Boolean);if(!j.trips.some(t=>t.id===j.cur))j.cur=j.trips[0]?j.trips[0].id:'';return{db:j}}}
-    catch(e){try{localStorage.setItem(K+'_corrupt',raw)}catch(err){}}}
+    catch(e){try{localStorage.setItem(K+'_corrupt',raw)}catch(_){}}}
   try{const r=localStorage.getItem(KL);
     if(r){const j=JSON.parse(r);if(j&&Array.isArray(j.acts)&&Array.isArray(j.cals)&&j.cals.length){
       const t=fromLegacy(j,{id:'egypt-2026',name:'Égypte 2026',flag:'🇪🇬',dest:'Le Caire, Égypte',start:'2026-12-01',n:8,center:[30.04,31.24],zoom:11,money:'EGP',notes:[]});
@@ -501,7 +501,6 @@ async function fetchOsmActivities(center,dest,type='all',query=''){
     }catch(e){}
   }
   if(!lat||!lng)return[];
-
   const kw=query?`${query} ${dest}`:(type==='food'?`restaurant ${dest}`:`tourism ${dest}`);
   try{
     const rs=await geocode(kw,24,false);
@@ -1126,7 +1125,7 @@ function onClick(e){
   if(tEl.id==='filtertoggle'){filterOpen=!filterOpen;bars();return}
   if(tEl.id==='new'){if(!S)return;addSheet();return}
   if(tEl.id==='brand'){tripsSheet();return}
-  if(tEl.id==='unp'){sheet(`<h2 style="font-size:20px;margin-top:0">Lieux à positionner</h2><p class="empty">Choisissez un lieu pour lui associer une position sur la carte.</p>${unp().map(a=>`<div class="near" data-open="${a.id}"><div><b>${esc(a.n)}</b><small>${CT[a.c]} · ${a.s.map(x=>SL[x]?SL[x][0]:'').join(', ')}</small></div><span>›</span></div>`).join('')}`);return}
+  if(tEl.id==='unp'){sheet(`<h2 style="font-size:20px;margin-top:0">Lieux à positionner</h2><p class="empty">Choisissez un lieu pour lui associer une position sur la carte.</p>${unp().map(a=>`<div class="near" data-open="${a.id}"><div><b>${esc(a.n)}</b><small>${I18N[curLang].cat_names[a.c]||a.c} · ${a.s.map(x=>I18N[curLang].slots[x]||'').join(', ')}</small></div><span>›</span></div>`).join('')}`);return}
   if(tEl.id==='undo'){if(undo.length){restore(undo.pop());save();refresh()}return}
   if(d.opnegal!==undefined){
     const item=discList[+d.opnegal];
@@ -1222,7 +1221,10 @@ function onClick(e){
   if(d.export){doExport(d.export==='all');return}}
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeGallery();return}
+  if(e.key==='Escape'){
+    closeGallery();
+    return;
+  }
   if(e.key==='ArrowLeft'&&$('#gallery-modal').classList.contains('on')){
     if(curGallery.length){curGalIdx=(curGalIdx-1+curGallery.length)%curGallery.length;updateGalUI()}return;
   }
@@ -1247,7 +1249,7 @@ document.addEventListener('input',e=>{const id=e.target.id;
   else if(id==='sq'){clearTimeout(sqT);sqT=setTimeout(runSearch,650)}});
 
 window.addEventListener('pagehide',save);
-document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
+document.visibilitychange=()=>{if(document.hidden)save()};
 
 /* ================= Démarrage ================= */
 const boot=loadDB();DB=boot.db;S=curTrip();AIM=aiWelcome();applyTheme();applyLang(curLang);
