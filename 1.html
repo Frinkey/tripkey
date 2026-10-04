@@ -384,6 +384,10 @@ let discType='all',discList=[],discLoading=false;
 let listSearchQuery='',listFilterCat='all';
 let curGallery=[],curGalIdx=0;
 
+// Variables pour la pagination OpenTripMap
+let otmPlaces = [];
+let otmOffset = 0;
+
 const curTrip=()=>DB.trips.find(t=>t.id===DB.cur)||null;
 const cal=()=>S.cals.find(c=>c.id===S.cur)||S.cals[0],get=id=>S.acts.find(a=>a.id===id),dayO=()=>{const c=cal();return c.days[Math.min(day,c.days.length-1)]};
 const dayDate=i=>addDays(pISO(S.start)||new Date(),i),dl=i=>{const d=dayDate(i);return I18N[curLang].days_short[d.getDay()]+' '+d.getDate()+' '+I18N[curLang].months_short[d.getMonth()]};
@@ -450,8 +454,7 @@ const legTxt=l=>(l.w?'🚶 ':'🚗 ')+fmtMin(l.min)+' · '+fmtKm(l.km);
 
 /* ================= Sources de Découverte ================= */
 
-async function fetchOtmActivities(center, dest, type='all', query='') {
-  OTM_ERRORS = [];
+async function fetchOtmRadius(center, dest, type='all', query='') {
   let lat = center && center[0], lng = center && center[1];
   if(!lat || !lng){
     try{
@@ -465,81 +468,110 @@ async function fetchOtmActivities(center, dest, type='all', query='') {
   }
 
   let kinds = 'interesting_places';
-  let catMapping = 'v';
-  if (type === 'attraction') { kinds = 'amusements,sport'; catMapping = 'a'; }
-  else if (type === 'culture') { kinds = 'cultural,historic,architecture'; catMapping = 'v'; }
-  else if (type === 'nature') { kinds = 'natural,nature_reserves'; catMapping = 'a'; }
-  else if (type === 'food') { kinds = 'foods'; catMapping = 'f'; }
+  if (type === 'attraction') { kinds = 'amusements,sport'; }
+  else if (type === 'culture') { kinds = 'cultural,historic,architecture'; }
+  else if (type === 'nature') { kinds = 'natural,nature_reserves'; }
+  else if (type === 'food') { kinds = 'foods'; }
 
   try {
-    // OpenTripMap n'accepte QUE 'en' ou 'ru' dans l'URL
-    const lang = 'en';
-    const radiusUrl = `https://api.opentripmap.com/0.1/${lang}/places/radius?radius=15000&lon=${lng}&lat=${lat}&kinds=${kinds}&rate=1&format=geojson&limit=30&apikey=${OTM_API_KEY}`;
+    const lang = 'en'; // OTM Radius & XID free tier expect 'en'
+    
+    // On recupère jusqu'à 100 lieux pour avoir de la marge pour trier et filtrer
+    const radiusUrl = `https://api.opentripmap.com/0.1/${lang}/places/radius?radius=15000&lon=${lng}&lat=${lat}&kinds=${kinds}&rate=1&format=geojson&limit=100&apikey=${OTM_API_KEY}`;
     
     OTM_ERRORS.push(`Requête Radius (15km) : ${kinds}`);
 
     const r = await fetchT(radiusUrl, 8000);
     if (!r.ok) {
         OTM_ERRORS.push(`✕ Erreur HTTP ${r.status} (Radius API)`);
-        const txt = await r.text();
-        OTM_ERRORS.push(`Détails: ${txt.substring(0, 150)}`);
         return [];
     }
     
     const data = await r.json();
     let places = (data && data.features) ? data.features.map(f => f.properties) : [];
     
-    OTM_ERRORS.push(`Lieux bruts trouvés : ${places.length}`);
-
     places = places.filter(p => p.name && p.name.trim() !== '');
 
     if (query) {
       const qNorm = query.toLowerCase().trim();
       places = places.filter(p => p.name.toLowerCase().includes(qNorm));
-      OTM_ERRORS.push(`Après filtre ("${query}") : ${places.length}`);
     }
 
-    const detailedPlaces = [];
-    let successCount = 0;
-    let failCount = 0;
+    // TRI PAR POPULARITÉ ! (Les lieux 'rate' = 3 ou 2 d'abord, ce sont eux qui ont des photos)
+    places.sort((a, b) => {
+       const rA = a.rate || 0;
+       const rB = b.rate || 0;
+       if (rA !== rB) return rB - rA; // décroissant
+       return (a.dist || 0) - (b.dist || 0); // puis par distance
+    });
 
-    for (const p of places.slice(0, 10)) {
+    OTM_ERRORS.push(`Tri par popularité appliqué sur ${places.length} résultats bruts.`);
+    return places;
+  } catch (e) {
+    OTM_ERRORS.push("✕ Erreur générale : " + e.message);
+    return [];
+  }
+}
+
+async function loadMoreOtm() {
+    if(discLoading) return;
+    discLoading = true;
+    renderDiscover();
+
+    const lang = 'en';
+    const batch = otmPlaces.slice(otmOffset, otmOffset + 10);
+    
+    let catMapping = 'v';
+    if (discType === 'attraction') catMapping = 'a';
+    else if (discType === 'culture') catMapping = 'v';
+    else if (discType === 'nature') catMapping = 'a';
+    else if (discType === 'food') catMapping = 'f';
+
+    let successCount = 0;
+    
+    for (const p of batch) {
       try {
         const detailUrl = `https://api.opentripmap.com/0.1/${lang}/places/xid/${p.xid}?apikey=${OTM_API_KEY}`;
         const res = await fetchT(detailUrl, 4000);
         
         if (res.ok) {
           const details = await res.json();
-          detailedPlaces.push({
+          
+          let actualCat = catMapping;
+          if (discType === 'all' && p.kinds) {
+              if (p.kinds.includes('foods')) actualCat = 'f';
+              else if (p.kinds.includes('amusements')||p.kinds.includes('sport')||p.kinds.includes('nature')) actualCat = 'a';
+          }
+
+          // Priorité aux images hautes def puis aux miniatures
+          let thumbUrl = null;
+          if (details.image) thumbUrl = details.image;
+          else if (details.preview && details.preview.source) thumbUrl = details.preview.source;
+
+          discList.push({
             id: 'otm-' + p.xid,
             name: details.name || p.name,
-            desc: (details.wikipedia_extracts && details.wikipedia_extracts.text) || (details.info && details.info.descr) || p.kinds.replace(/_/g, ' '),
+            desc: (details.wikipedia_extracts && details.wikipedia_extracts.text) || (details.info && details.info.descr) || p.kinds.replace(/_/g, ', '),
             lat: details.point.lat,
             lng: details.point.lon,
-            cat: catMapping,
+            cat: actualCat,
             source: 'OpenTripMap',
             sourceUrl: details.wikipedia || details.url || `https://opentripmap.com/en/card/${p.xid}`,
             bookingUrl: details.url || null,
-            thumb: details.preview ? details.preview.source : null,
+            thumb: thumbUrl,
             pageTitle: details.name || p.name
           });
           successCount++;
-        } else {
-          failCount++;
-          if(failCount === 1) OTM_ERRORS.push(`✕ Erreur HTTP ${res.status} (fiche xid:${p.xid})`);
         }
       } catch (e) {
-        failCount++;
-        if(failCount === 1) OTM_ERRORS.push(`✕ Exception détail: ${e.message}`);
+         // Silencieux pour ne pas bloquer les autres
       }
     }
-    
-    OTM_ERRORS.push(`Fiches chargées : ${successCount} succès, ${failCount} échecs.`);
-    return detailedPlaces;
-  } catch (e) {
-    OTM_ERRORS.push("✕ Erreur générale : " + e.message);
-    return [];
-  }
+
+    OTM_ERRORS.push(`Page chargée : ${successCount} nouveaux lieux détaillés.`);
+    otmOffset += 10;
+    discLoading = false;
+    renderDiscover();
 }
 
 /* ================= Visionneuse Galerie (Lightbox) ================= */
@@ -814,10 +846,12 @@ async function loadDiscover(force=false,query=''){
   discLoading=true; 
   renderDiscover();
   
-  discList=await fetchOtmActivities(S.center,S.dest,discType,query);
-  
-  discLoading=false; 
-  renderDiscover();
+  OTM_ERRORS = []; // Réinitialise les logs
+  otmPlaces = await fetchOtmRadius(S.center, S.dest, discType, query);
+  otmOffset = 0;
+  discList = [];
+
+  await loadMoreOtm();
 }
 
 function findExistingAct(item){
@@ -842,17 +876,17 @@ function renderDiscover(){
   <div class="row" style="padding-bottom:12px">${types.map(([k,l])=>`<button class="chip ${discType===k?'on':''}" data-disctype="${k}">${l}</button>`).join('')}</div>`;
 
   if (OTM_ERRORS && OTM_ERRORS.length > 0) {
-     h += `<div class="note" style="border-color:var(--bad); background:var(--sf); max-height:200px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
-           <b style="color:var(--bad)">Logs de diagnostic (OTM) :</b>
-           <ul style="margin:5px 0 0; padding-left:20px; font-size:12px; color:var(--mu); line-height:1.5;">
+     h += `<details class="note" style="border-color:var(--bad); background:var(--sf);">
+           <summary><b style="color:var(--bad)">Logs de diagnostic (OTM)</b></summary>
+           <ul style="margin:5px 0 0; padding-left:20px; font-size:12px; color:var(--mu); max-height:200px; overflow-y:auto; -webkit-overflow-scrolling:touch; line-height:1.5;">
              ${OTM_ERRORS.map(err => `<li>${esc(err)}</li>`).join('')}
            </ul>
-           </div>`;
+           </details>`;
   }
 
-  if(discLoading){
+  if(!discList.length && discLoading){
     h+=`<div class="empty" style="text-align:center;padding:40px 0">${t('loading_ideas',{dest:esc(S.dest)})}</div>`;
-  } else if(!discList.length){
+  } else if(!discList.length && !discLoading){
     h+=`<div class="note" style="cursor:default">${t('no_ideas')}</div>`;
   } else {
     h+=`<div class="near-list">`+discList.map((item,i)=>{
@@ -892,6 +926,11 @@ function renderDiscover(){
         </div>
       </div>`;
     }).join('')+`</div>`;
+
+    if(otmOffset < otmPlaces.length) {
+      if(discLoading) h += `<div class="empty" style="text-align:center;padding:20px 0">⏳ Chargement...</div>`;
+      else h += `<button class="btn s" style="width:100%;margin-top:10px;margin-bottom:20px;" data-otmmore>Charger plus d'idées</button>`;
+    }
   }
   $('#discover').innerHTML=h;
 }
@@ -1182,6 +1221,7 @@ function onClick(e){
   if(d.disctype){discType=d.disctype;loadDiscover(true);return}
   if('discsearch' in d){const q=($('#discq')||{}).value||'';loadDiscover(true,q);return}
   if(d.adddisc!==undefined){addActivityFromDisc(+d.adddisc);return}
+  if('otmmore' in d){loadMoreOtm();return;}
   if(d.theme){setTheme(d.theme);return}
   if(d.sub){infoSub=d.sub;renderInfo();return}
   if('edittrip' in d){tripForm(S.id);return}
