@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px 15px;
+            background: #0078d4;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #005a9e;
+        }
+
+        input {
+            padding: 10px;
+            width: 250px;
+            margin-right: 10px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Menu des pages</h1>
+
+    <div class="section">
+        <input type="text" id="filename" placeholder="Ex: test.html">
+        <button class="btn" onclick="openPage()">Ouvrir</button>
+    </div>
+
+    <div id="menu"></div>
+
+    <script>
+        function openPage() {
+            const file = document.getElementById('filename').value.trim();
+
+            if (!file) {
+                alert('Veuillez saisir un nom de fichier');
+                return;
+            }
+
+            window.location.href = file.endsWith('.html')
+                ? file
+                : file + '.html';
+        }
+
+        const menu = document.getElementById('menu');
+
+        for (let i = 1; i <= 10; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.textContent = `Page ${i}`;
+            btn.onclick = () => window.location.href = `${i}.html`;
+            menu.appendChild(btn);
+        }
+    </script>
+
+</body>
+</html>
