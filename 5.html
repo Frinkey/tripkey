@@ -298,6 +298,7 @@ const uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const rich=s=>esc(s).replace(/\n/g,'<br>').replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
 
+const CT={v:'Visite',a:'Activité',f:'Food',n:'Night show'};
 const COL={v:'#0ea5b7',a:'#f2603f',f:'#8b5cf6',n:'#e8438a'},EM={v:'🏛',a:'⚡',f:'🍽',n:'🎭'},SE={m:'🌅',a:'☀️',s:'🌇',e:'🌙'};
 const EXC={h:['Hébergement','🏨'],t:['Transport','🚕'],f:['Nourriture','🍽'],a:['Activités','🎟'],s:['Shopping','🛍'],o:['Autre','💬']};
 const RT={f:['Vol','✈️'],h:['Hôtel','🏨'],t:['Train / bus','🚆'],c:['Location de voiture','🚗'],r:['Restaurant','🍽'],a:['Activité','🎟'],o:['Autre','📌']};
