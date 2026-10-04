@@ -724,7 +724,7 @@ function renderList(){
   }
 }
 
-/* ================= Onglet Explorer ================= */
+/* ================= Onglet Explorer (avec icônes compactes) ================= */
 async function loadDiscover(force=false,query=''){
   if(!S)return;
   if(discList.length&&!force&&!query)return;
@@ -1025,11 +1025,22 @@ function tab(t){tabNow=t;$('#dock').classList.toggle('hide',t!=='map');$('#top')
 function refresh(){if(!S)return;bars();drawMap();if(tabNow==='plan')renderPlan();if(tabNow==='list')renderList();if(tabNow==='discover')renderDiscover();if(tabNow==='info')renderInfo()}
 
 document.addEventListener('click',e=>{try{onClick(e)}catch(err){console.error(err);toast('Erreur : '+err.message)}});
-const CLK='button,[data-open],[data-geopick],[data-trip],[data-note],[data-item],[data-resid],[data-expid],[data-destll],[data-opnegal],[data-openart],#sheet,#article-modal';
-const num=v=>{const x=parseFloat(String(v).replace(',','.').replace(/\s/g,''));return Number.isFinite(x)?x:NaN};
 
 function onClick(e){
+  const artBtn=e.target.closest('[data-openart]');
+  if(artBtn){
+    const idx=+artBtn.dataset.openart;
+    const item=discList[idx];
+    if(item)openArticleModal(item);
+    return;
+  }
+  const artModal=e.target.closest('#article-modal');
+  if(artModal&&(e.target===artModal||e.target.closest('#art-close')||e.target.closest('#art-close-btn'))){
+    closeArticleModal();
+    return;
+  }
   if(e.target.closest('a'))return;
+
   const sug=e.target.closest('[data-destll]');
   if(sug){
     const d=sug.dataset;
@@ -1039,10 +1050,10 @@ function onClick(e){
     const list=$('#td-sug');if(list){list.style.display='none';list.innerHTML=''}
     return;
   }
+
+  const CLK='button,[data-open],[data-geopick],[data-trip],[data-note],[data-item],[data-resid],[data-expid],[data-opnegal],#sheet';
   const t=e.target.closest(CLK);if(!t)return;const d=t.dataset;
   if(t.id==='sheet'){if(e.target===t)close();return}
-  if(t.id==='article-modal'){if(e.target===t)closeArticleModal();return}
-  if(t.id==='art-close'||t.id==='art-close-btn'){closeArticleModal();return}
   if(t.id==='themebtn'){setTheme(resolved()==='dark'?'light':'dark');return}
   if(t.id==='filtertoggle'){filterOpen=!filterOpen;bars();return}
   if(t.id==='new'){if(!S)return;addSheet();return}
@@ -1056,11 +1067,6 @@ function onClick(e){
   if(d.opnegal!==undefined){
     const item=discList[+d.opnegal];
     if(item)openGallery(item.pageTitle||item.name,item.thumb,item.name);
-    return;
-  }
-  if(d.openart!==undefined){
-    const item=discList[+d.openart];
-    if(item)openArticleModal(item);
     return;
   }
   if(d.deldisc){
