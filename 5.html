@@ -104,6 +104,13 @@ input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=c
 #gal-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,.2);color:#fff;border:0;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 #gal-caption{color:#fff;font-size:14px;margin-top:14px;text-align:center;max-width:90%;font-weight:600}
 
+/* Modale de lecture interne (Fiche détaillée d'activité) */
+#article-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:1250;display:none;align-items:flex-end}
+#article-modal.on{display:flex}
+#article-card{background:var(--sheet);width:100%;max-height:86vh;border-radius:28px 28px 0 0;padding:20px 18px calc(24px + env(safe-area-inset-bottom));overflow-y:auto;display:flex;flex-direction:column;animation:up .28s cubic-bezier(.2,.9,.2,1)}
+#article-body{line-height:1.6;font-size:15px;color:var(--tx);margin:12px 0}
+#article-body img{max-width:100%;border-radius:14px;margin:8px 0}
+
 @media print{html,body{height:auto!important;overflow:visible!important;background:#fff!important;color:#000!important}body>*:not(#printarea){display:none!important}#printarea{display:block!important;padding:16px;font:14px/1.5 system-ui}#printarea h1{font-size:22px;margin:0 0 4px}#printarea h2{font-size:16px;margin:16px 0 4px;border-bottom:1px solid #999;padding-bottom:2px}#printarea p{margin:2px 0}}
 </style></head><body>
 <div id="map"></div>
@@ -144,6 +151,21 @@ input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=c
     <button class="gal-btn" id="gal-next" aria-label="Photo suivante">›</button>
   </div>
   <div id="gal-caption"></div>
+</div>
+
+<!-- Modale de lecture interne (fiche d'activité) -->
+<div id="article-modal">
+  <div id="article-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <b id="article-title" style="font-size:20px">Détails de l'activité</b>
+      <button class="btn s sm" id="art-close">✕</button>
+    </div>
+    <div id="article-body"></div>
+    <div class="row" style="justify-content:space-between;margin-top:12px">
+      <a class="btn s sm" id="art-external" target="_blank" rel="noopener" href="#">Consulter sur le web ↗</a>
+      <button class="btn sm" id="art-close-btn">Fermer</button>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -455,6 +477,37 @@ function updateGalUI(){
 }
 function closeGallery(){$('#gallery-modal').classList.remove('on')}
 
+/* ================= Modale de lecture interne ================= */
+async function openArticleModal(item){
+  $('#article-title').textContent=item.name;
+  $('#article-body').innerHTML='<div class="empty" style="text-align:center;padding:24px 0">⏳ Chargement des informations…</div>';
+  $('#article-external').href=item.sourceUrl;
+  $('#article-modal').classList.add('on');
+
+  if(item.pageTitle){
+    try{
+      const r=await fetchT(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(item.pageTitle)}`);
+      if(r.ok){
+        const j=await r.json();
+        let html='';
+        if(j.originalimage&&j.originalimage.source){
+          html+=`<img src="${esc(j.originalimage.source)}" alt="${esc(item.name)}">`;
+        }
+        if(j.extract_html){
+          html+=j.extract_html;
+        }else if(j.extract){
+          html+=`<p>${esc(j.extract)}</p>`;
+        }
+        if(!html)html='<p>Aucun résumé textuel disponible.</p>';
+        $('#article-body').innerHTML=html;
+        return;
+      }
+    }catch(e){console.error(e)}
+  }
+  $('#article-body').innerHTML=`<p>${esc(item.desc||'Aucune information détaillée disponible.')}</p>`;
+}
+function closeArticleModal(){$('#article-modal').classList.remove('on')}
+
 /* ================= Entrées d'une journée ================= */
 const resDay=r=>{const a=pISO(r.date),s=pISO(S.start);if(!a||!s)return-1;return Math.round((a-s)/864e5)};
 function dayEntries(i){const d=cal().days[i],out=[];if(!d)return out;
@@ -732,7 +785,8 @@ function renderDiscover(){
         <div class="row" style="margin-top:10px;justify-content:space-between;align-items:center">
           <div class="row" style="gap:6px">
             <a class="btn s ic" target="_blank" rel="noopener" href="${esc(gMapsUrl)}" title="Voir l'itinéraire Maps">📍</a>
-            <a class="btn s ic" target="_blank" rel="noopener" href="${esc(item.sourceUrl)}" title="${item.bookingUrl?'Réserver des billets':'En savoir plus'}">${item.bookingUrl?'🎟':'↗'}</a>
+            <button class="btn s ic" data-openart="${i}" title="En savoir plus">📖</button>
+            ${item.bookingUrl?`<a class="btn s ic" target="_blank" rel="noopener" href="${esc(item.bookingUrl)}" title="Réserver des billets">🎟</a>`:''}
           </div>
           <div class="row" style="gap:6px">
             ${existing?`
@@ -971,7 +1025,7 @@ function tab(t){tabNow=t;$('#dock').classList.toggle('hide',t!=='map');$('#top')
 function refresh(){if(!S)return;bars();drawMap();if(tabNow==='plan')renderPlan();if(tabNow==='list')renderList();if(tabNow==='discover')renderDiscover();if(tabNow==='info')renderInfo()}
 
 document.addEventListener('click',e=>{try{onClick(e)}catch(err){console.error(err);toast('Erreur : '+err.message)}});
-const CLK='button,[data-open],[data-geopick],[data-trip],[data-note],[data-item],[data-resid],[data-expid],[data-destll],[data-opnegal],#sheet';
+const CLK='button,[data-open],[data-geopick],[data-trip],[data-note],[data-item],[data-resid],[data-expid],[data-destll],[data-opnegal],[data-openart],#sheet,#article-modal';
 const num=v=>{const x=parseFloat(String(v).replace(',','.').replace(/\s/g,''));return Number.isFinite(x)?x:NaN};
 
 function onClick(e){
@@ -987,6 +1041,8 @@ function onClick(e){
   }
   const t=e.target.closest(CLK);if(!t)return;const d=t.dataset;
   if(t.id==='sheet'){if(e.target===t)close();return}
+  if(t.id==='article-modal'){if(e.target===t)closeArticleModal();return}
+  if(t.id==='art-close'||t.id==='art-close-btn'){closeArticleModal();return}
   if(t.id==='themebtn'){setTheme(resolved()==='dark'?'light':'dark');return}
   if(t.id==='filtertoggle'){filterOpen=!filterOpen;bars();return}
   if(t.id==='new'){if(!S)return;addSheet();return}
@@ -1000,6 +1056,11 @@ function onClick(e){
   if(d.opnegal!==undefined){
     const item=discList[+d.opnegal];
     if(item)openGallery(item.pageTitle||item.name,item.thumb,item.name);
+    return;
+  }
+  if(d.openart!==undefined){
+    const item=discList[+d.openart];
+    if(item)openArticleModal(item);
     return;
   }
   if(d.deldisc){
@@ -1091,7 +1152,11 @@ function onClick(e){
   if(d.export){doExport(d.export==='all');return}}
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeGallery();return}
+  if(e.key==='Escape'){
+    if($('#article-modal').classList.contains('on')){closeArticleModal();return}
+    closeGallery();
+    return;
+  }
   if(e.key==='ArrowLeft'&&$('#gallery-modal').classList.contains('on')){
     if(curGallery.length){curGalIdx=(curGalIdx-1+curGallery.length)%curGallery.length;updateGalUI()}return;
   }
