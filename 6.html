@@ -35,12 +35,13 @@ button{font-family:inherit}
 #tl{display:flex;gap:8px;overflow-x:auto;padding:0 12px 10px;scrollbar-width:none}#tl::-webkit-scrollbar{display:none}
 .tk{flex:none;min-width:150px;max-width:220px;border-radius:16px;padding:9px 12px;background:var(--sf);border:1px solid var(--ln);border-inline-start:4px solid var(--c,var(--gold));box-shadow:var(--shs);cursor:pointer}.tk b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tk small{color:var(--mu);font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tk.ghost{border:1px dashed var(--ln);border-inline-start:1px dashed var(--ln);color:var(--mu);font-size:14px;min-width:240px;white-space:normal;background:transparent;box-shadow:none;cursor:default}
-#nav{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));z-index:700;display:flex;align-items:center;gap:2px;padding:5px;border-radius:22px}
-#nav button{flex:1;border:0;background:none;border-radius:16px;padding:6px 0 4px;font:700 9px ui-rounded,system-ui;color:var(--mu);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+#nav{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));z-index:700;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:22px;overflow-x:auto;scrollbar-width:none}
+#nav::-webkit-scrollbar{display:none}
+#nav button{flex:none;border:0;background:none;border-radius:14px;padding:6px 10px;font:700 11px ui-rounded,system-ui;color:var(--mu);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;white-space:nowrap}
 #nav svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 #nav button.on{color:var(--accTx);background:var(--acc)}
-#nav .ib{flex:none;width:34px;height:34px;padding:0;justify-content:center;color:var(--tx);background:var(--sf2);font-size:15px}
-#nav .ib:disabled{opacity:.3}#nav .sep{width:1px;height:24px;background:var(--ln);margin:0 2px}
+#nav .ib{width:34px;height:34px;padding:0;justify-content:center;color:var(--tx);background:var(--sf2);font-size:15px;border-radius:50%}
+#nav .ib:disabled{opacity:.3}#nav .sep{width:1px;height:24px;background:var(--ln);margin:0 2px;flex:none}
 .sw{flex:none;display:flex;align-items:center;gap:8px;border:1px solid var(--ln);background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:999px;padding:6px 12px 6px 8px;font:600 13px ui-rounded,system-ui;color:var(--tx);box-shadow:var(--shs);cursor:pointer}
 .sw i{width:30px;height:18px;border-radius:9px;background:var(--ln);position:relative;transition:.2s}.sw i:after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0004;transition:.2s}
 .sw.on i{background:var(--acc)}.sw.on i:after{left:14px}
@@ -368,7 +369,7 @@ function fromLegacy(j,o){return norm(Object.assign({id:uid(),name:'Voyage import
 function loadDB(){
   let raw=null;try{raw=localStorage.getItem(K)}catch(e){}
   if(raw){try{const j=JSON.parse(raw);if(j&&Array.isArray(j.trips)){j.trips=j.trips.map(norm).filter(Boolean);if(!j.trips.some(t=>t.id===j.cur))j.cur=j.trips[0]?j.trips[0].id:'';return{db:j}}}
-    catch(e){try{localStorage.setItem(K+'_corrupt',raw)}catch(_}{}}}
+    catch(e){try{localStorage.setItem(K+'_corrupt',raw)}catch(_){}}}
   try{const r=localStorage.getItem(KL);
     if(r){const j=JSON.parse(r);if(j&&Array.isArray(j.acts)&&Array.isArray(j.cals)&&j.cals.length){
       const t=fromLegacy(j,{id:'egypt-2026',name:'Égypte 2026',flag:'🇪🇬',dest:'Le Caire, Égypte',start:'2026-12-01',n:8,center:[30.04,31.24],zoom:11,money:'EGP',notes:[]});
@@ -440,7 +441,7 @@ async function resolveLink(input){
   let name=nameFromUrl(u);
   if(isMapsUrl(u)&&(isShort(u)||!name)){const r=await expand(u);if(r){if(r.lat!=null)return{lat:r.lat,lng:r.lng,name:r.name||name,how:'lien court'};if(r.name)name=r.name}}
   if(name){try{const rs=await geocode(name,1);if(rs[0])return{lat:rs[0].lat,lng:rs[0].lng,name,how:'nom du lieu, à vérifier'}}catch(e){}}
-  throw Error(isShort(u)?'Lien court illisible depuis le navigateur. Ouvre-le dans Maps puis copie le lien long ou les coordonnées, ou utilise « Chercher par nom ».':'Aucune coordonnée trouvée dans este lien.')}
+  throw Error(isShort(u)?'Lien court illisible depuis le navigateur. Ouvre-le dans Maps puis copie le lien long ou les coordonnées, ou utilise « Chercher par nom ».':'Aucune coordonnée trouvée dans ce lien.')}
 function hav(a,b){if(!a||!b||a.lat==null||b.lat==null)return null;const r=x=>x*Math.PI/180,p=r(b.lat-a.lat),q=r(b.lng-a.lng),h=Math.sin(p/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(q/2)**2;return 12742*Math.asin(Math.sqrt(h))}
 function leg(a,b){const d=hav(a,b);if(d==null)return null;const km=d*1.3,w=km<=1.5,min=Math.max(1,Math.round(km/(w?4.8:25)*60));return{km,min,w}}
 const legTxt=l=>(l.w?'🚶 ':'🚗 ')+fmtMin(l.min)+' · '+fmtKm(l.km);
@@ -573,99 +574,6 @@ async function fetchOsmActivities(center,dest,type='all',query=''){
       pageTitle:it.short
     }));
   }catch(e){return[];}
-}
-
-/* ================= Cloud Communauté (Serveur JSONbin partagé) ================= */
-const BIN_URL='https://api.jsonbin.v3.b/v6/b/66123456...'; // Stockage public partagé sécurisé
-async function fetchCommunityTrips(){
-  communityLoading=true;renderCommunity();
-  try{
-    const r=await fetchT('https://api.jsonbin.v3.b/v3/b/670000000000000000000000/latest'); // Endpoint public de démo
-    if(r.ok){
-      const j=await r.json();
-      communityTrips=Array.isArray(j.record)?j.record:[];
-    }
-  }catch(e){
-    // Fallback local ou simulation si réseau restreint
-    communityTrips=[
-      {id:'comm-1',name:'Le Caire & Gizeh Essentiel',flag:'🇪🇬',dest:'Le Caire',n:5,acts:[
-        {id:'c1',n:'Pyramides de Gizeh',c:'v',lat:29.979,lng:31.134,price:'700 EGP',d:150},
-        {id:'c2',n:'Khan el-Khalili',c:'v',lat:30.047,lng:31.262,price:'Gratuit',d:120}
-      ]}
-    ];
-  }
-  communityLoading=false;renderCommunity();
-}
-
-async function publishCurrentTrip(){
-  if(!S)return;
-  toast('⏳ Publication sur le serveur…');
-  try{
-    communityTrips.push(JSON.parse(JSON.stringify(S)));
-    toast('✓ Voyage publié avec succès !');
-    renderCommunity();
-  }catch(e){toast('Erreur de publication')}
-}
-
-function renderCommunity(){
-  if(tabNow!=='community')return;
-  $('#community').innerHTML=`<h2>${t('community_title')}</h2>
-  <p style="color:var(--mu);font-size:14px;margin-bottom:16px">${t('community_desc')}</p>
-  <button class="btn g" data-publishtrip style="width:100%;margin-bottom:16px">${t('publish_trip')}</button>
-  <h3>${t('shared_trips')}</h3>`+
-  (communityLoading?`<div class="empty">⏳ Chargement…</div>`:
-   (communityTrips.length?communityTrioListHTML():`<div class="empty">Aucun voyage partagé pour l’instant. Soyez le premier !</div>`));
-}
-
-function communityTrioListHTML(){
-  return communityTeListMarkup();
-}
-function communityTeListMarkup(){
-  return communityTrips.map((trip,idx)=>`
-    <div class="card blk" style="margin-bottom:14px;padding:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <b>${esc(trip.flag)} ${esc(trip.name)} (${esc(trip.dest)})</b>
-        <button class="btn s sm" data-viewcomm="${idx}">👁 Voir les étapes (${trip.acts.length})</button>
-      </div>
-    </div>`).join('');
-}
-
-function viewCommunityTrip(idx){
-  const trip=communityTrips[idx];
-  if(!trip)return;
-  sheet(`<h2 style="font-size:20px;margin-top:0">${esc(trip.flag)} ${esc(trip.name)}</h2>
-  <p style="color:var(--mu)">Destination : ${esc(trip.dest)} · ${trip.acts.length} activités</p>
-  <div style="max-height:50vh;overflow-y:auto;margin:12px 0">
-    ${trip.acts.map((a,ai)=>`<div class="ck"><button class="t" data-togglecommact="${idx}|${ai}"><span class="bx" id="comm-bx-${idx}-${ai}">+</span><span class="tx"><b>${esc(a.n)}</b> <small>(${CT[a.c]||a.c})</small></span></button></div>`).join('')}
-  </div>
-  <button class="btn g" data-importcommacts="${idx}" style="width:100%">${t('import_acts')}</button>`);
-}
-
-let selectedCommActs=new Set();
-function toggleCommAct(tripIdx,actIdx){
-  const k=`${tripIdx}-${actIdx}`;
-  if(selectedCommActs.has(k))selectedCommActs.delete(k);else selectedCommActs.add(k);
-  const bx=$(`#comm-bx-${tripIdx}-${actIdx}`);
-  if(bx){bx.textContent=selectedCommActs.has(k)?'✓':'+';bx.style.background=selectedCommActs.has(k)?'var(--acc)':'';}
-}
-
-function importCommActs(tripIdx){
-  const trip=communityTrips[tripIdx];
-  if(!trip)return;
-  let added=0;
-  mut(()=>{
-    trip.acts.forEach((a,ai)=>{
-      if(selectedCommActs.has(`${tripIdx}-${ai}`)){
-        const newAct=X(a.n,a.c,a.s,{lat:a.lat,lng:a.lng,price:a.price,hrs:a.hrs,note:a.note,src:'Communauté'});
-        S.acts.push(newAct);
-        added++;
-      }
-    });
-  });
-  selectedCommActs.clear();
-  close();
-  toast(`✓ ${added} activité(s) importée(s) dans vos lieux !`);
-  afterPos();
 }
 
 /* ================= Visionneuse Galerie (Lightbox) ================= */
@@ -1176,7 +1084,7 @@ function doExport(all){if(all)download('sauvegarde-tous-mes-voyages.json',DB);el
 function doImport(f){const r=new FileReader();r.onerror=()=>toast('Lecture du fichier impossible');
   r.onload=()=>{try{const j=JSON.parse(r.result);let trips=[];
     if(j&&Array.isArray(j.trips))trips=j.trips.map(norm).filter(Boolean);
-    else if(j&&Array.isArray(j.acts)&&Array.isArray(j.cals)&&j.cals.length)trips=[fromLegacy(j,{name:f.name.replace(/\.json$/i, '')||'Voyage importé'})];
+    else if(j&&Array.isArray(j.acts)&&Array.isArray(j.cals)&&j.cals.length)trips=[fromLegacy(j,{name:f.name.replace(/\.json$/i,'')||'Voyage importé'})];
     else throw Error('format non reconnu');
     if(!trips.length)throw Error('aucun séjour trouvé');
     const rep=trips.filter(tTrip=>DB.trips.some(x=>x.id===tTrip.id)).length;
