@@ -304,6 +304,7 @@ function applyLang(lang){
 
 /* ================= Constantes & utilitaires ================= */
 const OTM_API_KEY = '5ae2e3f221c38a28845f05b60d69059f50b8de59fa1d8bd95d907662';
+let OTM_ERRORS = []; // Variable globale pour afficher les erreurs OTM sur mobile
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const K='tripkit_v1',KL='egmap26d',KT='tripkit_theme',MAXD=60;
@@ -448,15 +449,20 @@ function leg(a,b){const d=hav(a,b);if(d==null)return null;const km=d*1.3,w=km<=1
 const legTxt=l=>(l.w?'🚶 ':'🚗 ')+fmtMin(l.min)+' · '+fmtKm(l.km);
 
 /* ================= Sources de Découverte ================= */
+
 async function fetchOtmActivities(center, dest, type='all', query='') {
+  OTM_ERRORS = [];
   let lat = center && center[0], lng = center && center[1];
   if(!lat || !lng){
     try{
+      OTM_ERRORS.push("Recherche de la destination: " + dest);
       const geo = await geocodeDest(dest);
-      if(geo && geo[0]){ lat = geo[0].lat; lng = geo[0].lng; }
-    } catch(e){}
+      if(geo && geo[0]){ lat = geo[0].lat; lng = geo[0].lng; OTM_ERRORS.push(`✓ Trouvé : ${lat}, ${lng}`); }
+      else { OTM_ERRORS.push("✕ Impossible de trouver les coordonnées GPS de cette destination."); return []; }
+    } catch(e){
+      OTM_ERRORS.push("✕ Erreur lors de la recherche du lieu : " + e.message); return [];
+    }
   }
-  if(!lat || !lng) return [];
 
   let kinds = 'interesting_places';
   let catMapping = 'v';
@@ -467,26 +473,35 @@ async function fetchOtmActivities(center, dest, type='all', query='') {
 
   try {
     const lang = ['fr','en','es'].includes(curLang) ? curLang : 'fr';
-    
     const radiusUrl = `https://api.opentripmap.com/0.1/${lang}/places/radius?radius=15000&lon=${lng}&lat=${lat}&kinds=${kinds}&rate=1&format=geojson&limit=30&apikey=${OTM_API_KEY}`;
     
+    OTM_ERRORS.push(`Requête Radius (15km) avec filtres: ${kinds}`);
+
     const r = await fetchT(radiusUrl, 8000);
     if (!r.ok) {
-        console.error("OpenTripMap Radius API Error");
+        OTM_ERRORS.push(`✕ Erreur HTTP ${r.status} (Radius API)`);
+        const txt = await r.text();
+        OTM_ERRORS.push(`Détails: ${txt.substring(0, 100)}`);
         return [];
     }
     
     const data = await r.json();
     let places = (data && data.features) ? data.features.map(f => f.properties) : [];
     
+    OTM_ERRORS.push(`Lieux trouvés dans la zone: ${places.length}`);
+
     places = places.filter(p => p.name && p.name.trim() !== '');
 
     if (query) {
       const qNorm = query.toLowerCase().trim();
       places = places.filter(p => p.name.toLowerCase().includes(qNorm));
+      OTM_ERRORS.push(`Lieux après filtrage textuel ("${query}"): ${places.length}`);
     }
 
     const detailedPlaces = [];
+    let successCount = 0;
+    let failCount = 0;
+
     for (const p of places.slice(0, 10)) {
       try {
         const detailUrl = `https://api.opentripmap.com/0.1/${lang}/places/xid/${p.xid}?apikey=${OTM_API_KEY}`;
@@ -507,14 +522,21 @@ async function fetchOtmActivities(center, dest, type='all', query='') {
             thumb: details.preview ? details.preview.source : null,
             pageTitle: details.name || p.name
           });
+          successCount++;
+        } else {
+          failCount++;
+          if(failCount === 1) OTM_ERRORS.push(`✕ Erreur HTTP ${res.status} lors de la lecture d'une fiche.`);
         }
       } catch (e) {
+        failCount++;
+        if(failCount === 1) OTM_ERRORS.push(`✕ Exception lors de la lecture d'une fiche: ${e.message}`);
       }
     }
     
+    OTM_ERRORS.push(`Bilan : ${successCount} fiches lues avec succès, ${failCount} échecs.`);
     return detailedPlaces;
   } catch (e) {
-    console.error("Erreur générale OpenTripMap:", e);
+    OTM_ERRORS.push("✕ Erreur d'exécution générale : " + e.message);
     return [];
   }
 }
@@ -817,6 +839,15 @@ function renderDiscover(){
     <button class="btn s" data-discsearch>${t('find')}</button>
   </div>
   <div class="row" style="padding-bottom:12px">${types.map(([k,l])=>`<button class="chip ${discType===k?'on':''}" data-disctype="${k}">${l}</button>`).join('')}</div>`;
+
+  if (OTM_ERRORS && OTM_ERRORS.length > 0) {
+     h += `<div class="note" style="border-color:var(--bad); background:var(--sf);">
+           <b style="color:var(--bad)">Logs de diagnostic (OTM) :</b>
+           <ul style="margin:5px 0 0; padding-left:20px; font-size:12px; color:var(--mu)">
+             ${OTM_ERRORS.map(err => `<li>${esc(err)}</li>`).join('')}
+           </ul>
+           </div>`;
+  }
 
   if(discLoading){
     h+=`<div class="empty" style="text-align:center;padding:40px 0">${t('loading_ideas',{dest:esc(S.dest)})}</div>`;
