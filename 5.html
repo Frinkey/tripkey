@@ -284,10 +284,11 @@ function applyLang(lang){
   });
   if(S){
     bars();
-    if(tabNow==='plan')renderPlan();
-    if(tabNow==='list')renderList();
-    if(tabNow==='discover')loadDiscover(true);
-    if(tabNow==='info')renderInfo();
+    renderPlan();
+    renderList();
+    renderInfo();
+    renderAI();
+    loadDiscover(true);
   }
 }
 
@@ -383,7 +384,7 @@ const vis=a=>{if(!ok(a))return false;const inD=dayO().items.some(i=>i.aid===a.id
 const unp=()=>S.acts.filter(a=>a.lat==null&&vis(a));
 const fm=n=>Number(n).toLocaleString(curLang==='en'?'en-US':(curLang==='es'?'es-ES':'fr-FR'),{maximumFractionDigits:2})+' '+S.money;
 
-/* ================= Géo & Découverte (i18n) ================= */
+/* ================= Géo & Découverte (Overpass optimisé) ================= */
 const okLL=(la,lo)=>Number.isFinite(la)&&Number.isFinite(lo)&&Math.abs(la)<=90&&Math.abs(lo)<=180&&!(la===0&&lo===0);
 const RXS=[/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,/@(-?\d+\.\d+),(-?\d+\.\d+)/,/[?&](?:q|ll|query|destination|daddr|center|sll)=(-?\d+\.\d+)[,+ ]+(-?\d+\.\d+)/,/\/place\/(-?\d+\.\d+),(-?\d+\.\d+)/,/#map=\d+\/(-?\d+\.\d+)\/(-?\d+\.\d+)/,/mlat=(-?\d+\.\d+)&(?:amp;)?mlon=(-?\d+\.\d+)/];
 function parseGPS(txt){
@@ -484,24 +485,33 @@ async function fetchWikiActivities(dest,type='all',query=''){
 async function fetchOverpassActivities(center,type='all',query=''){
   if(!center||!center[0])return[];
   const [lat,lng]=center;
-  let filterStr='';
+  const delta=0.18;
+  const bbox=`${lat-delta},${lng-delta},${lat+delta},${lng+delta}`;
+
+  let tags=[];
   if(type==='attraction'){
-    filterStr='nwr["tourism"~"attraction|theme_park|zoo|aquarium"](around:20000,'+lat+','+lng+');nwr["leisure"~"water_park"](around:20000,'+lat+','+lng+');';
+    tags=['node["tourism"="attraction"]','node["tourism"="theme_park"]','node["tourism"="zoo"]','node["tourism"="aquarium"]','node["leisure"="water_park"]'];
   }else if(type==='culture'){
-    filterStr='nwr["tourism"="museum"](around:20000,'+lat+','+lng+');nwr["historic"](around:20000,'+lat+','+lng+');';
+    tags=['node["tourism"="museum"]','node["historic"]','node["tourism"="gallery"]'];
   }else if(type==='nature'){
-    filterStr='nwr["tourism"="viewpoint"](around:20000,'+lat+','+lng+');nwr["leisure"="park"](around:20000,'+lat+','+lng+');nwr["natural"~"beach|peak|waterfall"](around:20000,'+lat+','+lng+');';
+    tags=['node["tourism"="viewpoint"]','node["leisure"="park"]','node["natural"]'];
   }else if(type==='food'){
-    filterStr='nwr["amenity"~"restaurant|cafe|food_court"](around:12000,'+lat+','+lng+');';
+    tags=['node["amenity"="restaurant"]','node["amenity"="cafe"]'];
   }else{
-    filterStr='nwr["tourism"~"attraction|theme_park|zoo|aquarium|museum|viewpoint"](around:20000,'+lat+','+lng+');nwr["historic"~"monument|castle|ruins"](around:20000,'+lat+','+lng+');';
+    tags=['node["tourism"~"attraction|museum|viewpoint|theme_park"]','node["historic"]','node["leisure"~"park|water_park"]'];
   }
-  const ql=`[out:json][timeout:15];(${filterStr});out center tags 30;`;
+
+  const queryBody=tags.map(t=>`${t}(${bbox});`).join('');
+  const ql=`[out:json][timeout:15];(${queryBody});out center 30;`;
+
   try{
-    const r=await fetchT('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(ql),12000);
-    if(!r.ok)return [];
+    let r=await fetchT('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(ql),12000);
+    if(!r.ok){
+      r=await fetchT('https://maps.mail.ru/osm/tools/overpass/api/interpreter?data='+encodeURIComponent(ql),12000);
+    }
+    if(!r||!r.ok)return[];
     const j=await r.json();
-    if(!j.elements)return [];
+    if(!j.elements)return[];
     let list=j.elements.map(el=>{
       const tg=el.tags||{};
       const name=tg['name:'+curLang]||tg.name||tg['name:en']||tg['name:fr'];
