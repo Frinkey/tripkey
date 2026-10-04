@@ -36,13 +36,14 @@ button{font-family:inherit}
 .tk{flex:none;min-width:150px;max-width:220px;border-radius:16px;padding:9px 12px;background:var(--sf);border:1px solid var(--ln);border-inline-start:4px solid var(--c,var(--gold));box-shadow:var(--shs);cursor:pointer}.tk b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tk small{color:var(--mu);font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tk.ghost{border:1px dashed var(--ln);border-inline-start:1px dashed var(--ln);color:var(--mu);font-size:14px;min-width:240px;white-space:normal;background:transparent;box-shadow:none;cursor:default}
 
-#nav-container{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));z-index:700;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:22px}
+/* Barre de navigation horizontale avec indicateur de défilement */
+#nav-container{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));z-index:700;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:22px;background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:var(--sh);border:1px solid var(--ln);background-image:linear-gradient(90deg,var(--glass),transparent 20%,transparent 80%,var(--glass))}
 #nav{display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
 #nav::-webkit-scrollbar{display:none}
 #nav button{flex:none;border:0;background:none;border-radius:14px;padding:6px 12px;font:700 11px ui-rounded,system-ui;color:var(--mu);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;white-space:nowrap}
 #nav svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 #nav button.on{color:var(--accTx);background:var(--acc)}
-#nav-actions{display:flex;align-items:center;gap:4px;flex:none;padding-inline-start:4px;border-inline-start:1px solid var(--ln)}
+#nav-actions{display:flex;align-items:center;gap:6px;flex:none;padding-inline-start:6px;border-inline-start:1px solid var(--ln)}
 .ib{flex:none;width:34px;height:34px;padding:0;display:flex;align-items:center;justify-content:center;color:var(--tx);background:var(--sf2);font-size:14px;border-radius:50%;border:0;cursor:pointer}
 .ib:disabled{opacity:.3}
 
@@ -188,8 +189,8 @@ const I18N={
     filter_v:'🏛 Visites',filter_a:'⚡ Activités',filter_f:'🍽 Bonnes tables',filter_n:'🎭 Sorties',
     to_place_title:'À placer sur la carte ({n})',on_map_title:'Sur la carte ({n})',all_geolocated:'Toutes vos adresses sont géolocalisées.',
     no_place_found:'Aucun lieu ne correspond à ces critères.',empty_places_book:'Votre carnet de voyage est vide. Ajoutez des adresses ou explorez des idées.',
-    community_title:'Voyages de la communauté',community_desc:'Publiez votre voyage ou consultez ceux partagés pour y piocher des activités à la carte.',
-    publish_trip:'📤 Publier mon voyage actuel sur le serveur',shared_trips:'Séjours partagés',import_acts:'Importer les activités sélectionnées',
+    community_title:'Communauté de voyages',tab_shared:'Explorer partagés',tab_mine:'Mes voyages publiés',
+    publish_trip:'📤 Publier mon voyage actuel',import_acts:'Importer les activités sélectionnées',delete_pub:'Supprimer',
     days_short:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],
     months_short:['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'],
     cat_names:{v:'Visite',a:'Activité',f:'Food',n:'Night show'},
@@ -216,8 +217,8 @@ const I18N={
     filter_v:'🏛 Sights',filter_a:'⚡ Activities',filter_f:'🍽 Dining',filter_n:'🎭 Nightlife',
     to_place_title:'Needs location ({n})',on_map_title:'On the map ({n})',all_geolocated:'All your places are located on the map.',
     no_place_found:'No places match your search.',empty_places_book:'Your trip notebook is empty. Add places manually or browse Explore.',
-    community_title:'Community Trips',community_desc:'Publish your trip or browse shared ones to pick activities à la carte.',
-    publish_trip:'📤 Publish my current trip to server',shared_trips:'Shared Trips',import_acts:'Import selected activities',
+    community_title:'Travel Community',tab_shared:'Shared Trips',tab_mine:'My Published Trips',
+    publish_trip:'📤 Publish my current trip',import_acts:'Import selected activities',delete_pub:'Delete',
     days_short:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
     months_short:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
     cat_names:{v:'Sight',a:'Activity',f:'Food',n:'Nightlife'},
@@ -244,8 +245,8 @@ const I18N={
     filter_v:'🏛 Visitas',filter_a:'⚡ Actividades',filter_f:'🍽 Restaurantes',filter_n:'🎭 Ocio nocturno',
     to_place_title:'Por ubicar en el mapa ({n})',on_map_title:'En el mapa ({n})',all_geolocated:'Todos tus lugares están geolocalizados.',
     no_place_found:'Ningún lugar coincide con la búsqueda.',empty_places_book:'Tu cuaderno de viaje está vacío. Añade lugares o descubre en Explorar.',
-    community_title:'Viajes de la comunidad',community_desc:'Publica tu viaje o consulta los compartidos para elegir actividades a la carta.',
-    publish_trip:'📤 Publicar mi viaje actual en el servidor',shared_trips:'Viajes compartidos',import_acts:'Importar actividades seleccionadas',
+    community_title:'Comunidad de Viajes',tab_shared:'Viajes compartidos',tab_mine:'Mis viajes publicados',
+    publish_trip:'📤 Publicar mi viaje actual',import_acts:'Importar actividades seleccionadas',delete_pub:'Eliminar',
     days_short:['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],
     months_short:['ene.','feb.','mar.','abr.','may.','jun.','jul.','ago.','sep.','oct.','nov.','dic.'],
     cat_names:{v:'Visita',a:'Actividad',f:'Restaurante',n:'Ocio nocturno'},
@@ -272,8 +273,8 @@ const I18N={
     filter_v:'🏛 زيارات',filter_a:'⚡ أنشطة',filter_f:'🍽 مطاعم',filter_n:'🎭 سهرات',
     to_place_title:'بانتظار التحديد على الخريطة ({n})',on_map_title:'على الخريطة ({n})',all_geolocated:'تم تحديد موقع جميع الأماكن.',
     no_place_found:'لا توجد نتائج مطابقة.',empty_places_book:'دفتر رحلتك فارغ. أضف أماكنك أو استكشف من الدليل.',
-    community_title:'رحلات المجتمع',community_desc:'انشر رحلتك أو تصفح رحلات الآخرين لاختيار الأنشطة المفضلة.',
-    publish_trip:'📤 نشر رحلتي الحالية على الخادم',shared_trips:'الرحلات المشتركة',import_acts:'استيراد الأنشطة المحددة',
+    community_title:'مجتمع الرحلات',tab_shared:'الرحلات المشتركة',tab_mine:'رحلاتي المنشورة',
+    publish_trip:'📤 نشر رحلتي الحالية',import_acts:'استيراد الأنشطة المحددة',delete_pub:'حذف',
     days_short:['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'],
     months_short:['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],
     cat_names:{v:'زيارة',a:'نشاط',f:'مطاعم',n:'سهرة'},
@@ -283,6 +284,9 @@ const I18N={
 
 let curLang='fr';
 try{const sl=localStorage.getItem('tripkit_lang');if(sl&&I18N[sl])curLang=sl}catch(e){}
+let authorId=localStorage.getItem('tripkit_author');
+if(!authorId){authorId='user-'+uid();localStorage.setItem('tripkit_author',authorId);}
+
 const t=(k,o={})=>{
   let s=(I18N[curLang]&&I18N[curLang][k])||(I18N.fr[k]||k);
   for(const[x,v] of Object.entries(o))s=s.replace(new RegExp('\\{'+x+'\\}','g'),v);
@@ -346,11 +350,12 @@ if(mq&&mq.addEventListener)mq.addEventListener('change',()=>{if(themePref==='aut
 /* ================= Modèle de données ================= */
 const X=(n,c='v',s='',o={})=>Object.assign({id:uid(),n,c,s:Array.isArray(s)?s:String(s).split('').filter(Boolean),lat:null,lng:null,area:null,price:null,hrs:null,note:null,src:'Saisie manuelle',maps:null,rate:0,fav:false,d:90,tags:[]},o);
 const mkCal=(name,n)=>({id:uid(),name,days:Array.from({length:n},()=>({hotel:'',items:[]}))});
-function mkTrip(o){const t={id:o.id||uid(),name:o.name,flag:o.flag||'🌍',dest:o.dest||o.name,start:o.start,n:o.n,center:o.center||null,zoom:o.zoom||11,acts:[],cals:[],cur:'',notes:[],money:o.money||'€',budget:null,people:[],exp:[],res:[],lists:[]};const c=mkCal('Planning principal',t.n);t.cals.push(c);t.cur=c.id;return t}
+function mkTrip(o){const t={id:o.id||uid(),name:o.name,flag:o.flag||'🌍',dest:o.dest||o.name,start:o.start,n:o.n,center:o.center||null,zoom:o.zoom||11,acts:[],cals:[],cur:'',notes:[],money:o.money||'€',budget:null,people:[],exp:[],res:[],lists:[],author:authorId};const c=mkCal('Planning principal',t.n);t.cals.push(c);t.cur=c.id;return t}
 const fin=v=>Number.isFinite(+v)&&v!==''&&v!==null;
 function norm(t){
   if(!t||typeof t!=='object')return null;
   t.id=t.id||uid();t.name=String(t.name||'Voyage');t.flag=t.flag||'🌍';t.dest=t.dest||t.name;
+  t.author=String(t.author||authorId);
   if(!pISO(t.start))t.start=toISO(new Date());
   t.acts=Array.isArray(t.acts)?t.acts.filter(a=>a&&typeof a==='object'):[];t.notes=Array.isArray(t.notes)?t.notes.filter(n=>n&&typeof n==='object'):[];
   t.cals=Array.isArray(t.cals)?t.cals.filter(c=>c&&typeof c==='object'):[];
@@ -388,7 +393,7 @@ let filterOpen=false,destSugTimer=null,lastChosenCoords=null;
 let discEngine='wiki',discType='all',discList=[],discLoading=false;
 let listSearchQuery='',listFilterCat='all';
 let curGallery=[],curGalIdx=0;
-let communityTrips=[],communityLoading=false;
+let communityTrips=[],communityLoading=false,commSubTab='shared';
 
 const curTrip=()=>DB.trips.find(t=>t.id===DB.cur)||null;
 const cal=()=>S.cals.find(c=>c.id===S.cur)||S.cals[0],get=id=>S.acts.find(a=>a.id===id),dayO=()=>{const c=cal();return c.days[Math.min(day,c.days.length-1)]};
@@ -963,19 +968,17 @@ function removeActivityFromDiscover(actId){
 async function fetchCommunityTrips(){
   communityLoading=true;renderCommunity();
   try{
-    const r=await fetchT('https://api.jsonbin.v3.b/v3/b/670000000000000000000000/latest');
-    if(r.ok){
-      const j=await r.json();
-      communityTrips=Array.isArray(j.record)?j.record:[];
+    let saved=null;try{saved=localStorage.getItem('tripkit_community');}catch(e){}
+    if(saved){communityTrips=JSON.parse(saved);}
+    else{
+      communityTrips=[
+        {id:'comm-1',author:'admin',name:'Le Caire & Gizeh Essentiel',flag:'🇪🇬',dest:'Le Caire',n:5,acts:[
+          {id:'c1',n:'Pyramides de Gizeh',c:'v',lat:29.979,lng:31.134,price:'700 EGP',d:150,thumb:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Kheops-Pyramid.jpg/300px-Kheops-Pyramid.jpg',note:'Magnifique site historique.'},
+          {id:'c2',n:'Khan el-Khalili',c:'v',lat:30.047,lng:31.262,price:'Gratuit',d:120,thumb:'',note:'Grand marché traditionnel.'}
+        ]}
+      ];
     }
-  }catch(e){
-    communityTrips=[
-      {id:'comm-1',name:'Le Caire & Gizeh Essentiel',flag:'🇪🇬',dest:'Le Caire',n:5,acts:[
-        {id:'c1',n:'Pyramides de Gizeh',c:'v',lat:29.979,lng:31.134,price:'700 EGP',d:150},
-        {id:'c2',n:'Khan el-Khalili',c:'v',lat:30.047,lng:31.262,price:'Gratuit',d:120}
-      ]}
-    ];
-  }
+  }catch(e){communityTrips=[];}
   communityLoading=false;renderCommunity();
 }
 
@@ -983,55 +986,96 @@ async function publishCurrentTrip(){
   if(!S)return;
   toast('⏳ Publication…');
   try{
-    communityTrips.push(JSON.parse(JSON.stringify(S)));
+    S.author=authorId;
+    const idx=communityTrips.findIndex(x=>x.id===S.id);
+    if(idx>=0)communityTrips[idx]=JSON.parse(JSON.stringify(S));
+    else communityTrips.push(JSON.parse(JSON.stringify(S)));
+    try{localStorage.setItem('tripkit_community',JSON.stringify(communityTrips));}catch(e){}
     toast('✓ Publié avec succès !');
     renderCommunity();
   }catch(e){toast('Erreur de publication')}
 }
 
-function renderCommunity(){
-  if(tabNow!=='community')return;
-  $('#community').innerHTML=`<h2>${t('community_title')}</h2>
-  <p style="color:var(--mu);font-size:14px;margin-bottom:16px">${t('community_desc')}</p>
-  <button class="btn g" data-publishtrip style="width:100%;margin-bottom:16px">${t('publish_trip')}</button>
-  <h3>${t('shared_trips')}</h3>`+
-  (communityLoading?`<div class="empty">⏳ Chargement…</div>`:
-   (communityTrips.length?communityTrips.map((trip,idx)=>`
-    <div class="card blk" style="margin-bottom:14px;padding:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <b>${esc(trip.flag)} ${esc(trip.name)} (${esc(trip.dest)})</b>
-        <button class="btn s sm" data-viewcomm="${idx}">👁 Étapes (${trip.acts.length})</button>
-      </div>
-    </div>`).join(''):`<div class="empty">Aucun voyage partagé.</div>`));
+function deleteCommunityTrip(id){
+  if(!confirm('Supprimer ce voyage de la communauté ?'))return;
+  communityTrips=communityTrips.filter(t=>t.id!==id);
+  try{localStorage.setItem('tripkit_community',JSON.stringify(communityTrips));}catch(e){}
+  toast('Voyage supprimé');
+  renderCommunity();
 }
 
-function viewCommunityTrip(idx){
-  const trip=communityTrips[idx];
+function renderCommunity(){
+  if(tabNow!=='community')return;
+  const subSeg=`<div class="seg" style="margin-bottom:12px">
+    <button class="${commSubTab==='shared'?'on':''}" data-commsub="shared">${t('tab_shared')}</button>
+    <button class="${commSubTab==='mine'?'on':''}" data-commsub="mine">${t('tab_mine')}</button>
+  </div>`;
+
+  const list=commSubTab==='shared'?communityTrips:communityTrips.filter(x=>x.author===authorId);
+
+  $('#community').innerHTML=`<h2>${t('community_title')}</h2>
+  <p style="color:var(--mu);font-size:14px;margin-bottom:12px">${t('community_desc')}</p>
+  <button class="btn g" data-publishtrip style="width:100%;margin-bottom:12px">${t('publish_trip')}</button>
+  ${subSeg}`+
+  (communityLoading?`<div class="empty">⏳ Chargement…</div>`:
+   (list.length?list.map(trip=>{
+     const isAuthor=trip.author===authorId;
+     return `<div class="card blk" style="margin-bottom:12px;padding:14px">
+       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+         <div>
+           <b style="font-size:16px">${esc(trip.flag)} ${esc(trip.name)}</b>
+           <small>📍 ${esc(trip.dest)} · ${trip.acts.length} étapes</small>
+         </div>
+         <div class="row" style="gap:6px">
+           <button class="btn s sm" data-viewcomm="${trip.id}">👁 Détails</button>
+           ${isAuthor?`<button class="btn r sm" data-delpub="${trip.id}">${t('delete_pub')}</button>`:''}
+         </div>
+       </div>
+     </div>`;
+   }).join(''):`<div class="empty">Aucun voyage trouvé.</div>`));
+}
+
+function viewCommunityTrip(tripId){
+  const trip=communityTrips.find(x=>x.id===tripId);
   if(!trip)return;
   sheet(`<h2 style="font-size:20px;margin-top:0">${esc(trip.flag)} ${esc(trip.name)}</h2>
   <p style="color:var(--mu)">Destination : ${esc(trip.dest)} · ${trip.acts.length} activités</p>
-  <div style="max-height:50vh;overflow-y:auto;margin:12px 0">
-    ${trip.acts.map((a,ai)=>`<div class="ck"><button class="t" data-togglecommact="${idx}|${ai}"><span class="bx" id="comm-bx-${idx}-${ai}">+</span><span class="tx"><b>${esc(a.n)}</b> <small>(${CT[a.c]||a.c})</small></span></button></div>`).join('')}
+  <div style="max-height:55vh;overflow-y:auto;margin:12px 0">
+    ${trip.acts.map((a,ai)=>{
+      const thumbHtml=a.thumb?`<img class="act-thumb" style="width:50px;height:50px;border-radius:10px;object-fit:cover" src="${esc(a.thumb)}" alt="">`:`<div style="width:50px;height:50px;border-radius:10px;background:var(--sf2);display:flex;align-items:center;justify-content:center;font-size:20px">${EM[a.c]||'📍'}</div>`;
+      return `<div class="card" style="padding:8px;margin-bottom:8px">
+        ${thumbHtml}
+        <div class="nm">
+          <b style="font-size:14px">${esc(a.n)}</b>
+          <small>${CT[a.c]||a.c}${a.price?' · '+esc(a.price):''}</small>
+        </div>
+        <button class="btn s sm" data-togglecommact="${trip.id}|${ai}" id="comm-btn-${trip.id}-${ai}">＋</button>
+      </div>`;
+    }).join('')}
   </div>
-  <button class="btn g" data-importcommacts="${idx}" style="width:100%">${t('import_acts')}</button>`);
+  <button class="btn g" data-importcommacts="${trip.id}" style="width:100%">${t('import_acts')}</button>`);
 }
 
 let selectedCommActs=new Set();
-function toggleCommAct(tripIdx,actIdx){
-  const k=`${tripIdx}-${actIdx}`;
+function toggleCommAct(tripId,actIdx){
+  const k=`${tripId}-${actIdx}`;
   if(selectedCommActs.has(k))selectedCommActs.delete(k);else selectedCommActs.add(k);
-  const bx=$(`#comm-bx-${tripIdx}-${actIdx}`);
-  if(bx){bx.textContent=selectedCommActs.has(k)?'✓':'+';bx.style.background=selectedCommActs.has(k)?'var(--acc)':'';}
+  const btn=$(`#comm-btn-${tripId}-${actIdx}`);
+  if(btn){
+    btn.textContent=selectedCommActs.has(k)?'✓':'＋';
+    btn.style.background=selectedCommActs.has(k)?'var(--acc)':'var(--sf2)';
+    btn.style.color=selectedCommActs.has(k)?'var(--accTx)':'var(--tx)';
+  }
 }
 
-function importCommActs(tripIdx){
-  const trip=communityTrips[tripIdx];
+function importCommActs(tripId){
+  const trip=communityTrips.find(x=>x.id===tripId);
   if(!trip)return;
   let added=0;
   mut(()=>{
     trip.acts.forEach((a,ai)=>{
-      if(selectedCommActs.has(`${tripIdx}-${ai}`)){
-        const newAct=X(a.n,a.c,a.s,{lat:a.lat,lng:a.lng,price:a.price,hrs:a.hrs,note:a.note,src:'Communauté'});
+      if(selectedCommActs.has(`${tripId}-${ai}`)){
+        const newAct=X(a.n,a.c,a.s,{lat:a.lat,lng:a.lng,price:a.price,hrs:a.hrs,note:a.note,src:'Communauté',thumb:a.thumb});
         S.acts.push(newAct);
         added++;
       }
@@ -1246,23 +1290,34 @@ function onClick(e){
   }
   const commBtn=e.target.closest('[data-viewcomm]');
   if(commBtn){
-    viewCommunityTrip(+commBtn.dataset.viewcomm);
+    viewCommunityTrip(commBtn.dataset.viewcomm);
     return;
   }
   const commActBtn=e.target.closest('[data-togglecommact]');
   if(commActBtn){
-    const [tIdx,aIdx]=commActBtn.dataset.togglecommact.split('|');
-    toggleCommAct(+tIdx,+aIdx);
+    const [tId,aIdx]=commActBtn.dataset.togglecommact.split('|');
+    toggleCommAct(tId,+aIdx);
     return;
   }
   const importCommBtn=e.target.closest('[data-importcommacts]');
   if(importCommBtn){
-    importCommActs(+importCommBtn.dataset.importcommacts);
+    importCommActs(importCommBtn.dataset.importcommacts);
     return;
   }
   const pubBtn=e.target.closest('[data-publishtrip]');
   if(pubBtn){
     publishCurrentTrip();
+    return;
+  }
+  const delPubBtn=e.target.closest('[data-delpub]');
+  if(delPubBtn){
+    deleteCommunityTrip(delPubBtn.dataset.delpub);
+    return;
+  }
+  const commSubBtn=e.target.closest('[data-commsub]');
+  if(commSubBtn){
+    commSubTab=commSubBtn.dataset.commsub;
+    renderCommunity();
     return;
   }
   if(e.target.closest('a'))return;
