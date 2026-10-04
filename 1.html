@@ -165,6 +165,20 @@ input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=c
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
 (()=>{'use strict';
+/* ================= Constantes & utilitaires globaux ================= */
+const OTM_API_KEY = '5ae2e3f221c38a28845f05b60d69059f50b8de59fa1d8bd95d907662';
+let OTM_ERRORS = [];
+
+// Intercepte les erreurs globales pour le diagnostic technique
+window.addEventListener('error', function(e) {
+    OTM_ERRORS.push('✕ JS Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+    if(typeof renderDiscover === 'function' && typeof tabNow !== 'undefined' && tabNow === 'discover') renderDiscover();
+});
+window.addEventListener('unhandledrejection', function(e) {
+    OTM_ERRORS.push('✕ Promise Rejection: ' + (e.reason && e.reason.stack ? e.reason.stack : String(e.reason)));
+    if(typeof renderDiscover === 'function' && typeof tabNow !== 'undefined' && tabNow === 'discover') renderDiscover();
+});
+
 /* ================= Internationalisation (i18n) ================= */
 const I18N={
   fr:{
@@ -218,58 +232,6 @@ const I18N={
     months_short:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
     cat_names:{v:'Sight',a:'Activity',f:'Food',n:'Nightlife'},
     slots:{m:'Morning',a:'Afternoon',s:'Sunset',e:'Evening'}
-  },
-  es:{
-    code:'es',dir:'ltr',name:'Español',flag:'🇪🇸',
-    nav_map:'Mapa',nav_plan:'Itinerario',nav_places:'Lugares',nav_explore:'Explorar',nav_trip:'Viaje',nav_assistant:'IA',
-    filters_down:'Filtros ▾',filters_up:'Filtros ▴',
-    welcome_desc:'Planifica cualquier viaje en un mapa interactivo: lugares, días, reservas y presupuesto. Cada viaje empieza en blanco.',
-    create_first_trip:'Crear mi primer viaje',import_backup:'Importar copia',
-    hide_planned:'Ocultar programados',hide_unplaced:'Ocultar sin ubicar',unplaced_btn:'📍 {n} sin ubicar',
-    empty_day:'Sin visitas previstas — añade actividades desde el mapa o Explorar.',
-    explore_title:'Explorar {dest}',explore_source:'Estilo de recomendaciones',
-    explore_wiki:'🏛 Lo imprescindible',explore_osm:'🎡 Ocio y actividades',
-    search_placeholder:'Buscar actividad en {dest}…',find:'Buscar',
-    cat_all:'✨ Ver todo',cat_attraction:'🎡 Parques y atracciones',cat_culture:'🏛 Patrimonio y museos',cat_nature:'🌿 Naturaleza y vistas',cat_food:'🍽 Gastronomía local',
-    itinerary:'Ruta',read_more:'Leer resumen completo',open_web:'Abrir sitio web ↗',book_ticket:'Reservar entradas',
-    view_details:'Ver ficha',remove_trip:'Quitar del viaje',add_places:'Guardar en mis lugares',
-    about_title:'Acerca de {name}:',no_info:'No hay información adicional disponible.',
-    loading_ideas:'⏳ Buscando las mejores ideas para {dest}…',no_ideas:'No se encontraron sugerencias. Prueba con otro filtro o término.',
-    saved_places:'Lugares guardados y deseos',search_places:'Buscar lugares o notas…',add_btn:'＋ Añadir',bulk_btn:'En lote',
-    filter_all:'Todos',filter_fav:'♥ Favoritos',filter_unp:'📍 Por ubicar',
-    filter_v:'🏛 Visitas',filter_a:'⚡ Actividades',filter_f:'🍽 Restaurantes',filter_n:'🎭 Ocio nocturno',
-    to_place_title:'Por ubicar en el mapa ({n})',on_map_title:'En el mapa ({n})',all_geolocated:'Todos tus lugares están geolocalizados.',
-    no_place_found:'Ningún lugar coincide con la búsqueda.',empty_places_book:'Tu cuaderno de viaje está vacío. Añade lugares o descubre en Explorar.',
-    days_short:['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],
-    months_short:['ene.','feb.','mar.','abr.','may.','jun.','jul.','ago.','sep.','oct.','nov.','dic.'],
-    cat_names:{v:'Visita',a:'Actividad',f:'Restaurante',n:'Ocio nocturno'},
-    slots:{m:'Mañana',a:'Tarde',s:'Atardecer',e:'Noche'}
-  },
-  ar:{
-    code:'ar',dir:'rtl',name:'العربية',flag:'🇸🇦',
-    nav_map:'الخريطة',nav_plan:'البرنامج',nav_places:'الأماكن',nav_explore:'استكشف',nav_trip:'الرحلة',nav_assistant:'ذكاء',
-    filters_down:'التصنيفات ▾',filters_up:'التصنيفات ▴',
-    welcome_desc:'خطط لأي رحلة على خريطة تفاعلية: أماكنك، أيامك، حجوزاتك وميزانيتك.',
-    create_first_trip:'إنشاء رحلتي الأولى',import_backup:'استيراد نسخة احتياطية',
-    hide_planned:'إخفاء المجدولة',hide_unplaced:'إخفاء غير المحددة',unplaced_btn:'📍 {n} بدون موقع',
-    empty_day:'لا توجد زيارات مقررة — أضف من الخريطة أو من تبويب استكشف.',
-    explore_title:'استكشف {dest}',explore_source:'نوع الاقتراحات',
-    explore_wiki:'🏛 أبرز المعالم والثقافة',explore_osm:'🎡 أنشطة وترفيه',
-    search_placeholder:'ابحث عن نشاط في {dest}…',find:'بحث',
-    cat_all:'✨ عرض الكل',cat_attraction:'🎡 مدن الملاهي والترفيه',cat_culture:'🏛 التراث والمتاحف',cat_nature:'🌿 الطبيعة والإطلالات',cat_food:'🍽 أطعمة وتذوق',
-    itinerary:'الاتجاهات',read_more:'قراءة الملخص الكامل',open_web:'فتح الموقع الأصلي ↗',book_ticket:'حجز تذاكر',
-    view_details:'عرض التفاصيل',remove_trip:'إزالة من الرحلة',add_places:'حفظ في قائمة الأماكن',
-    about_title:'حول {name}:',no_info:'لا توجد معلومات إضافية متوفرة.',
-    loading_ideas:'⏳ جاري اختيار أفضل الاقتراحات لـ {dest}…',no_ideas:'لم يتم العثور على اقتراحات. حاول تغيير الفلتر أو كلمة البحث.',
-    saved_places:'أماكني ورغباتي',search_places:'بحث في الأماكن أو الملاحظات…',add_btn:'＋ إضافة',bulk_btn:'بالجملة',
-    filter_all:'الكل',filter_fav:'♥ المفضلة',filter_unp:'📍 بانتظار التحديد',
-    filter_v:'🏛 زيارات',filter_a:'⚡ أنشطة',filter_f:'🍽 مطاعم',filter_n:'🎭 سهرات',
-    to_place_title:'بانتظار التحديد على الخريطة ({n})',on_map_title:'على الخريطة ({n})',all_geolocated:'تم تحديد موقع جميع الأماكن.',
-    no_place_found:'لا توجد نتائج مطابقة.',empty_places_book:'دفتر رحلتك فارغ. أضف أماكنك أو استكشف من الدليل.',
-    days_short:['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'],
-    months_short:['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],
-    cat_names:{v:'زيارة',a:'نشاط',f:'مطاعم',n:'سهرة'},
-    slots:{m:'صباحاً',a:'ظهراً',s:'غروب',e:'مساءً'}
   }
 };
 
@@ -301,10 +263,6 @@ function applyLang(lang){
     loadDiscover(true);
   }
 }
-
-/* ================= Constantes & utilitaires ================= */
-const OTM_API_KEY = '5ae2e3f221c38a28845f05b60d69059f50b8de59fa1d8bd95d907662';
-let OTM_ERRORS = [];
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const K='tripkit_v1',KL='egmap26d',KT='tripkit_theme',MAXD=60;
@@ -463,7 +421,7 @@ async function fetchOtmRadius(center, dest, type='all', query='') {
       if(geo && geo[0]){ lat = geo[0].lat; lng = geo[0].lng; OTM_ERRORS.push(`✓ Trouvé : ${lat}, ${lng}`); }
       else { OTM_ERRORS.push("✕ Coordonnées introuvables pour cette destination."); return []; }
     } catch(e){
-      OTM_ERRORS.push("✕ Erreur de géocodage : " + e.message); return [];
+      OTM_ERRORS.push("✕ Erreur de géocodage : " + (e.stack || String(e))); return [];
     }
   }
 
@@ -508,7 +466,7 @@ async function fetchOtmRadius(center, dest, type='all', query='') {
     OTM_ERRORS.push(`Tri par popularité appliqué sur ${places.length} résultats bruts.`);
     return places;
   } catch (e) {
-    OTM_ERRORS.push("✕ Erreur générale : " + e.message);
+    OTM_ERRORS.push("✕ Erreur d'exécution (Radius) : " + (e.stack || String(e)));
     return [];
   }
 }
@@ -563,7 +521,7 @@ async function loadMoreOtm() {
           successCount++;
         }
       } catch (e) {
-         // Silencieux pour ne pas bloquer les autres
+          OTM_ERRORS.push(`✕ Exception détail (${p.xid}): ${e.stack || String(e)}`);
       }
     }
 
@@ -845,12 +803,12 @@ async function loadDiscover(force=false,query=''){
   discLoading=true; 
   renderDiscover();
   
-  OTM_ERRORS = []; // Réinitialise les logs
+  OTM_ERRORS = []; 
   otmPlaces = await fetchOtmRadius(S.center, S.dest, discType, query);
   otmOffset = 0;
   discList = [];
 
-  discLoading = false; // Permet à loadMoreOtm de se lancer
+  discLoading = false; 
   await loadMoreOtm();
 }
 
@@ -878,7 +836,7 @@ function renderDiscover(){
   if (OTM_ERRORS && OTM_ERRORS.length > 0) {
      h += `<details class="note" style="border-color:var(--bad); background:var(--sf);">
            <summary><b style="color:var(--bad)">Logs de diagnostic (OTM)</b></summary>
-           <ul style="margin:5px 0 0; padding-left:20px; font-size:12px; color:var(--mu); max-height:250px; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; line-height:1.5; display:block;">
+           <ul style="margin:5px 0 0; padding-left:20px; font-size:11px; color:var(--mu); max-height:250px; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; line-height:1.4; display:block; word-break:break-word; white-space:pre-wrap;">
              ${OTM_ERRORS.map(err => `<li>${esc(err)}</li>`).join('')}
            </ul>
            </details>`;
