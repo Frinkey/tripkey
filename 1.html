@@ -304,7 +304,7 @@ function applyLang(lang){
 
 /* ================= Constantes & utilitaires ================= */
 const OTM_API_KEY = '5ae2e3f221c38a28845f05b60d69059f50b8de59fa1d8bd95d907662';
-let OTM_ERRORS = []; // Variable globale pour afficher les erreurs OTM sur mobile
+let OTM_ERRORS = [];
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const K='tripkit_v1',KL='egmap26d',KT='tripkit_theme',MAXD=60;
@@ -455,12 +455,12 @@ async function fetchOtmActivities(center, dest, type='all', query='') {
   let lat = center && center[0], lng = center && center[1];
   if(!lat || !lng){
     try{
-      OTM_ERRORS.push("Recherche de la destination: " + dest);
+      OTM_ERRORS.push("Recherche coordonnées pour : " + dest);
       const geo = await geocodeDest(dest);
       if(geo && geo[0]){ lat = geo[0].lat; lng = geo[0].lng; OTM_ERRORS.push(`✓ Trouvé : ${lat}, ${lng}`); }
-      else { OTM_ERRORS.push("✕ Impossible de trouver les coordonnées GPS de cette destination."); return []; }
+      else { OTM_ERRORS.push("✕ Coordonnées introuvables pour cette destination."); return []; }
     } catch(e){
-      OTM_ERRORS.push("✕ Erreur lors de la recherche du lieu : " + e.message); return [];
+      OTM_ERRORS.push("✕ Erreur de géocodage : " + e.message); return [];
     }
   }
 
@@ -472,30 +472,31 @@ async function fetchOtmActivities(center, dest, type='all', query='') {
   else if (type === 'food') { kinds = 'foods'; catMapping = 'f'; }
 
   try {
-    const lang = ['fr','en','es'].includes(curLang) ? curLang : 'fr';
+    // OpenTripMap n'accepte QUE 'en' ou 'ru' dans l'URL
+    const lang = 'en';
     const radiusUrl = `https://api.opentripmap.com/0.1/${lang}/places/radius?radius=15000&lon=${lng}&lat=${lat}&kinds=${kinds}&rate=1&format=geojson&limit=30&apikey=${OTM_API_KEY}`;
     
-    OTM_ERRORS.push(`Requête Radius (15km) avec filtres: ${kinds}`);
+    OTM_ERRORS.push(`Requête Radius (15km) : ${kinds}`);
 
     const r = await fetchT(radiusUrl, 8000);
     if (!r.ok) {
         OTM_ERRORS.push(`✕ Erreur HTTP ${r.status} (Radius API)`);
         const txt = await r.text();
-        OTM_ERRORS.push(`Détails: ${txt.substring(0, 100)}`);
+        OTM_ERRORS.push(`Détails: ${txt.substring(0, 150)}`);
         return [];
     }
     
     const data = await r.json();
     let places = (data && data.features) ? data.features.map(f => f.properties) : [];
     
-    OTM_ERRORS.push(`Lieux trouvés dans la zone: ${places.length}`);
+    OTM_ERRORS.push(`Lieux bruts trouvés : ${places.length}`);
 
     places = places.filter(p => p.name && p.name.trim() !== '');
 
     if (query) {
       const qNorm = query.toLowerCase().trim();
       places = places.filter(p => p.name.toLowerCase().includes(qNorm));
-      OTM_ERRORS.push(`Lieux après filtrage textuel ("${query}"): ${places.length}`);
+      OTM_ERRORS.push(`Après filtre ("${query}") : ${places.length}`);
     }
 
     const detailedPlaces = [];
@@ -525,18 +526,18 @@ async function fetchOtmActivities(center, dest, type='all', query='') {
           successCount++;
         } else {
           failCount++;
-          if(failCount === 1) OTM_ERRORS.push(`✕ Erreur HTTP ${res.status} lors de la lecture d'une fiche.`);
+          if(failCount === 1) OTM_ERRORS.push(`✕ Erreur HTTP ${res.status} (fiche xid:${p.xid})`);
         }
       } catch (e) {
         failCount++;
-        if(failCount === 1) OTM_ERRORS.push(`✕ Exception lors de la lecture d'une fiche: ${e.message}`);
+        if(failCount === 1) OTM_ERRORS.push(`✕ Exception détail: ${e.message}`);
       }
     }
     
-    OTM_ERRORS.push(`Bilan : ${successCount} fiches lues avec succès, ${failCount} échecs.`);
+    OTM_ERRORS.push(`Fiches chargées : ${successCount} succès, ${failCount} échecs.`);
     return detailedPlaces;
   } catch (e) {
-    OTM_ERRORS.push("✕ Erreur d'exécution générale : " + e.message);
+    OTM_ERRORS.push("✕ Erreur générale : " + e.message);
     return [];
   }
 }
@@ -841,9 +842,9 @@ function renderDiscover(){
   <div class="row" style="padding-bottom:12px">${types.map(([k,l])=>`<button class="chip ${discType===k?'on':''}" data-disctype="${k}">${l}</button>`).join('')}</div>`;
 
   if (OTM_ERRORS && OTM_ERRORS.length > 0) {
-     h += `<div class="note" style="border-color:var(--bad); background:var(--sf);">
+     h += `<div class="note" style="border-color:var(--bad); background:var(--sf); max-height:200px; overflow-y:auto; -webkit-overflow-scrolling:touch;">
            <b style="color:var(--bad)">Logs de diagnostic (OTM) :</b>
-           <ul style="margin:5px 0 0; padding-left:20px; font-size:12px; color:var(--mu)">
+           <ul style="margin:5px 0 0; padding-left:20px; font-size:12px; color:var(--mu); line-height:1.5;">
              ${OTM_ERRORS.map(err => `<li>${esc(err)}</li>`).join('')}
            </ul>
            </div>`;
