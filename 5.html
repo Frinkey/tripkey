@@ -19,8 +19,6 @@ button{font-family:inherit}
 #brand small{color:var(--mu);font-weight:600;margin-inline-start:8px;font-size:13px}
 #filtertoggle{flex:none;border-radius:999px;padding:9px 14px;font:700 13.5px ui-rounded,system-ui;color:var(--tx);cursor:pointer;display:inline-flex;align-items:center;gap:4px}
 #filtertoggle.on{background:var(--acc);color:var(--accTx);border-color:transparent}
-#langbtn,#themebtn{flex:none;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--tx);padding:0;border:1px solid var(--ln);cursor:pointer;font-weight:700;font-size:13px}
-#themebtn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .row{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none}.row::-webkit-scrollbar{display:none}.row.wrap{flex-wrap:wrap;overflow:visible}
 #filterbox{display:flex;flex-direction:column;gap:8px;transition:all .2s ease}
 #filterbox.collapsed{display:none}
@@ -37,10 +35,12 @@ button{font-family:inherit}
 #tl{display:flex;gap:8px;overflow-x:auto;padding:0 12px 10px;scrollbar-width:none}#tl::-webkit-scrollbar{display:none}
 .tk{flex:none;min-width:150px;max-width:220px;border-radius:16px;padding:9px 12px;background:var(--sf);border:1px solid var(--ln);border-inline-start:4px solid var(--c,var(--gold));box-shadow:var(--shs);cursor:pointer}.tk b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tk small{color:var(--mu);font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tk.ghost{border:1px dashed var(--ln);border-inline-start:1px dashed var(--ln);color:var(--mu);font-size:14px;min-width:240px;white-space:normal;background:transparent;box-shadow:none;cursor:default}
-#nav{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));z-index:700;display:flex;align-items:center;gap:2px;padding:5px;border-radius:22px}
+#nav{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));z-index:700;display:flex;align-items:center;gap:3px;padding:5px;border-radius:22px}
 #nav button{flex:1;border:0;background:none;border-radius:16px;padding:6px 0 4px;font:700 9px ui-rounded,system-ui;color:var(--mu);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
 #nav svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-#nav button.on{color:var(--accTx);background:var(--acc)}#nav .ib{flex:none;width:34px;height:34px;padding:0;justify-content:center;color:var(--tx);background:var(--sf2)}#nav .ib:disabled{opacity:.3}#nav .sep{width:1px;height:24px;background:var(--ln);margin:0 2px}
+#nav button.on{color:var(--accTx);background:var(--acc)}
+#nav .ib{flex:none;width:34px;height:34px;padding:0;justify-content:center;color:var(--tx);background:var(--sf2);font-size:15px}
+#nav .ib:disabled{opacity:.3}#nav .sep{width:1px;height:24px;background:var(--ln);margin:0 2px}
 .sw{flex:none;display:flex;align-items:center;gap:8px;border:1px solid var(--ln);background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:999px;padding:6px 12px 6px 8px;font:600 13px ui-rounded,system-ui;color:var(--tx);box-shadow:var(--shs);cursor:pointer}
 .sw i{width:30px;height:18px;border-radius:9px;background:var(--ln);position:relative;transition:.2s}.sw i:after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0004;transition:.2s}
 .sw.on i{background:var(--acc)}.sw.on i:after{left:14px}
@@ -116,8 +116,6 @@ input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=c
   <div id="brandrow">
     <button id="brand" class="glass"></button>
     <button id="filtertoggle" class="glass" aria-label="Filtres">Filtres ▾</button>
-    <button id="langbtn" class="glass" aria-label="Langue">FR</button>
-    <button id="themebtn" class="glass" aria-label="Thème"></button>
   </div>
   <div id="filterbox" class="collapsed">
     <div class="row" id="flt"></div>
@@ -134,6 +132,9 @@ input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=c
   <button data-t="discover"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg><span data-i18n="nav_explore">Explorer</span></button>
   <button data-t="info"><svg viewBox="0 0 24 24"><rect x="3.5" y="7" width="17" height="12.5" rx="3"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3.5 12.5h17"/></svg><span data-i18n="nav_trip">Voyage</span></button>
   <button data-t="ai"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16v4M17 18h4"/></svg><span data-i18n="nav_assistant">Assistant</span></button>
+  <span class="sep"></span>
+  <button class="ib" id="langbtn" title="Langue">🇫🇷</button>
+  <button class="ib" id="themebtn" title="Thème"></button>
   <span class="sep"></span>
   <button class="ib" id="undo" aria-label="Annuler"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
   <button class="ib" id="redo" aria-label="Rétablir"><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
@@ -158,7 +159,7 @@ input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=c
 /* ================= Internationalisation (i18n) ================= */
 const I18N={
   fr:{
-    code:'fr',dir:'ltr',name:'Français',
+    code:'fr',dir:'ltr',name:'Français',flag:'🇫🇷',
     nav_map:'Carte',nav_plan:'Planning',nav_places:'Lieux',nav_explore:'Explorer',nav_trip:'Voyage',nav_assistant:'Assistant',
     filters_down:'Filtres ▾',filters_up:'Filtres ▴',
     welcome_desc:'Planifie n’importe quel voyage sur une carte : tes lieux, tes journées, tes réservations et ton budget. Chaque destination démarre vierge.',
@@ -184,7 +185,7 @@ const I18N={
     slots:{m:'Matin',a:'Après-midi',s:'Coucher de soleil',e:'Soirée'}
   },
   en:{
-    code:'en',dir:'ltr',name:'English',
+    code:'en',dir:'ltr',name:'English',flag:'🇬🇧',
     nav_map:'Map',nav_plan:'Schedule',nav_places:'Places',nav_explore:'Explore',nav_trip:'Trip',nav_assistant:'Assistant',
     filters_down:'Filters ▾',filters_up:'Filters ▴',
     welcome_desc:'Plan any journey on an interactive map: places, days, bookings and budget. Every destination starts fresh.',
@@ -210,7 +211,7 @@ const I18N={
     slots:{m:'Morning',a:'Afternoon',s:'Sunset',e:'Evening'}
   },
   es:{
-    code:'es',dir:'ltr',name:'Español',
+    code:'es',dir:'ltr',name:'Español',flag:'🇪🇸',
     nav_map:'Mapa',nav_plan:'Itinerario',nav_places:'Lugares',nav_explore:'Explorar',nav_trip:'Viaje',nav_assistant:'Asistente',
     filters_down:'Filtros ▾',filters_up:'Filtros ▴',
     welcome_desc:'Planifica cualquier viaje en un mapa interactivo: lugares, días, reservas y presupuesto. Cada viaje empieza en blanco.',
@@ -236,7 +237,7 @@ const I18N={
     slots:{m:'Mañana',a:'Tarde',s:'Atardecer',e:'Noche'}
   },
   ar:{
-    code:'ar',dir:'rtl',name:'العربية',
+    code:'ar',dir:'rtl',name:'العربية',flag:'🇸🇦',
     nav_map:'الخريطة',nav_plan:'البرنامج',nav_places:'الأماكن',nav_explore:'استكشف',nav_trip:'الرحلة',nav_assistant:'المساعد',
     filters_down:'التصنيفات ▾',filters_up:'التصنيفات ▴',
     welcome_desc:'خطط لأي رحلة على خريطة تفاعلية: أماكنك، أيامك، حجوزاتك وميزانيتك.',
@@ -277,7 +278,7 @@ function applyLang(lang){
   try{localStorage.setItem('tripkit_lang',lang)}catch(e){}
   document.documentElement.lang=lang;
   document.documentElement.dir=I18N[lang].dir;
-  const lb=$('#langbtn');if(lb)lb.textContent=lang.toUpperCase();
+  const lb=$('#langbtn');if(lb)lb.textContent=I18N[lang].flag;
   $$('[data-i18n]').forEach(el=>{
     const k=el.dataset.i18n;
     if(k)el.textContent=t(k);
@@ -373,10 +374,10 @@ let curGallery=[],curGalIdx=0;
 const curTrip=()=>DB.trips.find(t=>t.id===DB.cur)||null;
 const cal=()=>S.cals.find(c=>c.id===S.cur)||S.cals[0],get=id=>S.acts.find(a=>a.id===id),dayO=()=>{const c=cal();return c.days[Math.min(day,c.days.length-1)]};
 const dayDate=i=>addDays(pISO(S.start)||new Date(),i),dl=i=>{const d=dayDate(i);return I18N[curLang].days_short[d.getDay()]+' '+d.getDate()+' '+I18N[curLang].months_short[d.getMonth()]};
-function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2400)}
+function toast(tText){const e=$('#toast');e.textContent=tText;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2400)}
 function save(){try{localStorage.setItem(K,JSON.stringify(DB))}catch(e){toast('Sauvegarde impossible : exporte tes données')}}
 const snap=()=>JSON.stringify(S);
-function restore(js){const t=norm(JSON.parse(js)),i=DB.trips.findIndex(x=>x.id===t.id);if(i>=0){DB.trips[i]=t;S=t}}
+function restore(js){const tTrip=norm(JSON.parse(js)),i=DB.trips.findIndex(x=>x.id===tTrip.id);if(i>=0){DB.trips[i]=tTrip;S=tTrip}}
 function mut(fn){undo.push(snap());if(undo.length>25)undo.shift();redo=[];fn();save();refresh()}
 const used=()=>new Set(cal().days.flatMap(d=>d.items.filter(i=>i.aid).map(i=>i.aid)));
 const ok=a=>(!fs.size||a.s.some(x=>fs.has(x)))&&(!fc.size||fc.has(a.c));
@@ -384,16 +385,16 @@ const vis=a=>{if(!ok(a))return false;const inD=dayO().items.some(i=>i.aid===a.id
 const unp=()=>S.acts.filter(a=>a.lat==null&&vis(a));
 const fm=n=>Number(n).toLocaleString(curLang==='en'?'en-US':(curLang==='es'?'es-ES':'fr-FR'),{maximumFractionDigits:2})+' '+S.money;
 
-/* ================= Géo & Découverte (Overpass optimisé) ================= */
+/* ================= Géo & Découverte ================= */
 const okLL=(la,lo)=>Number.isFinite(la)&&Number.isFinite(lo)&&Math.abs(la)<=90&&Math.abs(lo)<=180&&!(la===0&&lo===0);
 const RXS=[/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,/@(-?\d+\.\d+),(-?\d+\.\d+)/,/[?&](?:q|ll|query|destination|daddr|center|sll)=(-?\d+\.\d+)[,+ ]+(-?\d+\.\d+)/,/\/place\/(-?\d+\.\d+),(-?\d+\.\d+)/,/#map=\d+\/(-?\d+\.\d+)\/(-?\d+\.\d+)/,/mlat=(-?\d+\.\d+)&(?:amp;)?mlon=(-?\d+\.\d+)/];
 function parseGPS(txt){
-  const t=String(txt||'').trim();if(!t)return null;const c=[t];try{const d=decodeURIComponent(t);if(d!==t)c.push(d)}catch(e){}
+  const tStr=String(txt||'').trim();if(!tStr)return null;const c=[tStr];try{const d=decodeURIComponent(tStr);if(d!==tStr)c.push(d)}catch(e){}
   for(const s of c)for(const r of RXS){const m=r.exec(s);if(m&&okLL(+m[1],+m[2]))return[+m[1],+m[2]]}
-  if(!/:\/\//.test(t)){
-    let m=/^(-?\d+(?:\.\d+)?)\s*°?\s*([NSns])?\s*[,;\s]\s*(-?\d+(?:\.\d+)?)\s*°?\s*([EWew])?$/.exec(t);
+  if(!/:\/\//.test(tStr)){
+    let m=/^(-?\d+(?:\.\d+)?)\s*°?\s*([NSns])?\s*[,;\s]\s*(-?\d+(?:\.\d+)?)\s*°?\s*([EWew])?$/.exec(tStr);
     if(m){let la=+m[1],lo=+m[3];if(/s/i.test(m[2]||''))la=-Math.abs(la);if(/w/i.test(m[4]||''))lo=-Math.abs(lo);if(okLL(la,lo))return[la,lo]}
-    m=/^(-?\d+,\d+)\s*[;\s]\s*(-?\d+,\d+)$/.exec(t);if(m){const la=+m[1].replace(',','.'),lo=+m[2].replace(',','.');if(okLL(la,lo))return[la,lo]}}
+    m=/^(-?\d+,\d+)\s*[;\s]\s*(-?\d+,\d+)$/.exec(tStr);if(m){const la=+m[1].replace(',','.'),lo=+m[2].replace(',','.');if(okLL(la,lo))return[la,lo]}}
   return null}
 function nameFromUrl(u){let m=/\/maps\/place\/([^/@?]+)/.exec(u)||/[?&]q=([^&]+)/.exec(u);if(!m)return'';let n=m[1].replace(/\+/g,' ');try{n=decodeURIComponent(n)}catch(e){}n=n.trim();return parseGPS(n)?'':n}
 const isShort=u=>/(maps\.app\.goo\.gl|goo\.gl\/maps|g\.co\/kgs|share\.google)/i.test(u);
@@ -412,7 +413,7 @@ async function expand(u){
   let name='';
   for(const f of tries){try{const o=await f(),g=parseGPS(o.fin),nm=nameFromUrl(o.fin);if(g)return{lat:g[0],lng:g[1],name:nm};const h=fromHtml(o.html);if(h)return{...h,name:h.name||nm};if(nm)name=name||nm}catch(e){}}
   return name?{name}:null}
-function guessCat(c,t){if(['restaurant','cafe','fast_food','bar','pub','food_court','ice_cream','biergarten','bakery'].includes(t))return'f';if(c==='amenity'&&['nightclub','theatre','cinema','arts_centre'].includes(t))return'n';if(c==='tourism'&&['museum','gallery','attraction','viewpoint','artwork','zoo','theme_park'].includes(t))return'v';if(c==='shop'||c==='leisure')return'a';return'v'}
+function guessCat(c,tCat){if(['restaurant','cafe','fast_food','bar','pub','food_court','ice_cream','biergarten','bakery'].includes(tCat))return'f';if(c==='amenity'&&['nightclub','theatre','cinema','arts_centre'].includes(tCat))return'n';if(c==='tourism'&&['museum','gallery','attraction','viewpoint','artwork','zoo','theme_park'].includes(tCat))return'v';if(c==='shop'||c==='leisure')return'a';return'v'}
 async function geocode(q,lim=5,bias=true){
   const b=bias&&S&&S.center?`&viewbox=${S.center[1]-.7},${S.center[0]+.7},${S.center[1]+.7},${S.center[0]-.7}`:'';
   const r=await fetchT('https://nominatim.openstreetmap.org/search?format=jsonv2&limit='+lim+'&accept-language='+curLang+b+'&q='+encodeURIComponent(q));
@@ -482,83 +483,31 @@ async function fetchWikiActivities(dest,type='all',query=''){
   }catch(e){console.error(e);return[]}
 }
 
-async function fetchOverpassActivities(center,type='all',query=''){
-  if(!center||!center[0])return[];
-  const [lat,lng]=center;
-  const delta=0.18;
-  const bbox=`${lat-delta},${lng-delta},${lat+delta},${lng+delta}`;
+async function fetchOsmActivities(center,dest,type='all',query=''){
+  if(!dest)return[];
+  let keywords='';
+  if(type==='attraction') keywords='attraction theme park zoo aquarium';
+  else if(type==='culture') keywords='museum monument castle';
+  else if(type==='nature') keywords='park viewpoint garden beach';
+  else if(type==='food') keywords='restaurant cafe';
+  else keywords='tourism attraction park museum restaurant';
 
-  let tags=[];
-  if(type==='attraction'){
-    tags=['node["tourism"="attraction"]','node["tourism"="theme_park"]','node["tourism"="zoo"]','node["tourism"="aquarium"]','node["leisure"="water_park"]'];
-  }else if(type==='culture'){
-    tags=['node["tourism"="museum"]','node["historic"]','node["tourism"="gallery"]'];
-  }else if(type==='nature'){
-    tags=['node["tourism"="viewpoint"]','node["leisure"="park"]','node["natural"]'];
-  }else if(type==='food'){
-    tags=['node["amenity"="restaurant"]','node["amenity"="cafe"]'];
-  }else{
-    tags=['node["tourism"~"attraction|museum|viewpoint|theme_park"]','node["historic"]','node["leisure"~"park|water_park"]'];
-  }
-
-  const queryBody=tags.map(t=>`${t}(${bbox});`).join('');
-  const ql=`[out:json][timeout:15];(${queryBody});out center 30;`;
-
+  const fullQuery=query?`${query} ${dest}`:`${keywords} ${dest}`;
   try{
-    let r=await fetchT('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(ql),12000);
-    if(!r.ok){
-      r=await fetchT('https://maps.mail.ru/osm/tools/overpass/api/interpreter?data='+encodeURIComponent(ql),12000);
-    }
-    if(!r||!r.ok)return[];
-    const j=await r.json();
-    if(!j.elements)return[];
-    let list=j.elements.map(el=>{
-      const tg=el.tags||{};
-      const name=tg['name:'+curLang]||tg.name||tg['name:en']||tg['name:fr'];
-      if(!name)return null;
-      const elLat=el.lat||(el.center&&el.center.lat);
-      const elLng=el.lon||(el.center&&el.center.lon);
-      if(!elLat||!elLng)return null;
-
-      let cat='v';
-      if(tg.amenity==='restaurant'||tg.amenity==='cafe')cat='f';
-      else if(tg.tourism==='theme_park'||tg.leisure==='water_park'||tg.tourism==='zoo')cat='a';
-      else if(tg.amenity==='theatre'||tg.amenity==='nightclub')cat='n';
-
-      const booking=tg['contact:website']||tg.website||tg['booking:url']||tg['tickets:url']||tg.url||null;
-      const osmUrl=`https://www.openstreetmap.org/${el.type}/${el.id}`;
-
-      let descParts=[];
-      if(tg.opening_hours)descParts.push('🕒 '+tg.opening_hours);
-      if(tg['description:'+curLang]||tg.description)descParts.push(tg['description:'+curLang]||tg.description);
-      if(!descParts.length){
-        const sub=tg.tourism||tg.historic||tg.leisure||tg.amenity||'Lieu';
-        descParts.push(sub);
-      }
-
-      let thumb=tg.image||null;
-      if(thumb&&thumb.startsWith('http://'))thumb=thumb.replace('http://','https://');
-
-      return {
-        id:'osm-'+el.id,
-        name:name,
-        desc:descParts.join(' · '),
-        lat:+elLat.toFixed(6),
-        lng:+elLng.toFixed(6),
-        cat:cat,
-        source:t('explore_osm'),
-        sourceUrl:booking||osmUrl,
-        bookingUrl:booking,
-        thumb:thumb,
-        pageTitle:tg.wikipedia?tg.wikipedia.replace(/^[a-z]+:/i,''):name
-      };
-    }).filter(Boolean);
-
-    if(query){
-      const qNorm=query.toLowerCase().trim();
-      list=list.filter(item=>item.name.toLowerCase().includes(qNorm)||item.desc.toLowerCase().includes(qNorm));
-    }
-    return list.slice(0,25);
+    const rs=await geocode(fullQuery,24,false);
+    return rs.map((item,i)=>({
+      id:'osm-item-'+i,
+      name:item.short,
+      desc:item.name,
+      lat:item.lat,
+      lng:item.lng,
+      cat:item.cat||'a',
+      source:t('explore_osm'),
+      sourceUrl:`https://www.openstreetmap.org/search?query=${encodeURIComponent(item.name)}`,
+      bookingUrl:null,
+      thumb:null,
+      pageTitle:item.short
+    }));
   }catch(e){console.error(e);return[]}
 }
 
@@ -624,7 +573,7 @@ function findItem(id){const c=cal();for(let i=0;i<c.days.length;i++){const it=c.
 function bars(){ if(!S)return; const c=cal();
   $('#brand').innerHTML=`${esc(S.flag)} ${esc(S.name)}<small>${esc(c.name)} ▾</small>`;
   $('#undo').disabled=!undo.length;$('#redo').disabled=!redo.length;
-  $('#days').innerHTML=c.days.map((d,i)=>{const t=dayDate(i);return`<button class="dt ${i===day?'on':''}" data-day="${i}"><small>${I18N[curLang].days_short[t.getDay()]}</small><b>${t.getDate()}</b><small class="mo">${I18N[curLang].months_short[t.getMonth()]}</small>${d.items.length?'<i></i>':''}</button>`}).join('');
+  $('#days').innerHTML=c.days.map((d,i)=>{const tDate=dayDate(i);return`<button class="dt ${i===day?'on':''}" data-day="${i}"><small>${I18N[curLang].days_short[tDate.getDay()]}</small><b>${tDate.getDate()}</b><small class="mo">${I18N[curLang].months_short[tDate.getMonth()]}</small>${d.items.length?'<i></i>':''}</button>`}).join('');
   $('#flt').innerHTML=Object.entries(I18N[curLang].slots).map(([k,v])=>`<button class="chip ${fs.has(k)?'on':''}" data-s="${k}">${SE[k]} ${v}</button>`).join('')+Object.entries(I18N[curLang].cat_names).map(([k,v])=>`<button class="chip ${fc.has(k)?'on':''}" data-c="${k}">${EM[k]} ${v}</button>`).join('');
   $('#tg').innerHTML=`<button class="sw ${hideO?'on':''}" data-tg="o"><i></i>${t('hide_planned')}</button><button class="sw ${hideU?'on':''}" data-tg="u"><i></i>${t('hide_unplaced')}</button>`;
   const btnFilt=$('#filtertoggle');if(btnFilt){btnFilt.innerHTML=filterOpen?t('filters_up'):t('filters_down');btnFilt.classList.toggle('on',filterOpen||fs.size>0||fc.size>0||hideO||hideU)}
@@ -724,9 +673,9 @@ async function bulkGo(){if(bulkBusy)return;const lines=$('#bl').value.split('\n'
   finally{bulkBusy=false}}
 
 /* ================= Planning ================= */
-function placeInDay(d,a){const last=d.items.filter(i=>i.aid&&get(i.aid)).sort(byT).pop();let t='15:00';
-  if(last){const e=tm(last.t)+(get(last.aid).d||60)+30;if(e>tm(t))t=mt(e)}
-  d.items.push({id:uid(),aid:a.id,t})}
+function placeInDay(d,a){const last=d.items.filter(i=>i.aid&&get(i.aid)).sort(byT).pop();let tVal='15:00';
+  if(last){const e=tm(last.t)+(get(last.aid).d||60)+30;if(e>tm(tVal))tVal=mt(e)}
+  d.items.push({id:uid(),aid:a.id,t:tVal})}
 function addToDay(aid){const a=get(aid),d=dayO();if(!a||d.items.some(i=>i.aid===aid))return;mut(()=>placeInDay(d,a))}
 const rankOf=a=>({m:0,a:1,s:2,e:3}[a.s[0]]??1);
 const routeKm=list=>{let k=0;for(let i=1;i<list.length;i++){const l=leg(get(list[i-1].aid),get(list[i].aid));if(l)k+=l.km}return k};
@@ -735,7 +684,7 @@ function optimizeDay(n){
   const groups=[[],[],[],[]];acts.forEach(i=>groups[rankOf(get(i.aid))].push(i));
   let anchor=null;const order=[];
   groups.forEach(g=>{const rest=[...g];while(rest.length){let bi=0;if(anchor){let bd=1e9;rest.forEach((x,k)=>{const dd=hav(anchor,get(x.aid)),v=dd==null?500:dd;if(v<bd){bd=v;bi=k}})}const x=rest.splice(bi,1)[0];order.push(x);anchor=get(x.aid)}});
-  let end=0;order.forEach(i=>{const a=get(i.aid),st=tm('15:00'),t=Math.max(end,st);i.t=mt(t);end=t+(a.d||60)+30});
+  let end=0;order.forEach(i=>{const a=get(i.aid),st=tm('15:00'),tVal=Math.max(end,st);i.t=mt(tVal);end=tVal+(a.d||60)+30});
   d.items=[...d.items.filter(i=>!(i.aid&&get(i.aid))),...order];return{before,after:routeKm(order)}}
 function autofill(n){
   const d=cal().days[n],u=used(),pool=S.acts.filter(a=>!u.has(a.id));if(!pool.length)return[];
@@ -832,7 +781,7 @@ async function loadDiscover(force=false,query=''){
   if(discList.length&&!force&&!query)return;
   discLoading=true;renderDiscover();
   if(discEngine==='osm'){
-    discList=await fetchOverpassActivities(S.center,discType,query);
+    discList=await fetchOsmActivities(S.center,S.dest,discType,query);
   } else {
     discList=await fetchWikiActivities(S.dest,discType,query);
   }
@@ -945,7 +894,7 @@ function renderInfo(){if(!S)return;const sub=SUBS.map(([k,l])=>`<button class="c
 function infoOverview(){return`<div class="card"><div class="nm"><b style="font-size:19px">${esc(S.flag)} ${esc(S.name)}</b><small>${rangeLbl(S)} · ${S.n} jours · ${S.acts.length} lieux prévus</small><small>📍 ${esc(S.dest)} · Devise : ${esc(S.money)}</small></div></div>
   <div class="row" style="padding:0 0 4px"><button class="btn s" data-edittrip>Modifier les dates</button><button class="btn" data-trips>Tous mes voyages</button></div>
   <h3>Langue de l'application & des sources</h3>
-  <div class="seg">${Object.entries(I18N).map(([k,v])=>`<button class="${curLang===k?'on':''}" data-setlang="${k}">${v.name}</button>`).join('')}</div>
+  <div class="seg">${Object.entries(I18N).map(([k,v])=>`<button class="${curLang===k?'on':''}" data-setlang="${k}">${v.flag} ${v.name}</button>`).join('')}</div>
   <h3>Compagnons de voyage</h3><div class="row wrap">${S.people.map(p=>`<span class="chip">${esc(p.name)} <button data-delperson="${p.id}" style="border:0;background:none;color:var(--mu);padding:0 0 0 6px" aria-label="Retirer">✕</button></span>`).join('')||'<span class="empty">Ajoutez les participants pour équilibrer les dépenses.</span>'}</div>
   <div class="sp" style="margin-top:8px"><input id="pn" placeholder="Prénom" maxlength="30"><button class="btn s" data-addperson>＋ Ajouter</button></div>
   <h3>Affichage</h3><div class="seg">${[['light','☀ Clair'],['dark','☾ Sombre'],['auto','Automatique']].map(([k,l])=>`<button class="${themePref===k?'on':''}" data-theme="${k}">${l}</button>`).join('')}</div>
@@ -1003,25 +952,25 @@ function printTrip(){let a=$('#printarea');if(a)a.remove();a=document.createElem
   document.body.appendChild(a);const rm=()=>{const x=$('#printarea');if(x)x.remove();window.removeEventListener('afterprint',rm)};window.addEventListener('afterprint',rm);setTimeout(()=>window.print(),50)}
 
 /* ================= Voyages ================= */
-function tripsSheet(){sheet(`<h2 style="font-size:22px;margin-top:0">Mes projets de voyages</h2>${DB.trips.map(t=>`<div class="near ${t.id===DB.cur?'cur':''}" data-trip="${t.id}"><div><b>${esc(t.flag)} ${esc(t.name)}</b><small>${rangeLbl(t)} · ${t.acts.length} étapes</small></div><span>${t.id===DB.cur?'✓':'›'}</span></div>`).join('')}
+function tripsSheet(){sheet(`<h2 style="font-size:22px;margin-top:0">Mes projets de voyages</h2>${DB.trips.map(tItem=>`<div class="near ${tItem.id===DB.cur?'cur':''}" data-trip="${tItem.id}"><div><b>${esc(tItem.flag)} ${esc(tItem.name)}</b><small>${rangeLbl(tItem)} · ${tItem.acts.length} étapes</small></div><span>${tItem.id===DB.cur?'✓':'›'}</span></div>`).join('')}
   <div class="row" style="padding:14px 0 0"><button class="btn g" data-newtrip>＋ Nouveau voyage</button><label class="btn s">Importer une sauvegarde<input type="file" data-imp accept="application/json" hidden></label></div>`)}
 
 function tripForm(id){
-  const t=id?DB.trips.find(x=>x.id===id):null;
-  const end=t?toISO(addDays(pISO(t.start),t.n-1)):'';
-  const curDest=t?t.dest:'';
-  lastChosenCoords=t?t.center:null;
+  const tTrip=id?DB.trips.find(x=>x.id===id):null;
+  const end=tTrip?toISO(addDays(pISO(tTrip.start),tTrip.n-1)):'';
+  const curDest=tTrip?tTrip.dest:'';
+  lastChosenCoords=tTrip?tTrip.center:null;
 
-  sheet(`<h2 style="font-size:22px;margin-top:0">${t?'Modifier mon voyage':'Organiser un voyage'}</h2>${!t&&!DB.trips.length?'<p class="empty">Chaque séjour démarre vierge.</p>':''}
-  <label class="lb">Donnez un titre à votre séjour</label><input id="tn" placeholder="Ex : Road trip en Italie" value="${esc(t?t.name:'')}">
+  sheet(`<h2 style="font-size:22px;margin-top:0">${tTrip?'Modifier mon voyage':'Organiser un voyage'}</h2>${!tTrip&&!DB.trips.length?'<p class="empty">Chaque séjour démarre vierge.</p>':''}
+  <label class="lb">Donnez un titre à votre séjour</label><input id="tn" placeholder="Ex : Road trip en Italie" value="${esc(tTrip?tTrip.name:'')}">
   <label class="lb">Destination principale</label>
   <div class="suggest-box">
     <input id="td" placeholder="Ville, région ou pays…" autocomplete="off" value="${esc(curDest)}">
     <div id="td-sug" class="sug-list"></div>
   </div>
-  <div class="two"><div><label class="lb">Icône / Drapeau</label><input id="tf" placeholder="🌍" maxlength="8" value="${esc(t?t.flag:'')}"></div><div><label class="lb">Monnaie</label><input id="tc" placeholder="€" maxlength="6" value="${esc(t?t.money:'€')}"></div></div>
-  <div class="two"><div><label class="lb">Date d’arrivée</label><input id="ts" type="date" value="${t?t.start:''}"></div><div><label class="lb">Date de départ</label><input id="te" type="date" value="${end}"></div></div>
-  <div class="row" style="padding:0"><button class="btn" data-savetrip="${id||''}">${t?'Mettre à jour':'Créer mon voyage'}</button>${DB.trips.length||t?'<button class="btn s" data-close>Annuler</button>':''}</div>`);
+  <div class="two"><div><label class="lb">Icône / Drapeau</label><input id="tf" placeholder="🌍" maxlength="8" value="${esc(tTrip?tTrip.flag:'')}"></div><div><label class="lb">Monnaie</label><input id="tc" placeholder="€" maxlength="6" value="${esc(tTrip?tTrip.money:'€')}"></div></div>
+  <div class="two"><div><label class="lb">Date d’arrivée</label><input id="ts" type="date" value="${tTrip?tTrip.start:''}"></div><div><label class="lb">Date de départ</label><input id="te" type="date" value="${end}"></div></div>
+  <div class="row" style="padding:0"><button class="btn" data-savetrip="${id||''}">${tTrip?'Mettre à jour':'Créer mon voyage'}</button>${DB.trips.length||tTrip?'<button class="btn s" data-close>Annuler</button>':''}</div>`);
 
   const inp=$('#td');
   if(inp){
@@ -1046,22 +995,22 @@ async function saveTrip(id){
   if(!name)return toast('Donnez un nom à votre voyage');if(!a||!b)return toast('Renseignez les deux dates');
   const n=Math.round((b-a)/864e5)+1;if(n<1)return toast('La date de départ doit être après l’arrivée');if(n>MAXD)return toast('Maximum '+MAXD+' jours');
   const start=toISO(a);
-  if(id){const t=DB.trips.find(x=>x.id===id);if(!t)return;
-    const lost=n<t.n?t.cals.reduce((s,c)=>s+c.days.slice(n).reduce((x,d)=>x+d.items.length,0),0):0;
+  if(id){const tTrip=DB.trips.find(x=>x.id===id);if(!tTrip)return;
+    const lost=n<tTrip.n?tTrip.cals.reduce((s,c)=>s+c.days.slice(n).reduce((x,d)=>x+d.items.length,0),0):0;
     if(lost&&!confirm(lost+' élément(s) des derniers jours seront supprimés. Continuer ?'))return;
-    let ctr=lastChosenCoords||t.center;
-    if(dest!==t.dest&&!lastChosenCoords){toast('Localisation…');try{const r=await geocode(dest,1,false);if(r[0])ctr=[r[0].lat,r[0].lng]}catch(e){}}
-    mut(()=>{t.name=name;t.flag=flag;t.dest=dest;t.money=money.slice(0,6);t.start=start;t.center=ctr;t.cals.forEach(c=>{while(c.days.length<n)c.days.push({hotel:'',items:[]});c.days=c.days.slice(0,n)});t.exp.forEach(x=>{if(x.day!=null&&x.day>=n)x.day=null});t.n=n;day=Math.min(day,n-1)});
+    let ctr=lastChosenCoords||tTrip.center;
+    if(dest!==tTrip.dest&&!lastChosenCoords){toast('Localisation…');try{const r=await geocode(dest,1,false);if(r[0])ctr=[r[0].lat,r[0].lng]}catch(e){}}
+    mut(()=>{tTrip.name=name;tTrip.flag=flag;tTrip.dest=dest;tTrip.money=money.slice(0,6);tTrip.start=start;tTrip.center=ctr;tTrip.cals.forEach(c=>{while(c.days.length<n)c.days.push({hotel:'',items:[]});c.days=c.days.slice(0,n)});tTrip.exp.forEach(x=>{if(x.day!=null&&x.day>=n)x.day=null});tTrip.n=n;day=Math.min(day,n-1)});
     lastChosenCoords=null;close();bars();centerMap();toast('✓ Voyage mis à jour');return}
-  toast('Préparation…');const t=mkTrip({name,flag,dest,start,n,money:money.slice(0,6)});
-  if(lastChosenCoords){t.center=lastChosenCoords;t.zoom=11;lastChosenCoords=null}
-  else{try{const r=await geocode(dest,1,false);if(r[0]){t.center=[r[0].lat,r[0].lng];t.zoom=11}else toast('Destination enregistrée')}catch(e){} }
-  DB.trips.push(t);close();setTrip(t.id);toast('✓ Voyage prêt')}
+  toast('Préparation…');const tTrip=mkTrip({name,flag,dest,start,n,money:money.slice(0,6)});
+  if(lastChosenCoords){tTrip.center=lastChosenCoords;tTrip.zoom=11;lastChosenCoords=null}
+  else{try{const r=await geocode(dest,1,false);if(r[0]){tTrip.center=[r[0].lat,r[0].lng];tTrip.zoom=11}else toast('Destination enregistrée')}catch(e){} }
+  DB.trips.push(tTrip);close();setTrip(tTrip.id);toast('✓ Voyage prêt')}
 function setTrip(id){DB.cur=id;S=curTrip();undo=[];redo=[];day=0;fs.clear();fc.clear();hideO=false;hideU=false;placing=null;infoSub='apercu';discList=[];listSearchQuery='';listFilterCat='all';AIM=aiWelcome();save();show()}
 function show(){$('#welcome').classList.toggle('on',!S);if(!S){document.title='Trip Planner';return}document.title=S.flag+' '+S.name;bars();tab('map');setTimeout(centerMap,120)}
 function deleteTrip(){if(!S||!confirm('Supprimer définitivement « '+S.name+' » ?'))return;
   try{localStorage.setItem(K+'_backup',JSON.stringify(DB))}catch(e){}
-  DB.trips=DB.trips.filter(t=>t.id!==S.id);DB.cur=DB.trips[0]?DB.trips[0].id:'';S=curTrip();undo=[];redo=[];day=0;AIM=aiWelcome();save();show();toast('Voyage supprimé')}
+  DB.trips=DB.trips.filter(tTrip=>tTrip.id!==S.id);DB.cur=DB.trips[0]?DB.trips[0].id:'';S=curTrip();undo=[];redo=[];day=0;AIM=aiWelcome();save();show();toast('Voyage supprimé')}
 
 /* ================= Import / export ================= */
 function download(name,obj){const u=URL.createObjectURL(new Blob([JSON.stringify(obj,null,1)],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}
@@ -1073,16 +1022,16 @@ function doImport(f){const r=new FileReader();r.onerror=()=>toast('Lecture du fi
     else if(j&&Array.isArray(j.acts)&&Array.isArray(j.cals)&&j.cals.length)trips=[fromLegacy(j,{name:f.name.replace(/\.json$/i,'')||'Voyage importé'})];
     else throw Error('format non reconnu');
     if(!trips.length)throw Error('aucun séjour trouvé');
-    const rep=trips.filter(t=>DB.trips.some(x=>x.id===t.id)).length;
+    const rep=trips.filter(tTrip=>DB.trips.some(x=>x.id===tTrip.id)).length;
     if(rep&&!confirm(rep+' voyage(s) existant(s) seront remplacés par ce fichier. Continuer ?'))return;
     try{localStorage.setItem(K+'_backup',JSON.stringify(DB))}catch(e){}
-    for(const t of trips){const i=DB.trips.findIndex(x=>x.id===t.id);if(i>=0)DB.trips[i]=t;else DB.trips.push(t)}
+    for(const tTrip of trips){const i=DB.trips.findIndex(x=>x.id===tTrip.id);if(i>=0)DB.trips[i]=tTrip;else DB.trips.push(tTrip)}
     close();setTrip(trips[0].id);toast(`✓ ${trips.length} voyage(s) importé(s)`)}
    catch(e){toast('Import impossible : '+e.message)}};r.readAsText(f)}
 
 /* ================= Assistant ================= */
 function aiWelcome(){if(!S)return[];const f=S.acts[0];return[{r:'a',h:'Bonjour ! Je peux vous aider à <b>organiser vos journées</b>, optimiser vos déplacements ou vous recommander des idées <b>autour d’un endroit</b>.'}]}
-const NF=t=>String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const NF=tStr=>String(tStr).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 const STOP=new Set('ajoute ajouter rajoute mets mettre met place placer retire retirer supprime supprimer enleve enlever pour dans sur jour journee des les une propose proposer suggere idee idees autour pres proche cote quoi faire infos info prix horaires organise organiser optimise optimiser resume planning programme avec moi'.split(' '));
 const aiKey=()=>{try{return localStorage.getItem(K+'_ai')||localStorage.getItem(KL+'_ai')||''}catch(e){return''}};
 function findAct(q){const tk=NF(q).split(/[^\p{L}\p{N}]+/u).filter(w=>w.length>2&&!STOP.has(w));if(!tk.length)return null;let b=null,bs=0;for(const a of S.acts){const h=NF(a.n+' '+(a.ar||''));const sc=tk.filter(w=>h.includes(w)).length;if(sc>bs){bs=sc;b=a}}return bs?b:null}
