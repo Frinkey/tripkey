@@ -474,7 +474,7 @@ async function fetchOtmRadius(center, dest, type='all', query='') {
   else if (type === 'food') { kinds = 'foods'; }
 
   try {
-    const lang = 'en'; // OTM Radius & XID free tier expect 'en'
+    const lang = 'en'; // OTM Radius expect 'en'
     
     // On recupère jusqu'à 100 lieux pour avoir de la marge pour trier et filtrer
     const radiusUrl = `https://api.opentripmap.com/0.1/${lang}/places/radius?radius=15000&lon=${lng}&lat=${lat}&kinds=${kinds}&rate=1&format=geojson&limit=100&apikey=${OTM_API_KEY}`;
@@ -514,11 +514,10 @@ async function fetchOtmRadius(center, dest, type='all', query='') {
 }
 
 async function loadMoreOtm() {
-    if(discLoading) return;
     discLoading = true;
     renderDiscover();
 
-    const lang = 'en';
+    const xidLang = ['fr','en','es','ar','de','ru','it','pt'].includes(curLang) ? curLang : 'en';
     const batch = otmPlaces.slice(otmOffset, otmOffset + 10);
     
     let catMapping = 'v';
@@ -531,7 +530,7 @@ async function loadMoreOtm() {
     
     for (const p of batch) {
       try {
-        const detailUrl = `https://api.opentripmap.com/0.1/${lang}/places/xid/${p.xid}?apikey=${OTM_API_KEY}`;
+        const detailUrl = `https://api.opentripmap.com/0.1/${xidLang}/places/xid/${p.xid}?apikey=${OTM_API_KEY}`;
         const res = await fetchT(detailUrl, 4000);
         
         if (res.ok) {
@@ -724,7 +723,7 @@ async function doGeo(){const st=$('#gst');if(!st)return;const q=$('#en').value.t
 function pickGeo(i){const r=GR[+i];if(!r||!$('#ell'))return;$('#ell').value=r.lat+', '+r.lng;if(!$('#en').value.trim())$('#en').value=r.short;$('#gres').innerHTML='';$('#gst').textContent='✓ Emplacement sélectionné'}
 function bulkSheet(){sheet(`<h2 style="font-size:22px;margin-top:0">Ajouter plusieurs lieux</h2><p class="empty">Colle une adresse ou un nom par ligne. Les emplacements sont reconnus automatiquement.</p>
   <textarea id="bl" rows="8" autocapitalize="off" placeholder="Musée d'art moderne https://maps.app.goo.gl/…&#10;Restaurant Le Belvédère"></textarea>
-  <select id="bc">${Object.entries(I18N[curLang].cat_names).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select><div id="bst" class="gst"></div>
+  <select id="bc">${Object.entries(I18N[curLang].cat_names).map(([k,v])=>`<option value="${k}" ${k===a.c?'selected':''}>${v}</option>`).join('')}</select><div id="bst" class="gst"></div>
   <div class="row" style="padding:0"><button class="btn g" data-bulkgo>Ajouter tout</button><button class="btn s" data-close>Annuler</button></div>`)}
 async function bulkGo(){if(bulkBusy)return;const lines=$('#bl').value.split('\n').map(x=>x.trim()).filter(Boolean);if(!lines.length){toast('Colle au moins une ligne');return}
   bulkBusy=true;const cat=$('#bc').value,out=[];let found=0;
@@ -851,6 +850,7 @@ async function loadDiscover(force=false,query=''){
   otmOffset = 0;
   discList = [];
 
+  discLoading = false; // Permet à loadMoreOtm de se lancer
   await loadMoreOtm();
 }
 
@@ -878,7 +878,7 @@ function renderDiscover(){
   if (OTM_ERRORS && OTM_ERRORS.length > 0) {
      h += `<details class="note" style="border-color:var(--bad); background:var(--sf);">
            <summary><b style="color:var(--bad)">Logs de diagnostic (OTM)</b></summary>
-           <ul style="margin:5px 0 0; padding-left:20px; font-size:12px; color:var(--mu); max-height:200px; overflow-y:auto; -webkit-overflow-scrolling:touch; line-height:1.5;">
+           <ul style="margin:5px 0 0; padding-left:20px; font-size:12px; color:var(--mu); max-height:250px; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; line-height:1.5; display:block;">
              ${OTM_ERRORS.map(err => `<li>${esc(err)}</li>`).join('')}
            </ul>
            </details>`;
@@ -929,7 +929,7 @@ function renderDiscover(){
 
     if(otmOffset < otmPlaces.length) {
       if(discLoading) h += `<div class="empty" style="text-align:center;padding:20px 0">⏳ Chargement...</div>`;
-      else h += `<button class="btn s" style="width:100%;margin-top:10px;margin-bottom:20px;" data-otmmore>Charger plus d'idées</button>`;
+      else h += `<button class="btn s" style="width:100%;margin-top:10px;margin-bottom:20px;" data-otmmore>Charger plus d'idées (${otmOffset}/${otmPlaces.length})</button>`;
     }
   }
   $('#discover').innerHTML=h;
