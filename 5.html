@@ -58,6 +58,7 @@ h2{font-size:30px;font-weight:800;letter-spacing:-.8px;margin:4px 0 12px}h3{marg
 .mv{display:flex;flex-direction:column;gap:2px;flex:none}.mv button{border:0;background:var(--sf2);color:var(--tx);width:30px;height:22px;border-radius:8px;font-size:11px;padding:0;cursor:pointer}
 .btn{border:0;border-radius:16px;padding:12px 17px;font:700 15px ui-rounded,system-ui;background:var(--acc);color:var(--accTx);min-height:44px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;flex:none}
 .btn.s{background:var(--sf2);color:var(--tx)}.btn.g{background:var(--acc);color:var(--accTx)}.btn.r{background:var(--bad);color:#fff}.btn.sm{min-height:36px;padding:7px 12px;font-size:13.5px;border-radius:12px}
+.btn.ic{width:36px;height:36px;min-height:36px;padding:0;border-radius:12px;font-size:16px}
 input,select,textarea{width:100%;padding:13px;border:1px solid var(--ln);border-radius:14px;font:16px ui-rounded,system-ui;margin:4px 0 10px;background:var(--inp);color:var(--tx)}
 input::placeholder,textarea::placeholder{color:var(--mu);opacity:.8}select option{color:#000}
 input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=checkbox]{width:auto;margin:0 6px 0 0}
@@ -670,7 +671,7 @@ function renderList(){
   }
 }
 
-/* ================= Onglet Explorer ================= */
+/* ================= Onglet Explorer (avec icônes compactes) ================= */
 async function loadDiscover(force=false,query=''){
   if(!S)return;
   if(discList.length&&!force&&!query)return;
@@ -719,27 +720,27 @@ function renderDiscover(){
       const thumbHtml=item.thumb?`<img class="act-thumb" src="${esc(item.thumb)}" data-opnegal="${i}" alt="${esc(item.name)}">`
         :`<div class="act-thumb" style="display:flex;align-items:center;justify-content:center;font-size:26px" data-opnegal="${i}">${EM[item.cat]}</div>`;
 
-      return `<div class="card blk" style="margin-bottom:12px;padding:14px">
+      return `<div class="card blk" style="margin-bottom:12px;padding:12px">
         <div style="display:flex;gap:12px;align-items:flex-start">
           ${thumbHtml}
           <div style="flex:1;min-width:0">
             <span class="sug-badge">${EM[item.cat]} ${CT[item.cat]}</span>
-            <b style="font-size:16px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(item.name)}</b>
-            <p style="font-size:13px;color:var(--mu);margin:4px 0 0;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(item.desc||'Lieu recommandé pour votre séjour.')}</p>
+            <b style="font-size:15px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(item.name)}</b>
+            <p style="font-size:13px;color:var(--mu);margin:3px 0 0;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(item.desc||'Lieu recommandé pour votre séjour.')}</p>
           </div>
         </div>
         <div class="row" style="margin-top:10px;justify-content:space-between;align-items:center">
-          <div class="row" style="gap:4px">
-            <a class="btn s sm" target="_blank" rel="noopener" href="${esc(gMapsUrl)}">📍 Itinéraire</a>
-            <a class="btn s sm" target="_blank" rel="noopener" href="${esc(item.sourceUrl)}">${item.bookingUrl?'🎟 Réserver':'En savoir plus'}</a>
+          <div class="row" style="gap:6px">
+            <a class="btn s ic" target="_blank" rel="noopener" href="${esc(gMapsUrl)}" title="Voir l'itinéraire Maps">📍</a>
+            <a class="btn s ic" target="_blank" rel="noopener" href="${esc(item.sourceUrl)}" title="${item.bookingUrl?'Réserver des billets':'En savoir plus'}">${item.bookingUrl?'🎟':'↗'}</a>
           </div>
-          <div class="row">
+          <div class="row" style="gap:6px">
             ${existing?`
-              <button class="btn s sm" data-open="${existing.id}">Consulter</button>
-              <button class="btn r sm" data-deldisc="${existing.id}">Retirer</button>
+              <button class="btn s ic" data-open="${existing.id}" title="Consulter la fiche">👁</button>
+              <button class="btn r ic" data-deldisc="${existing.id}" title="Retirer de mon voyage">✕</button>
             `:`
-              <button class="btn s sm" data-addwiki="${i}|lib">Sauvegarder</button>
-              <button class="btn sm" data-addwiki="${i}|day">Au programme (J-${day+1})</button>
+              <button class="btn s ic" data-addwiki="${i}|lib" title="Sauvegarder dans mes lieux">＋</button>
+              <button class="btn ic" data-addwiki="${i}|day" title="Planifier pour le jour ${day+1}">📅</button>
             `}
           </div>
         </div>
@@ -894,7 +895,7 @@ async function saveTrip(id){
     lastChosenCoords=null;close();bars();centerMap();toast('✓ Voyage mis à jour');return}
   toast('Préparation de votre voyage…');const t=mkTrip({name,flag,dest,start,n,money:money.slice(0,6)});
   if(lastChosenCoords){t.center=lastChosenCoords;t.zoom=11;lastChosenCoords=null}
-  else{try{const r=await geocode(dest,1,false);if(r[0]){t.center=[r[0].lat,r[0].lng];t.zoom=11}else toast('Destination enregistrée')}catch(e){}}
+  else{try{const r=await geocode(dest,1,false);if(r[0]){t.center=[r[0].lat,r[0].lng];t.zoom=11}else toast('Destination enregistrée')}catch(e){} }
   DB.trips.push(t);close();setTrip(t.id);toast('✓ Voyage prêt')}
 function setTrip(id){DB.cur=id;S=curTrip();undo=[];redo=[];day=0;fs.clear();fc.clear();hideO=false;hideU=false;placing=null;infoSub='apercu';discList=[];listSearchQuery='';listFilterCat='all';AIM=aiWelcome();save();show()}
 function show(){$('#welcome').classList.toggle('on',!S);if(!S){document.title='Trip Planner';return}document.title=S.flag+' '+S.name;bars();tab('map');setTimeout(centerMap,120)}
