@@ -46,7 +46,6 @@ button{font-family:inherit}
 .bub{max-width:88%;padding:10px 14px;border-radius:18px;margin:8px 0;line-height:1.45;font-size:15px}.bub.a{background:var(--sf);border:1px solid var(--ln);border-top-left-radius:6px;box-shadow:var(--shs)}.bub.u{background:var(--acc);color:var(--accTx);font-weight:600;margin-left:auto;border-top-right-radius:6px;width:fit-content}
 .mini{border:0;border-radius:12px;padding:7px 12px;margin:4px 4px 0 0;background:var(--acc);color:var(--accTx);font:700 13px ui-rounded,system-ui;cursor:pointer}
 .aibar{position:sticky;bottom:0;display:flex;gap:8px;padding:10px 0 6px;background:linear-gradient(0deg,var(--bg) 75%,transparent)}.aibar input{margin:0;flex:1}details summary{cursor:pointer}
-#nlx{position:fixed;right:6px;bottom:calc(4px + env(safe-area-inset-bottom));z-index:1100;width:24px;height:24px;border-radius:50%;border:0;background:#101828cc;color:#fff;font-size:15px;line-height:22px;padding:0}
 .pane{position:fixed;inset:0;z-index:550;background:var(--bg);overflow:auto;padding:calc(84px + env(safe-area-inset-top)) 14px 40px;display:none;-webkit-overflow-scrolling:touch}.pane.on{display:block}
 #welcome{z-index:800;padding-top:calc(20px + env(safe-area-inset-top))}
 .hero{text-align:center;padding-top:10vh}.hero h2{font-size:40px;margin-bottom:10px}.hero p{color:var(--mu);max-width:340px;margin:0 auto 24px}.hero .btn{margin:5px}
@@ -119,7 +118,7 @@ input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=c
   <button class="ib" id="redo" aria-label="Rétablir"><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
 </div>
 <div class="pane" id="welcome"><div class="hero"><h2>🌍 Trip Planner</h2><p>Planifie n’importe quel voyage sur une carte : tes lieux, tes journées, tes réservations et ton budget. Chaque destination démarre vierge.</p><button class="btn g" data-newtrip>Créer mon premier voyage</button><label class="btn s">Importer une sauvegarde<input type="file" data-imp accept="application/json" hidden></label></div></div>
-<button id="nlx" aria-label="Fermer">×</button><div id="sheet"></div><div id="toast"></div>
+<div id="sheet"></div><div id="toast"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
 (()=>{'use strict';
@@ -196,7 +195,7 @@ function loadDB(){
   return{db:{v:2,trips:[],cur:''}}}
 let DB,S=null,undo=[],redo=[],day=0,fs=new Set(),fc=new Set(),hideO=false,hideU=false,placing=null,map,layer,PTS=[],tabNow='map',AIM=[],aiBusy=false,GR=[],SR=[],SRadd=new Set(),bulkBusy=false,infoSub='apercu';
 let filterOpen=false,destSugTimer=null,lastChosenCoords=null;
-let discCat='all',discList=[],discLoading=false,discAdd=new Set();
+let discEngine='wiki',discType='all',discList=[],discLoading=false,discAdd=new Set();
 
 const curTrip=()=>DB.trips.find(t=>t.id===DB.cur)||null;
 const cal=()=>S.cals.find(c=>c.id===S.cur)||S.cals[0],get=id=>S.acts.find(a=>a.id===id),dayO=()=>{const c=cal();return c.days[Math.min(day,c.days.length-1)]};
@@ -212,7 +211,7 @@ const vis=a=>{if(!ok(a))return false;const inD=dayO().items.some(i=>i.aid===a.id
 const unp=()=>S.acts.filter(a=>a.lat==null&&vis(a));
 const fm=n=>Number(n).toLocaleString('fr-FR',{maximumFractionDigits:2})+' '+S.money;
 
-/* ================= Géo & APIs fiables (OSM & Wikidata / Wikipedia) ================= */
+/* ================= Géo & APIs ================= */
 const okLL=(la,lo)=>Number.isFinite(la)&&Number.isFinite(lo)&&Math.abs(la)<=90&&Math.abs(lo)<=180&&!(la===0&&lo===0);
 const RXS=[/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,/@(-?\d+\.\d+),(-?\d+\.\d+)/,/[?&](?:q|ll|query|destination|daddr|center|sll)=(-?\d+\.\d+)[,+ ]+(-?\d+\.\d+)/,/\/place\/(-?\d+\.\d+),(-?\d+\.\d+)/,/#map=\d+\/(-?\d+\.\d+)\/(-?\d+\.\d+)/,/mlat=(-?\d+\.\d+)&(?:amp;)?mlon=(-?\d+\.\d+)/];
 function parseGPS(txt){
@@ -262,12 +261,12 @@ function hav(a,b){if(!a||!b||a.lat==null||b.lat==null)return null;const r=x=>x*M
 function leg(a,b){const d=hav(a,b);if(d==null)return null;const km=d*1.3,w=km<=1.5,min=Math.max(1,Math.round(km/(w?4.8:25)*60));return{km,min,w}}
 const legTxt=l=>(l.w?'🚶 ':'🚗 ')+fmtMin(l.min)+' · '+fmtKm(l.km);
 
-/* ================= Source d'activités vérifiée (Wikidata / Wikipedia API) ================= */
-async function fetchWikiActivities(dest,cat='all',query=''){
+/* ================= Sources de Découverte : Wikipedia & Overpass ================= */
+async function fetchWikiActivities(dest,type='all',query=''){
   if(!dest)return[];
   const target=query?`${query} ${dest}`:dest;
   try{
-    const r=await fetchT(`https://fr.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(target)}&gsrlimit=22&prop=coordinates|extracts|pageprops&exintro=1&explaintext=1&exchars=140&format=json&origin=*`);
+    const r=await fetchT(`https://fr.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(target)}&gsrlimit=24&prop=coordinates|extracts|pageprops&exintro=1&explaintext=1&exchars=140&format=json&origin=*`);
     if(!r.ok)return[];
     const j=await r.json();
     if(!j.query||!j.query.pages)return[];
@@ -280,27 +279,95 @@ async function fetchWikiActivities(dest,cat='all',query=''){
       const cLow=(title+' '+desc).toLowerCase();
       let detectedCat='v';
       if(/musée|museum|galerie|exposition/.test(cLow))detectedCat='v';
-      else if(/parc|jardin|nature|cascade|mont|plage|lac|forêt/.test(cLow))detectedCat='a';
+      else if(/parc|jardin|nature|cascade|mont|plage|lac|forêt|belvédère|vue/.test(cLow))detectedCat='a';
       else if(/restaurant|marché|gastronomie|café|dégustation|cuisine/.test(cLow))detectedCat='f';
-      else if(/spectacle|théâtre|opéra|concert|festival/.test(cLow))detectedCat='n';
-      else detectedCat='v';
+      else if(/spectacle|théâtre|opéra|concert|festival|nuit/.test(cLow))detectedCat='n';
 
-      if(cat!=='all'){
-        if(cat==='monument'&&!/monument|château|temple|palais|cathédrale|église|mosquée|pyramide|tour|place|statue|pont/.test(cLow))continue;
-        if(cat==='museum'&&!/musée|museum|galerie/.test(cLow))continue;
-        if(cat==='nature'&&!/parc|jardin|nature|lac|mont|plage|forêt/.test(cLow))continue;
-        if(cat==='food'&&detectedCat!=='f')continue;
+      if(type!=='all'){
+        if(type==='attraction'&&!/attraction|parc|aquarium|zoo|plage|loisir|roue|tour/.test(cLow))continue;
+        if(type==='culture'&&!/monument|château|temple|palais|cathédrale|église|mosquée|musée|pyramide|statue|histoire/.test(cLow))continue;
+        if(type==='nature'&&!/parc|jardin|nature|lac|mont|plage|forêt|cascade/.test(cLow))continue;
+        if(type==='food'&&detectedCat!=='f')continue;
       }
       results.push({
-        id:p.pageid,
+        id:'wiki-'+p.pageid,
         name:title,
         desc:desc,
         lat:+p.coordinates[0].lat.toFixed(6),
         lng:+p.coordinates[0].lon.toFixed(6),
-        cat:detectedCat
+        cat:detectedCat,
+        source:'Wikipédia',
+        sourceUrl:`https://fr.wikipedia.org/wiki/${encodeURIComponent(title)}`,
+        bookingUrl:null
       });
     }
     return results;
+  }catch(e){console.error(e);return[]}
+}
+
+async function fetchOverpassActivities(center,type='all',query=''){
+  if(!center||!center[0])return[];
+  const [lat,lng]=center;
+  let filterStr='';
+  if(type==='attraction'){
+    filterStr='nwr["tourism"~"attraction|theme_park|zoo|aquarium"](around:20000,'+lat+','+lng+');nwr["leisure"~"water_park"](around:20000,'+lat+','+lng+');';
+  }else if(type==='culture'){
+    filterStr='nwr["tourism"="museum"](around:20000,'+lat+','+lng+');nwr["historic"](around:20000,'+lat+','+lng+');';
+  }else if(type==='nature'){
+    filterStr='nwr["tourism"="viewpoint"](around:20000,'+lat+','+lng+');nwr["leisure"="park"](around:20000,'+lat+','+lng+');nwr["natural"~"beach|peak|waterfall"](around:20000,'+lat+','+lng+');';
+  }else if(type==='food'){
+    filterStr='nwr["amenity"~"restaurant|cafe|food_court"](around:12000,'+lat+','+lng+');';
+  }else{
+    filterStr='nwr["tourism"~"attraction|theme_park|zoo|aquarium|museum|viewpoint"](around:20000,'+lat+','+lng+');nwr["historic"~"monument|castle|ruins"](around:20000,'+lat+','+lng+');nwr["leisure"~"water_park|park"](around:20000,'+lat+','+lng+');';
+  }
+  const ql=`[out:json][timeout:15];(${filterStr});out center tags 30;`;
+  try{
+    const r=await fetchT('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(ql),12000);
+    if(!r.ok)return [];
+    const j=await r.json();
+    if(!j.elements)return [];
+    let list=j.elements.map(el=>{
+      const t=el.tags||{};
+      const name=t.name||t['name:fr']||t['name:en'];
+      if(!name)return null;
+      const elLat=el.lat||(el.center&&el.center.lat);
+      const elLng=el.lon||(el.center&&el.center.lon);
+      if(!elLat||!elLng)return null;
+
+      let cat='v';
+      if(t.amenity==='restaurant'||t.amenity==='cafe')cat='f';
+      else if(t.tourism==='theme_park'||t.leisure==='water_park'||t.tourism==='zoo')cat='a';
+      else if(t.amenity==='theatre'||t.amenity==='nightclub')cat='n';
+
+      const booking=t['contact:website']||t.website||t['booking:url']||t['tickets:url']||t.url||null;
+      const osmUrl=`https://www.openstreetmap.org/${el.type}/${el.id}`;
+
+      let descParts=[];
+      if(t.opening_hours)descParts.push('🕒 '+t.opening_hours);
+      if(t.description)descParts.push(t.description);
+      if(!descParts.length){
+        const sub=t.tourism||t.historic||t.leisure||t.amenity||'Lieu touristique';
+        descParts.push('Type : '+sub);
+      }
+
+      return {
+        id:'osm-'+el.id,
+        name:name,
+        desc:descParts.join(' · '),
+        lat:+elLat.toFixed(6),
+        lng:+elLng.toFixed(6),
+        cat:cat,
+        source:'OpenStreetMap',
+        sourceUrl:booking||osmUrl,
+        bookingUrl:booking
+      };
+    }).filter(Boolean);
+
+    if(query){
+      const qNorm=query.toLowerCase().trim();
+      list=list.filter(item=>item.name.toLowerCase().includes(qNorm)||item.desc.toLowerCase().includes(qNorm));
+    }
+    return list.slice(0,25);
   }catch(e){console.error(e);return[]}
 }
 
@@ -350,7 +417,7 @@ function actSheet(id){const a=get(id);if(!a)return;const inD=dayO().items.some(i
   sheet(`<h2 style="font-size:22px;margin-top:0">${esc(a.n)}</h2><p><span class="chip on">${CT[a.c]}</span>${a.sub?` <span class="chip">${esc(a.sub)}</span>`:''} ${a.s.map(x=>`<span class="chip">${SL[x]?SL[x][0]:esc(x)}</span>`).join(' ')}</p>
   <div class="stars">${[1,2,3,4,5].map(n=>`<button class="${n<=a.rate?'on':''}" data-rate="${id}|${n}">★</button>`).join('')} <button data-fav="${id}" style="color:${a.fav?'var(--gold)':'var(--ln)'}">♥</button></div>
   ${a.ar&&!a.n.includes(a.ar)?`<p dir="rtl">${esc(a.ar)}</p>`:''}${a.price?`<p>💶 ${esc(a.price)}</p>`:''}${a.hrs?`<p>🕒 ${esc(a.hrs)}</p>`:''}${a.note?`<p>📝 ${esc(a.note)}</p>`:''}<small style="color:var(--mu)">Source : ${esc(a.src)}${a.lat==null?' · 📍 position à saisir':''}</small>
-  <div class="row wrap" style="margin-top:14px"><button class="btn ${inD?'r':'g'}" data-${inD?'rmday':'add'}="${id}">${inD?'✕ Retirer de '+dl(day):'+ Ajouter à '+dl(day)}</button><button class="btn s" data-edit="${id}">Modifier</button><a class="btn s" target="_blank" rel="noopener" href="${esc(gm(a))}">Maps</a>${a.lat==null?`<button class="btn s" data-place="${id}">📍 Placer</button><button class="btn s" data-edit="${id}">🔗 Lien / GPS</button>`:''}</div>`)}
+  <div class="row wrap" style="margin-top:14px"><button class="btn ${inD?'r':'g'}" data-${inD?'rmday':'add'}="${id}">${inD?'✕ Retirer de '+dl(day):'+ Ajouter à '+dl(day)}</button><button class="btn s" data-edit="${id}">Modifier</button><a class="btn s" target="_blank" rel="noopener" href="${esc(gm(a))}">Maps</a>${a.maps&&a.maps!==gm(a)?`<a class="btn s" target="_blank" rel="noopener" href="${esc(a.maps)}">🔗 Lien / Résa</a>`:''}${a.lat==null?`<button class="btn s" data-place="${id}">📍 Placer</button><button class="btn s" data-edit="${id}">🔗 Lien / GPS</button>`:''}</div>`)}
 function nearSheet(aid){const a=get(aid),u=used();
   const l=S.acts.filter(b=>!u.has(b.id)).map(b=>({b,d:hav(a,b),same:a.area&&a.area===b.area})).filter(x=>x.d!=null?x.d<=12:x.same).sort((x,y)=>(x.d??50)-(y.d??50)).slice(0,6);
   sheet(`<h2 style="font-size:20px;margin-top:0">✓ Ajouté. À faire à proximité</h2>${l.length?l.map(({b,d,same})=>`<div class="near"><div><b>${esc(b.n)}</b><small>${d!=null?'📍 '+d.toFixed(1).replace('.',',')+' km':same?'même quartier':''} · ${b.s.map(x=>SL[x]?SL[x][0]:'').join(', ')}</small></div><button class="btn s sm" data-add2="${b.id}">＋</button></div>`).join(''):'<p class="empty">Rien d’autre à proximité (ou positions manquantes).</p>'}<button class="btn" style="margin-top:12px" data-close>Terminé</button>`)}
@@ -372,8 +439,8 @@ function addFromSearch(i,toDay){const r=SR[i];if(!r||SRadd.has(i))return;
   mut(()=>{S.acts.push(a);if(toDay)placeInDay(dayO(),a)});SRadd.add(i);renderSR();toast(toDay?'✓ Ajouté à '+dl(day):'✓ Ajouté à tes lieux');afterPos()}
 function editSheet(id,focusLink){const a=id?get(id):X('','v','');
   sheet(`<h2 style="font-size:22px;margin-top:0">${id?'Modifier le lieu':'Nouveau lieu'}</h2>
-  <label class="lb">Lien Google Maps — colle-le ici, la position (et le nom) se remplissent</label>
-  <input id="ema" inputmode="url" autocapitalize="off" placeholder="https://maps.app.goo.gl/…" value="${esc(a.maps||'')}">
+  <label class="lb">Lien Google Maps ou site officiel / réservation</label>
+  <input id="ema" inputmode="url" autocapitalize="off" placeholder="https://maps.app.goo.gl/… ou https://…" value="${esc(a.maps||'')}">
   <div id="gst" class="gst"></div>
   <input id="en" placeholder="Nom du lieu" value="${esc(a.n)}">
   <select id="ec">${Object.entries(CT).map(([k,v])=>`<option value="${k}" ${k===a.c?'selected':''}>${v}</option>`).join('')}</select>
@@ -389,7 +456,7 @@ function readForm(id){const n=$('#en').value.trim();if(!n){toast('Nom obligatoir
   if(v){const g=parseGPS(v);if(!g){toast('GPS non reconnu : « lat, lng » attendu');return null}lat=g[0];lng=g[1]}else{const g0=parseGPS($('#ema').value);if(g0){lat=g0[0];lng=g0[1]}}
   const du=parseInt($('#edu').value,10);
   const o={n,c:$('#ec').value,s:$$('.es:checked').map(x=>x.value),lat,lng,d:du>0?du:90,price:$('#epr').value.trim()||null,hrs:$('#eho').value.trim()||null,maps:$('#ema').value.trim()||null,note:$('#eno').value.trim()||null};
-  let r;mut(()=>{if(id){r=get(id);Object.assign(r,o)}else{r=X(o.n,o.c,'');Object.assign(r,o,{src:o.maps?'Lien Google Maps':'Saisie manuelle'});S.acts.push(r)}});
+  let r;mut(()=>{if(id){r=get(id);Object.assign(r,o)}else{r=X(o.n,o.c,'');Object.assign(r,o,{src:o.maps?'Lien saisi':'Saisie manuelle'});S.acts.push(r)}});
   if(lat!=null)afterPos();return r}
 async function doResolve(){const st=$('#gst');if(!st)return;const inp=$('#ema').value.trim()||$('#ell').value.trim();
   if(!inp){st.textContent='⚠ Colle d’abord un lien Google Maps.';return}
@@ -479,42 +546,55 @@ async function loadDiscover(force=false,query=''){
   if(!S)return;
   if(discList.length&&!force&&!query)return;
   discLoading=true;renderDiscover();
-  discList=await fetchWikiActivities(S.dest,discCat,query);
+  if(discEngine==='osm'){
+    discList=await fetchOverpassActivities(S.center,discType,query);
+  } else {
+    discList=await fetchWikiActivities(S.dest,discType,query);
+  }
   discLoading=false;renderDiscover();
 }
+
 function renderDiscover(){
   if(!S)return;
-  const cats=[
+  const types=[
     ['all','✨ Tout'],
-    ['monument','🏛 Monuments & Histoire'],
-    ['museum','🖼 Musées'],
-    ['nature','🌿 Nature & Parcs'],
+    ['attraction','🎡 Attractions & Loisirs'],
+    ['culture','🏛 Culture & Monuments'],
+    ['nature','🌿 Nature & Vues'],
     ['food','🍽 Sorties & Food']
   ];
   let h=`<h2>Explorer ${esc(S.dest||S.name)}</h2>
-  <p class="empty" style="padding:0 0 10px">Sélection d’activités et incontournables vérifiés (source officielle Wikidata & Wikipedia). Ajoute-les en un clic.</p>
+  <label class="lb">Source des recommandations</label>
+  <div class="seg" style="margin:6px 0 12px">
+    <button class="${discEngine==='wiki'?'on':''}" data-discengine="wiki">📖 Wikipédia / Wikidata (Culture & Notoriété)</button>
+    <button class="${discEngine==='osm'?'on':''}" data-discengine="osm">🌍 OpenStreetMap (Attractions & Terrain)</button>
+  </div>
   <div class="sp" style="margin-bottom:8px">
-    <input id="discq" placeholder="Chercher une idée à ${esc(S.dest)}…" autocomplete="off" enterkeyhint="search">
+    <input id="discq" placeholder="Rechercher une activité à ${esc(S.dest)}…" autocomplete="off" enterkeyhint="search">
     <button class="btn s" data-discsearch>Chercher</button>
   </div>
-  <div class="row" style="padding-bottom:12px">${cats.map(([k,l])=>`<button class="chip ${discCat===k?'on':''}" data-disccat="${k}">${l}</button>`).join('')}</div>`;
+  <div class="row" style="padding-bottom:12px">${types.map(([k,l])=>`<button class="chip ${discType===k?'on':''}" data-disctype="${k}">${l}</button>`).join('')}</div>`;
 
   if(discLoading){
-    h+=`<div class="empty" style="text-align:center;padding:40px 0">⏳ Chargement des meilleures activités pour ${esc(S.dest)}…</div>`;
+    h+=`<div class="empty" style="text-align:center;padding:40px 0">⏳ Chargement des activités (${discEngine==='wiki'?'Wikipédia':'OpenStreetMap'}) pour ${esc(S.dest)}…</div>`;
   } else if(!discList.length){
-    h+=`<div class="note" style="cursor:default"><b>Aucune activité trouvée</b><br>Essaie un autre filtre ou cherche directement un mot-clé (ex: « musée », « parc »).</div>`;
+    h+=`<div class="note" style="cursor:default"><b>Aucune activité trouvée</b><br>Essaie de changer de source, de filtre ou lance une recherche par mot-clé.</div>`;
   } else {
     h+=`<div class="near-list">`+discList.map((item,i)=>{
-      const isAlready=S.acts.some(a=>a.lat!=null&&hav(a,item)!=null&&hav(a,item)<.05);
+      const isAlready=S.acts.some(a=>a.lat!=null&&hav(a,item)!=null&&hav(a,item)<.04);
+      const gMapsUrl=`https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
       return `<div class="card blk" style="margin-bottom:12px;padding:14px">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
           <div>
-            <span class="sug-badge">${EM[item.cat]} ${CT[item.cat]}</span>
+            <span class="sug-badge">${EM[item.cat]} ${CT[item.cat]} · ${esc(item.source)}</span>
             <b style="font-size:16px;display:block">${esc(item.name)}</b>
           </div>
-          <a class="btn s sm" target="_blank" rel="noopener" href="https://fr.wikipedia.org/wiki/${encodeURIComponent(item.name)}">Wikipédia ↗</a>
+          <div class="row" style="flex:none;gap:4px">
+            <a class="btn s sm" target="_blank" rel="noopener" href="${esc(gMapsUrl)}">📍 Maps</a>
+            <a class="btn s sm" target="_blank" rel="noopener" href="${esc(item.sourceUrl)}">${item.bookingUrl?'🎟 Réserver':'Fiche ↗'}</a>
+          </div>
         </div>
-        <p style="font-size:13.5px;color:var(--mu);margin:8px 0 12px;line-height:1.4">${esc(item.desc||'Aucune description disponible.')}</p>
+        <p style="font-size:13.5px;color:var(--mu);margin:8px 0 12px;line-height:1.4">${esc(item.desc||'Activité répertoriée.')}</p>
         <div class="row" style="justify-content:flex-end">
           ${isAlready||discAdd.has(i)?'<span style="color:var(--ok);font-weight:700;font-size:14px;padding:6px 0">✓ Déjà dans tes lieux</span>':`
             <button class="btn s sm" data-addwiki="${i}|lib">＋ Lieux</button>
@@ -526,13 +606,15 @@ function renderDiscover(){
   }
   $('#discover').innerHTML=h;
 }
+
 function addActivityFromWiki(idx,toDay){
   const item=discList[idx];if(!item)return;
   const a=X(item.name,item.cat,'',{
     lat:item.lat,
     lng:item.lng,
-    note:item.desc||'',
-    src:'Wikidata / Wikipedia'
+    maps:item.bookingUrl||item.sourceUrl||null,
+    note:(item.desc||'')+(item.bookingUrl?'\nBilletterie / Site : '+item.bookingUrl:''),
+    src:item.source
   });
   mut(()=>{
     S.acts.push(a);
@@ -755,7 +837,6 @@ function onClick(e){
   }
   const t=e.target.closest(CLK);if(!t)return;const d=t.dataset;
   if(t.id==='sheet'){if(e.target===t)close();return}
-  if(t.id==='nlx'){$$('.nl-wrap').forEach(n=>n.remove());t.remove();return}
   if(t.id==='themebtn'){setTheme(resolved()==='dark'?'light':'dark');return}
   if(t.id==='filtertoggle'){filterOpen=!filterOpen;bars();return}
   if(t.id==='new'){if(!S)return;addSheet();return}
@@ -770,7 +851,8 @@ function onClick(e){
   if(d.trip){if(d.trip!==DB.cur)setTrip(d.trip);close();return}
   if(d.savetrip!==undefined){saveTrip(d.savetrip);return}
   if(!S)return;
-  if(d.disccat){discCat=d.disccat;loadDiscover(true);return}
+  if(d.discengine){discEngine=d.discengine;loadDiscover(true);return}
+  if(d.disctype){discType=d.disctype;loadDiscover(true);return}
   if('discsearch' in d){const q=($('#discq')||{}).value||'';loadDiscover(true,q);return}
   if(d.addwiki!==undefined){const[idx,mode]=d.addwiki.split('|');addActivityFromWiki(+idx,mode==='day');return}
   if(d.theme){setTheme(d.theme);return}
