@@ -109,7 +109,6 @@ input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=c
 .inline-article{display:none;background:var(--sf2);border-radius:14px;padding:12px;margin-top:10px;font-size:13.5px;line-height:1.55;color:var(--tx);border:1px solid var(--ln)}
 .inline-article.on{display:block}
 
-
 /* Nav défilante + boutons globaux fixes */
 #nav{gap:4px}
 #navw{position:relative;flex:1;min-width:0}
@@ -449,7 +448,6 @@ function leg(a,b){const d=hav(a,b);if(d==null)return null;const km=d*1.3,w=km<=1
 const legTxt=l=>(l.w?'🚶 ':'🚗 ')+fmtMin(l.min)+' · '+fmtKm(l.km);
 
 /* ================= Sources de Découverte ================= */
-
 async function fetchOtmActivities(center, dest, type='all', query='') {
   let lat = center && center[0], lng = center && center[1];
   if(!lat || !lng){
@@ -468,44 +466,55 @@ async function fetchOtmActivities(center, dest, type='all', query='') {
   else if (type === 'food') { kinds = 'foods'; catMapping = 'f'; }
 
   try {
-    const lang = ['fr','en','es','ar'].includes(curLang) ? curLang : 'fr';
-    const radiusUrl = `https://api.opentripmap.com/0.1/${lang}/places/radius?radius=15000&lon=${lng}&lat=${lat}&kinds=${kinds}&rate=2&format=json&limit=20&apikey=${OTM_API_KEY}`;
+    const lang = ['fr','en','es'].includes(curLang) ? curLang : 'fr';
+    
+    const radiusUrl = `https://api.opentripmap.com/0.1/${lang}/places/radius?radius=15000&lon=${lng}&lat=${lat}&kinds=${kinds}&rate=1&format=geojson&limit=30&apikey=${OTM_API_KEY}`;
     
     const r = await fetchT(radiusUrl, 8000);
-    if (!r.ok) return [];
-    let places = await r.json();
+    if (!r.ok) {
+        console.error("OpenTripMap Radius API Error");
+        return [];
+    }
+    
+    const data = await r.json();
+    let places = (data && data.features) ? data.features.map(f => f.properties) : [];
+    
+    places = places.filter(p => p.name && p.name.trim() !== '');
 
     if (query) {
       const qNorm = query.toLowerCase().trim();
       places = places.filter(p => p.name.toLowerCase().includes(qNorm));
     }
 
-    const detailedPlaces = await Promise.all(places.slice(0, 12).map(async (p) => {
+    const detailedPlaces = [];
+    for (const p of places.slice(0, 10)) {
       try {
-        const res = await fetchT(`https://api.opentripmap.com/0.1/${lang}/places/xid/${p.xid}?apikey=${OTM_API_KEY}`, 5000);
-        if (!res.ok) return null;
-        const details = await res.json();
+        const detailUrl = `https://api.opentripmap.com/0.1/${lang}/places/xid/${p.xid}?apikey=${OTM_API_KEY}`;
+        const res = await fetchT(detailUrl, 4000);
         
-        return {
-          id: 'otm-' + p.xid,
-          name: details.name || p.name,
-          desc: (details.wikipedia_extracts && details.wikipedia_extracts.text) || (details.info && details.info.descr) || p.kinds.replace(/_/g, ' '),
-          lat: details.point.lat,
-          lng: details.point.lon,
-          cat: catMapping,
-          source: 'OpenTripMap',
-          sourceUrl: details.wikipedia || details.url || `https://opentripmap.com/en/card/${p.xid}`,
-          bookingUrl: details.url || null,
-          thumb: details.preview ? details.preview.source : null,
-          pageTitle: details.name || p.name
-        };
+        if (res.ok) {
+          const details = await res.json();
+          detailedPlaces.push({
+            id: 'otm-' + p.xid,
+            name: details.name || p.name,
+            desc: (details.wikipedia_extracts && details.wikipedia_extracts.text) || (details.info && details.info.descr) || p.kinds.replace(/_/g, ' '),
+            lat: details.point.lat,
+            lng: details.point.lon,
+            cat: catMapping,
+            source: 'OpenTripMap',
+            sourceUrl: details.wikipedia || details.url || `https://opentripmap.com/en/card/${p.xid}`,
+            bookingUrl: details.url || null,
+            thumb: details.preview ? details.preview.source : null,
+            pageTitle: details.name || p.name
+          });
+        }
       } catch (e) {
-        return null;
       }
-    }));
-    return detailedPlaces.filter(Boolean);
+    }
+    
+    return detailedPlaces;
   } catch (e) {
-    console.error("Erreur OpenTripMap:", e);
+    console.error("Erreur générale OpenTripMap:", e);
     return [];
   }
 }
@@ -841,7 +850,7 @@ function renderDiscover(){
               <button class="btn s ic" data-open="${existing.id}" title="${t('view_details')}">👁</button>
               <button class="btn r ic" data-deldisc="${existing.id}" title="${t('remove_trip')}">✕</button>
             `:`
-              <button class="btn ic" data-addwiki="${i}" title="${t('add_places')}">＋</button>
+              <button class="btn ic" data-adddisc="${i}" title="${t('add_places')}">＋</button>
             `}
           </div>
         </div>
@@ -855,7 +864,7 @@ function renderDiscover(){
   $('#discover').innerHTML=h;
 }
 
-function addActivityFromWiki(idx){
+function addActivityFromDisc(idx){
   const item=discList[idx];if(!item)return;
   const a=X(item.name,item.cat,'',{
     lat:item.lat,
@@ -1140,7 +1149,7 @@ function onClick(e){
   
   if(d.disctype){discType=d.disctype;loadDiscover(true);return}
   if('discsearch' in d){const q=($('#discq')||{}).value||'';loadDiscover(true,q);return}
-  if(d.addwiki!==undefined){addActivityFromWiki(+d.addwiki);return}
+  if(d.adddisc!==undefined){addActivityFromDisc(+d.adddisc);return}
   if(d.theme){setTheme(d.theme);return}
   if(d.sub){infoSub=d.sub;renderInfo();return}
   if('edittrip' in d){tripForm(S.id);return}
