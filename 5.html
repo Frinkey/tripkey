@@ -356,7 +356,7 @@ const X=(n,c='v',s='',o={})=>Object.assign({id:uid(),n,c,s:Array.isArray(s)?s:St
 const mkCal=(name,n)=>({id:uid(),name,days:Array.from({length:n},()=>({hotel:'',items:[]}))});
 function mkTrip(o){const t={id:o.id||uid(),name:o.name,flag:o.flag||'🌍',dest:o.dest||o.name,start:o.start,n:o.n,center:o.center||null,zoom:o.zoom||11,acts:[],cals:[],cur:'',notes:[],money:o.money||'€',budget:null,people:[],exp:[],res:[],lists:[]};const c=mkCal('Planning principal',t.n);t.cals.push(c);t.cur=c.id;return t}
 const fin=v=>Number.isFinite(+v)&&v!==''&&v!==null;
-const num=v=>{const x=parseFloatString(v).replace(',','.').replace(/\s/g,''));return Number.isFinite(x)?x:NaN};
+const num=v=>{const x=parseFloat(String(v).replace(',','.').replace(/\s/g,''));return Number.isFinite(x)?x:NaN};
 function norm(t){
   if(!t||typeof t!=='object')return null;
   t.id=t.id||uid();t.name=String(t.name||'Voyage');t.flag=t.flag||'🌍';t.dest=t.dest||t.name;
