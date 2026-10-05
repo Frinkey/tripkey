@@ -134,6 +134,35 @@ input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=c
 #navw:after{right:0;background:linear-gradient(270deg,var(--bg),transparent)}
 #navw.sl:before,#navw.sr:after{opacity:.95}
 #navg{display:flex;align-items:center;gap:4px;flex:none}
+
+/* Explorer moderne : filtres instantanés */
+.seg.slide{position:relative;overflow:hidden}
+.seg.slide .thumb{position:absolute;top:3px;bottom:3px;inset-inline-start:3px;width:calc((100% - 6px)/var(--n));border-radius:11px;background:var(--sf);box-shadow:var(--shs);transform:translateX(calc(var(--i)*100%));transition:transform .38s cubic-bezier(.3,1.35,.5,1)}
+html[dir=rtl] .seg.slide .thumb{transform:translateX(calc(var(--i)*-100%))}
+.seg.slide button{position:relative;z-index:1;background:none!important;box-shadow:none!important;font-size:13px}
+.seg.slide button.on{color:var(--tx)}
+.fp-row{padding:2px 0 6px;align-items:center}
+.fp{flex:none;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--ln);background:var(--sf);color:var(--tx);border-radius:999px;padding:8px 13px;font:700 13.5px ui-rounded,system-ui,sans-serif;cursor:pointer;box-shadow:var(--shs);transition:transform .28s cubic-bezier(.3,1.5,.5,1),background .2s,box-shadow .2s,color .2s}
+.fp em{font-style:normal;font-size:11px;font-weight:800;background:var(--sf2);border-radius:999px;padding:1px 7px;min-width:20px;text-align:center;transition:background .2s}
+.fp.on{background:var(--acc);color:var(--accTx);border-color:transparent;box-shadow:0 6px 16px rgba(255,122,89,.32);transform:translateY(-1px)}
+.fp.on em{background:rgba(255,255,255,.5)}
+.fp:active{transform:scale(.92)}
+.fp.reset{background:var(--bad);color:#fff;border-color:transparent}
+.vsep{flex:none;width:1px;height:22px;background:var(--ln);margin:0 2px}
+.disc-bar{position:sticky;top:calc(68px + env(safe-area-inset-top));z-index:5;border-radius:22px;padding:10px;margin:6px 0 12px;display:flex;flex-direction:column;gap:8px}
+.disc-search{display:flex;align-items:center;gap:8px;background:var(--inp);border:1px solid var(--ln);border-radius:16px;padding:0 6px 0 12px;transition:box-shadow .2s,border-color .2s}
+.disc-search:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 28%,transparent)}
+.disc-search input{margin:0;border:0;background:none;padding:12px 2px;flex:1;min-width:0;width:auto;outline:none}
+.disc-search .x{border:0;background:var(--sf2);color:var(--mu);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:12px;padding:0}
+.disc-search .x[hidden]{display:none}
+.disc-count{display:flex;justify-content:space-between;align-items:center;margin:2px 2px 10px;color:var(--mu);font-size:13px}
+.disc-count b{color:var(--tx)}
+.disc-count button{border:0;background:none;color:var(--bad);font:700 13px ui-rounded,system-ui;cursor:pointer;padding:4px 2px}
+.disc-skel{height:112px;border-radius:20px;margin-bottom:12px;border:1px solid var(--ln);background:linear-gradient(100deg,var(--sf) 30%,var(--sf2) 50%,var(--sf) 70%);background-size:200% 100%;animation:shim 1.2s linear infinite}
+@keyframes shim{to{background-position:-200% 0}}
+.rise{animation:rise .4s cubic-bezier(.2,.9,.2,1) both;animation-delay:calc(var(--n,0)*35ms)}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}}
+@media (prefers-reduced-motion:reduce){.rise,.disc-skel,.fp,.seg.slide .thumb{animation:none;transition:none}}
 @media print{html,body{height:auto!important;overflow:visible!important;background:#fff!important;color:#000!important}body>*:not(#printarea){display:none!important}#printarea{display:block!important;padding:16px;font:14px/1.5 system-ui}#printarea h1{font-size:22px;margin:0 0 4px}#printarea h2{font-size:16px;margin:16px 0 4px;border-bottom:1px solid #999;padding-bottom:2px}#printarea p{margin:2px 0}}
 </style></head><body>
 <div id="map"></div>
@@ -394,7 +423,8 @@ function loadDB(){
   return{db:{v:2,trips:[],cur:''}}}
 let DB,S=null,undo=[],redo=[],day=0,fs=new Set(),fc=new Set(),hideO=false,hideU=false,placing=null,map,layer,PTS=[],tabNow='map',AIM=[],aiBusy=false,GR=[],SR=[],SRadd=new Set(),bulkBusy=false,infoSub='apercu';
 let filterOpen=false,destSugTimer=null,lastChosenCoords=null;
-let discEngine='wiki',discView='list',discType='all',discList=[],discLoading=false;
+let discEngine='wiki',discView='list',discType='all',discList=[],discLoading=false,discQuery='';
+const newFlt=()=>({cats:new Set(),photo:false,hideAdded:false,sort:'rel',q:''});let discFlt=newFlt();
 let discMapInstance=null,discLayerInstance=null;
 let listSearchQuery='',listFilterCat='all';
 let curGallery=[],curGalIdx=0;
@@ -987,7 +1017,7 @@ function renderList(){
 async function loadDiscover(force=false, query='', loadMore=false){
   if(!S)return;
   if(!loadMore && discList.length && !force && !query)return;
-  
+  if(!loadMore)discQuery=query||'';
   discLoading=true; 
   renderDiscover();
   
@@ -1008,164 +1038,89 @@ async function loadDiscover(force=false, query='', loadMore=false){
   
   discLoading=false; 
   renderDiscover();
-  if(discView==='map') renderDiscoverMap();
 }
 
 function findExistingAct(item){
   return S.acts.find(a=>(a.lat!=null&&hav(a,item)!=null&&hav(a,item)<.04)||a.n.toLowerCase()===item.name.toLowerCase());
 }
 
-function renderDiscoverMap() {
-  const wrap = $('#disc-map-wrap');
-  if (!wrap || discView !== 'map') return;
-
-  if (!discMapInstance) {
-    discMapInstance = L.map('disc-map', { zoomControl: false }).setView(S.center || [20, 0], S.zoom || 12);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap',
-      maxZoom: 19
-    }).addTo(discMapInstance);
-    discLayerInstance = L.layerGroup().addTo(discMapInstance);
-  }
-
-  discLayerInstance.clearLayers();
-  const validPts = [];
-
-  discList.forEach((item, i) => {
-    if (item.lat == null || item.lng == null) return;
-    validPts.push([item.lat, item.lng]);
-    const existing = findExistingAct(item);
-
-    const m = L.marker([item.lat, item.lng], {
-      icon: L.divIcon({
-        className: '',
-        iconSize: [36, 36],
-        iconAnchor: [18, 18],
-        html: `<div class="pin" style="--c:${COL[item.cat] || '#888'};width:36px;height:36px"><b>${EM[item.cat]}</b></div>`
-      })
-    }).addTo(discLayerInstance);
-
-    const gradColor = COL[item.cat] || '#888';
-    const grad = `background: linear-gradient(135deg, ${gradColor}, color-mix(in srgb, ${gradColor} 30%, #000)); color: #fff;`;
-
-    const popupHtml = `
-      <div class="disc-popup">
-        ${item.thumb 
-          ? `<img src="${esc(item.thumb)}" alt="${esc(item.name)}">` 
-          : `<div class="disc-popup-thumb" style="${grad}">${EM[item.cat]}</div>`
-        }
-        <b>${esc(item.name)}</b>
-        <p>${esc(item.desc || 'Aucune description disponible.')}</p>
-        <div style="display:flex;gap:6px;margin-top:6px">
-          ${existing 
-            ? `<button class="btn s sm" data-open="${existing.id}" style="width:100%">👁 Consulter</button>`
-            : `<button class="btn g sm" data-adddisc="${i}" style="width:100%">＋ Ajouter</button>`
-          }
-        </div>
-      </div>
-    `;
-    m.bindPopup(popupHtml);
-  });
-
-  setTimeout(() => {
-    discMapInstance.invalidateSize();
-    if (validPts.length) {
-      discMapInstance.fitBounds(validPts, { padding: [40, 40], maxZoom: 15 });
-    } else if (S.center) {
-      discMapInstance.setView(S.center, 12);
-    }
-  }, 100);
-}
-
-function renderDiscover(){
-  if(!S)return;
-  const types=[
-    ['all',t('cat_all')],
-    ['attraction',t('cat_attraction')],
-    ['culture',t('cat_culture')],
-    ['nature',t('cat_nature')],
-    ['food',t('cat_food')]
-  ];
-  
-  let h=`<h2>${t('explore_title',{dest:esc(S.dest||S.name)})}</h2>
-  <label class="lb">${t('explore_source')}</label>
-  <div class="seg" style="margin:6px 0 10px">
-    <button class="${discEngine==='wiki'?'on':''}" data-discengine="wiki">${t('explore_wiki')}</button>
-    <button class="${discEngine==='osm'?'on':''}" data-discengine="osm">${t('explore_osm')}</button>
-    <button class="${discEngine==='otm'?'on':''}" data-discengine="otm">${t('explore_otm')}</button>
-  </div>
-  
-  <div class="seg" style="margin:0 0 10px">
-    <button class="${discView==='list'?'on':''}" data-discview="list">📋 Liste</button>
-    <button class="${discView==='map'?'on':''}" data-discview="map">🗺 Carte</button>
-  </div>
-
-  <div class="sp" style="margin-bottom:8px;">
-    <input id="discq" placeholder="${t('search_placeholder',{dest:esc(S.dest)})}" autocomplete="off" enterkeyhint="search">
-    <button class="btn s" data-discsearch>${t('find')}</button>
-  </div>
-  <div class="row" style="padding-bottom:12px">${types.map(([k,l])=>`<button class="chip ${discType===k?'on':''}" data-disctype="${k}">${l}</button>`).join('')}</div>`;
-
-  h += `<div id="disc-map-wrap" class="${discView === 'map' && !discLoading ? 'on' : ''}"><div id="disc-map"></div></div>`;
-
-  if(discLoading){
-    h+=`<div class="disc-loader">
-          <div class="disc-spinner"></div>
-          <span>${t('loading_ideas',{dest:esc(S.dest)})}</span>
-        </div>`;
-  } else if(!discList.length){
-    h+=`<div class="note" style="cursor:default">${t('no_ideas')}</div>`;
-  } else if(discView === 'list') {
-    h+=`<div class="near-list">`+discList.map((item,i)=>{
-      const existing=findExistingAct(item);
-      const gMapsUrl=`https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
-      
-      const gradColor = COL[item.cat] || '#888';
-      const grad = `background: linear-gradient(135deg, ${gradColor}, color-mix(in srgb, ${gradColor} 30%, #000)); color: #fff; box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);`;
-      const thumbHtml=item.thumb?`<img class="act-thumb" src="${esc(item.thumb)}" data-opnegal="${i}" alt="${esc(item.name)}">`
-        :`<div class="act-thumb" style="${grad} display:flex;align-items:center;justify-content:center;font-size:32px" data-opnegal="${i}">${EM[item.cat]}</div>`;
-
-      return `<div class="card blk" style="margin-bottom:12px;padding:12px">
-        <div style="display:flex;gap:12px;align-items:flex-start">
-          ${thumbHtml}
-          <div style="flex:1;min-width:0">
-            <span class="sug-badge">${EM[item.cat]} ${I18N[curLang].cat_names[item.cat]||item.cat}</span>
+/* ---- Explorer : filtres instantanés, carte persistante ---- */
+const DCATS=['v','a','f','n'];
+function discActive(){return discFlt.cats.size+(discFlt.photo?1:0)+(discFlt.hideAdded?1:0)+((discFlt.q&&discFlt.q!==discQuery)?1:0)}
+function discVisible(){
+  const live=(discFlt.q&&discFlt.q!==discQuery)?NF(discFlt.q):'';
+  let arr=discList.map((item,i)=>({item,i})).filter(({item})=>{
+    if(discFlt.cats.size&&!discFlt.cats.has(item.cat))return false;
+    if(discFlt.photo&&!item.thumb)return false;
+    if(discFlt.hideAdded&&findExistingAct(item))return false;
+    if(live&&!NF(item.name+' '+(item.desc||'')).includes(live))return false;
+    return true});
+  if(discFlt.sort==='dist'&&S.center){const c={lat:S.center[0],lng:S.center[1]};arr.sort((x,y)=>(hav(c,x.item)??1e9)-(hav(c,y.item)??1e9))}
+  else if(discFlt.sort==='name')arr.sort((x,y)=>x.item.name.localeCompare(y.item.name,curLang));
+  return arr}
+function ensureDiscShell(){
+  if(discMapInstance&&!document.body.contains(discMapInstance.getContainer())){try{discMapInstance.remove()}catch(e){}discMapInstance=null;discLayerInstance=null}
+  if(!$('#disc-head'))$('#discover').innerHTML='<div id="disc-head"></div><div id="disc-bar-w"></div><div id="disc-map-wrap"><div id="disc-map"></div></div><div id="disc-list"></div><div id="disc-foot"></div>'}
+function renderDiscoverMap(){
+  const wrap=$('#disc-map-wrap');if(!wrap||discView!=='map'||typeof L==='undefined')return;
+  if(!discMapInstance){
+    discMapInstance=L.map('disc-map',{zoomControl:false}).setView(S.center||[20,0],S.zoom||12);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(discMapInstance);
+    discLayerInstance=L.layerGroup().addTo(discMapInstance)}
+  discLayerInstance.clearLayers();const pts=[];
+  discVisible().forEach(({item,i})=>{
+    if(item.lat==null||item.lng==null)return;pts.push([item.lat,item.lng]);
+    const existing=findExistingAct(item),col=COL[item.cat]||'#888';
+    const m=L.marker([item.lat,item.lng],{icon:L.divIcon({className:'',iconSize:[36,36],iconAnchor:[18,18],html:`<div class="pin" style="--c:${col};width:36px;height:36px;${existing?'opacity:.55':''}"><b>${EM[item.cat]}</b>${existing?'<em>✓</em>':''}</div>`})}).addTo(discLayerInstance);
+    const grad=`background:linear-gradient(135deg,${col},color-mix(in srgb,${col} 30%,#000));color:#fff;`;
+    m.bindPopup(`<div class="disc-popup">${item.thumb?`<img src="${esc(item.thumb)}" alt="${esc(item.name)}">`:`<div class="disc-popup-thumb" style="${grad}">${EM[item.cat]}</div>`}<b>${esc(item.name)}</b><p>${esc(item.desc||'Aucune description disponible.')}</p><div style="display:flex;gap:6px;margin-top:6px">${existing?`<button class="btn s sm" data-open="${existing.id}" style="width:100%">👁 Consulter</button>`:`<button class="btn g sm" data-adddisc="${i}" style="width:100%">＋ Ajouter</button>`}</div></div>`)});
+  setTimeout(()=>{if(!discMapInstance)return;discMapInstance.invalidateSize();
+    if(pts.length)discMapInstance.fitBounds(pts,{padding:[40,40],maxZoom:15});else if(S.center)discMapInstance.setView(S.center,12)},100)}
+function renderDiscResults(){
+  ensureDiscShell();const list=$('#disc-list'),foot=$('#disc-foot'),wrap=$('#disc-map-wrap');if(!list)return;
+  const showMap=discView==='map'&&!discLoading;wrap.classList.toggle('on',showMap);
+  if(discLoading){list.innerHTML=`<div class="disc-loader"><div class="disc-spinner"></div><span>${t('loading_ideas',{dest:esc(S.dest)})}</span></div>`+'<div class="disc-skel"></div>'.repeat(3);foot.innerHTML='';return}
+  const vis=discVisible(),act=discActive();
+  const info=discList.length?`<div class="disc-count"><span><b>${vis.length}</b> / ${discList.length} lieux</span>${act?`<button data-discflt="reset">✕ Réinitialiser (${act})</button>`:''}</div>`:'';
+  if(!discList.length){list.innerHTML=`<div class="note" style="cursor:default">${t('no_ideas')}</div>`;foot.innerHTML=''}
+  else if(!vis.length){list.innerHTML=info+`<div class="note" style="cursor:default">Aucun lieu ne correspond à ces filtres.</div>`;foot.innerHTML=''}
+  else if(discView==='map'){list.innerHTML=info;foot.innerHTML=''}
+  else{
+    list.innerHTML=info+`<div class="near-list">`+vis.map(({item,i},n)=>{
+      const existing=findExistingAct(item),gMapsUrl=`https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
+      const col=COL[item.cat]||'#888',grad=`background:linear-gradient(135deg,${col},color-mix(in srgb,${col} 30%,#000));color:#fff;box-shadow:inset 0 2px 6px rgba(0,0,0,.2);`;
+      const thumbHtml=item.thumb?`<img class="act-thumb" src="${esc(item.thumb)}" data-opnegal="${i}" alt="${esc(item.name)}" loading="lazy">`:`<div class="act-thumb" style="${grad}display:flex;align-items:center;justify-content:center;font-size:32px" data-opnegal="${i}">${EM[item.cat]}</div>`;
+      return `<div class="card blk${n<12?' rise':''}" style="margin-bottom:12px;padding:12px;--n:${n}">
+        <div style="display:flex;gap:12px;align-items:flex-start">${thumbHtml}
+          <div style="flex:1;min-width:0"><span class="sug-badge" style="color:${col}">${EM[item.cat]} ${I18N[curLang].cat_names[item.cat]||item.cat}</span>
             <b style="font-size:15px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(item.name)}</b>
-            <p style="font-size:13px;color:var(--mu);margin:3px 0 0;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(item.desc||'')}</p>
-          </div>
-        </div>
+            <p style="font-size:13px;color:var(--mu);margin:3px 0 0;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(item.desc||'')}</p></div></div>
         <div class="row" style="margin-top:10px;justify-content:space-between;align-items:center">
-          <div class="row" style="gap:6px">
-            <a class="btn s ic" target="_blank" rel="noopener" href="${esc(gMapsUrl)}" title="${t('itinerary')}">📍</a>
-            <button class="btn s ic" data-toggleinline="${i}" title="${t('read_more')}">📖</button>
-            <a class="btn s ic" target="_blank" rel="noopener" href="${esc(item.sourceUrl)}" title="${t('open_web')}">↗</a>
-            ${item.bookingUrl?`<a class="btn s ic" target="_blank" rel="noopener" href="${esc(item.bookingUrl)}" title="${t('book_ticket')}">🎟</a>`:''}
-          </div>
-          <div class="row" style="gap:6px">
-            ${existing?`
-              <button class="btn s ic" data-open="${existing.id}" title="${t('view_details')}">👁</button>
-              <button class="btn r ic" data-deldisc="${existing.id}" title="${t('remove_trip')}">✕</button>
-            `:`
-              <button class="btn ic" data-adddisc="${i}" title="${t('add_places')}">＋</button>
-            `}
-          </div>
-        </div>
-        <div class="inline-article" id="inline-${i}">
-          <b>${t('about_title',{name:esc(item.name)})}</b>
-          <p style="margin:6px 0 0">${esc(item.desc||t('no_info'))}</p>
-        </div>
-      </div>`;
-    }).join('')+`</div>`;
-    
-    if (discEngine === 'otm' && otmOffset < otmRawPlaces.length) {
-      h += `<button class="btn s" data-otmmore style="width:100%;margin-top:10px;">Charger plus d'idées (${otmRawPlaces.length - otmOffset} restantes)</button>`;
-    }
-  }
-  $('#discover').innerHTML=h;
-  if(discView === 'map' && !discLoading && discList.length) {
-    renderDiscoverMap();
-  }
-}
+          <div class="row" style="gap:6px"><a class="btn s ic" target="_blank" rel="noopener" href="${esc(gMapsUrl)}" title="${t('itinerary')}">📍</a><button class="btn s ic" data-toggleinline="${i}" title="${t('read_more')}">📖</button><a class="btn s ic" target="_blank" rel="noopener" href="${esc(item.sourceUrl)}" title="${t('open_web')}">↗</a>${item.bookingUrl?`<a class="btn s ic" target="_blank" rel="noopener" href="${esc(item.bookingUrl)}" title="${t('book_ticket')}">🎟</a>`:''}</div>
+          <div class="row" style="gap:6px">${existing?`<button class="btn s ic" data-open="${existing.id}" title="${t('view_details')}">👁</button><button class="btn r ic" data-deldisc="${existing.id}" title="${t('remove_trip')}">✕</button>`:`<button class="btn ic" data-adddisc="${i}" title="${t('add_places')}">＋</button>`}</div></div>
+        <div class="inline-article" id="inline-${i}"><b>${t('about_title',{name:esc(item.name)})}</b><p style="margin:6px 0 0">${esc(item.desc||t('no_info'))}</p></div></div>`}).join('')+`</div>`;
+    foot.innerHTML=(discEngine==='otm'&&otmOffset<otmRawPlaces.length)?`<button class="btn s" data-otmmore style="width:100%;margin-top:6px;">Charger plus d'idées (${otmRawPlaces.length-otmOffset} restantes)</button>`:''}
+  if(showMap)renderDiscoverMap()}
+function renderDiscover(){
+  if(!S)return;ensureDiscShell();
+  const types=[['all',t('cat_all')],['attraction',t('cat_attraction')],['culture',t('cat_culture')],['nature',t('cat_nature')],['food',t('cat_food')]];
+  const engines=[['wiki',t('explore_wiki')],['osm',t('explore_osm')],['otm',t('explore_otm')]],ei=Math.max(0,engines.findIndex(e=>e[0]===discEngine));
+  const head=$('#disc-head'),oldI=$('#disc-eng')?$('#disc-eng').style.getPropertyValue('--i'):'';
+  head.innerHTML=`<h2>${t('explore_title',{dest:esc(S.dest||S.name)})}</h2><label class="lb">${t('explore_source')}</label>
+    <div class="seg slide" id="disc-eng" style="margin:6px 0 12px;--n:3;--i:${ei}"><i class="thumb"></i>${engines.map(([k,l])=>`<button class="${discEngine===k?'on':''}" data-discengine="${k}">${l}</button>`).join('')}</div>
+    <div class="row fp-row">${types.map(([k,l])=>`<button class="fp ${discType===k?'on':''}" data-disctype="${k}">${l}</button>`).join('')}</div>`;
+  if(oldI!==''&&oldI!==String(ei)){const el=$('#disc-eng');el.style.setProperty('--i',oldI);requestAnimationFrame(()=>requestAnimationFrame(()=>el.style.setProperty('--i',ei)))}
+  const cnt={};discList.forEach(it=>cnt[it.cat]=(cnt[it.cat]||0)+1);
+  const sortL={rel:'✨ Pertinence',dist:'📍 Proximité',name:'🔤 A–Z'}[discFlt.sort],act=discActive();
+  const bw=$('#disc-bar-w'),sl=$('#disc-fr')?$('#disc-fr').scrollLeft:0,hadFocus=document.activeElement&&document.activeElement.id==='discq';
+  bw.innerHTML=`<div class="disc-bar glass"><div class="disc-search"><span aria-hidden="true">🔍</span><input id="discq" value="${esc(discFlt.q)}" placeholder="Filtrer ou chercher à ${esc(S.dest||S.name)}…" autocomplete="off" enterkeyhint="search"><button class="x" data-discclear ${discFlt.q?'':'hidden'} aria-label="Effacer">✕</button><button class="btn s sm" data-discsearch>En ligne</button></div>
+    <div class="row fp-row" id="disc-fr">
+      <button class="fp ${discView==='list'?'on':''}" data-discview="list">📋 Liste</button><button class="fp ${discView==='map'?'on':''}" data-discview="map">🗺 Carte</button><span class="vsep"></span>
+      ${DCATS.map(c=>`<button class="fp ${discFlt.cats.has(c)?'on':''}" data-discflt="cat:${c}">${EM[c]} ${I18N[curLang].cat_names[c]||c}<em>${cnt[c]||0}</em></button>`).join('')}<span class="vsep"></span>
+      <button class="fp ${discFlt.photo?'on':''}" data-discflt="photo">📷 Avec photo</button><button class="fp ${discFlt.hideAdded?'on':''}" data-discflt="added">✓ Pas encore ajoutés</button><button class="fp" data-discflt="sort">${sortL}</button>${act?`<button class="fp reset" data-discflt="reset">✕ ${act}</button>`:''}
+    </div></div>`;
+  const fr=$('#disc-fr');if(fr)fr.scrollLeft=sl;if(hadFocus){const q=$('#discq');if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length)}}
+  renderDiscResults()}
 
 function addActivityFromDisc(idx){
   const item=discList[idx];if(!item)return;
@@ -1180,7 +1135,6 @@ function addActivityFromDisc(idx){
     S.acts.push(a);
   });
   renderDiscover();
-  if(discView==='map') renderDiscoverMap();
   toast('✓ Enregistré');
   afterPos();
 }
@@ -1192,7 +1146,6 @@ function removeActivityFromDiscover(actId){
     S.cals.forEach(c=>c.days.forEach(x=>x.items=x.items.filter(i=>i.aid!==actId)));
   });
   renderDiscover();
-  if(discView==='map') renderDiscoverMap();
   toast('Activité retirée');
 }
 
@@ -1317,7 +1270,7 @@ async function saveTrip(id){
   if(lastChosenCoords){tTrip.center=lastChosenCoords;tTrip.zoom=11;lastChosenCoords=null}
   else{try{const r=await geocode(dest,1,false);if(r[0]){tTrip.center=[r[0].lat,r[0].lng];tTrip.zoom=11}else toast('Destination enregistrée')}catch(e){} }
   DB.trips.push(tTrip);close();setTrip(tTrip.id);toast('✓ Voyage prêt')}
-function setTrip(id){DB.cur=id;S=curTrip();undo=[];redo=[];day=0;fs.clear();fc.clear();hideO=false;hideU=false;placing=null;infoSub='apercu';discList=[];listSearchQuery='';listFilterCat='all';AIM=aiWelcome();save();show()}
+function setTrip(id){discFlt=newFlt();DB.cur=id;S=curTrip();undo=[];redo=[];day=0;fs.clear();fc.clear();hideO=false;hideU=false;placing=null;infoSub='apercu';discList=[];listSearchQuery='';listFilterCat='all';AIM=aiWelcome();save();show()}
 function show(){$('#welcome').classList.toggle('on',!S);if(!S){document.title='Trip Planner';return}document.title=S.flag+' '+S.name;bars();tab('map');setTimeout(centerMap,120)}
 function deleteTrip(){if(!S||!confirm('Supprimer définitivement « '+S.name+' » ?'))return;
   try{localStorage.setItem(K+'_backup',JSON.stringify(DB))}catch(e){}
@@ -1386,7 +1339,7 @@ function tab(tName){tabNow=tName;$('#dock').classList.toggle('hide',tName!=='map
   $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tName));['plan','list','discover','info','ai'].forEach(p=>$('#'+p).classList.toggle('on',p===tName));
   {const b=$('#nav [data-t="'+tName+'"]'),n=$('#navs');if(b&&n)n.scrollTo({left:b.offsetLeft-n.clientWidth/2+b.clientWidth/2,behavior:'smooth'})}
   $('#new').style.display=tName==='map'?'':'none';$('#unp').style.display=tName==='map'&&S&&unp().length?'':'none';
-  if(!S)return;if(tName==='plan')renderPlan();if(tName==='list')renderList();if(tName==='discover')loadDiscover();if(tName==='info')renderInfo();if(tName==='ai')renderAI();
+  if(!S)return;if(tName==='plan')renderPlan();if(tName==='list')renderList();if(tName==='discover'){loadDiscover();if(discList.length&&!discLoading)renderDiscover()}if(tName==='info')renderInfo();if(tName==='ai')renderAI();
   if(tName==='map')setTimeout(()=>{map.invalidateSize();drawMap()},60)}
 function refresh(){if(!S)return;bars();drawMap();if(tabNow==='plan')renderPlan();if(tabNow==='list')renderList();if(tabNow==='discover')renderDiscover();if(tabNow==='info')renderInfo()}
 
@@ -1458,10 +1411,17 @@ function onClick(e){
     loadDiscover(true);
     return;
   }
+  if(d.discflt){const k=d.discflt;
+    if(k.startsWith('cat:')){const c=k.slice(4);discFlt.cats.has(c)?discFlt.cats.delete(c):discFlt.cats.add(c)}
+    else if(k==='photo')discFlt.photo=!discFlt.photo;
+    else if(k==='added')discFlt.hideAdded=!discFlt.hideAdded;
+    else if(k==='sort'){const o=['rel','dist','name'];discFlt.sort=o[(o.indexOf(discFlt.sort)+1)%o.length]}
+    else if(k==='reset')discFlt=newFlt();
+    renderDiscover();return}
+  if('discclear' in d){discFlt.q='';renderDiscover();return}
   if(d.discview){
     discView=d.discview;
     renderDiscover();
-    if(discView==='map') renderDiscoverMap();
     return;
   }
   if(d.disctype){
@@ -1477,8 +1437,7 @@ function onClick(e){
     return;
   }
   if('otmmore' in d){
-    const q=($('#discq')||{}).value||'';
-    loadDiscover(true,q,true);
+    loadDiscover(true,discQuery,true);
     return;
   }
   if(d.adddisc!==undefined){addActivityFromDisc(+d.adddisc);return}
@@ -1582,6 +1541,7 @@ document.addEventListener('input',e=>{const id=e.target.id;
   if(id==='ema'){clearTimeout(rt);const v=e.target.value.trim();if(/^https?:\/\//i.test(v)||parseGPS(v))rt=setTimeout(doResolve,450)}
   else if(id==='sq'){clearTimeout(sqT);sqT=setTimeout(runSearch,650)}});
 
+document.addEventListener('input',e=>{if(e.target.id==='discq'){discFlt.q=e.target.value;renderDiscResults();const c=$('[data-discclear]');if(c)c.hidden=!discFlt.q}});
 window.addEventListener('pagehide',save);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
 
