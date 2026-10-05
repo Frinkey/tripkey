@@ -109,6 +109,11 @@ input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=c
 .inline-article{display:none;background:var(--sf2);border-radius:14px;padding:12px;margin-top:10px;font-size:13.5px;line-height:1.55;color:var(--tx);border:1px solid var(--ln)}
 .inline-article.on{display:block}
 
+/* Loader d'exploration */
+.disc-loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 0;gap:14px;color:var(--mu);font-weight:600;font-size:14px}
+.disc-spinner{width:36px;height:36px;border:3px solid var(--ln);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
 /* Nav défilante + boutons globaux fixes */
 #nav{gap:4px}
 #navw{position:relative;flex:1;min-width:0}
@@ -182,7 +187,7 @@ const I18N={
     itinerary:'Itinéraire',read_more:'Lire le résumé complet',open_web:'Ouvrir le site web ↗',book_ticket:'Réserver des billets',
     view_details:'Consulter la fiche',remove_trip:'Retirer de mon voyage',add_places:'Ajouter à mes lieux',
     about_title:'À propos de {name} :',no_info:'Aucune information supplémentaire disponible.',
-    loading_ideas:'⏳ Sélection des meilleures idées pour {dest}…',no_ideas:'Aucune suggestion trouvée. Modifiez votre filtre ou cherchez un autre terme.',
+    loading_ideas:'Sélection des meilleures idées pour {dest}…',no_ideas:'Aucune suggestion trouvée. Modifiez votre filtre ou cherchez un autre terme.',
     saved_places:'Mes adresses & envies',search_places:'Rechercher une adresse, une note…',add_btn:'＋ Ajouter',bulk_btn:'En lot',
     filter_all:'Tous',filter_fav:'♥ Mes coups de cœur',filter_unp:'📍 À positionner',
     filter_v:'🏛 Visites',filter_a:'⚡ Activités',filter_f:'🍽 Bonnes tables',filter_n:'🎭 Sorties',
@@ -202,13 +207,13 @@ const I18N={
     hide_planned:'Hide already scheduled',hide_unplaced:'Hide unplaced',unplaced_btn:'📍 {n} unlocated',
     empty_day:'No visits planned — add some from the map or the Explore tab.',
     explore_title:'Explore {dest}',explore_source:'Recommendation style',
-    explore_wiki:'🏛 Highlights & Culture',explore_osm:'🎡 Leisure & Activities',
+    explore_wiki:'🏛 Highlights & Culture',explore_osm:'🎡 Leisure & Activities',explore_otm:'🌍 OpenTripMap',
     search_placeholder:'Search an activity in {dest}…',find:'Find',
     cat_all:'✨ View all',cat_attraction:'🎡 Parks & Fun',cat_culture:'🏛 Heritage & Museums',cat_nature:'🌿 Nature & Views',cat_food:'🍽 Local Food',
     itinerary:'Directions',read_more:'Read full summary',open_web:'Open website ↗',book_ticket:'Book tickets',
     view_details:'View details',remove_trip:'Remove from trip',add_places:'Save to places',
     about_title:'About {name}:',no_info:'No additional information available.',
-    loading_ideas:'⏳ Finding best suggestions for {dest}…',no_ideas:'No suggestions found. Try adjusting your filter or search query.',
+    loading_ideas:'Finding best suggestions for {dest}…',no_ideas:'No suggestions found. Try adjusting your filter or search query.',
     saved_places:'Saved Places & Wishlist',search_places:'Search saved places or notes…',add_btn:'＋ Add',bulk_btn:'Bulk',
     filter_all:'All',filter_fav:'♥ Favorites',filter_unp:'📍 Needs location',
     filter_v:'🏛 Sights',filter_a:'⚡ Activities',filter_f:'🍽 Dining',filter_n:'🎭 Nightlife',
@@ -227,14 +232,14 @@ const I18N={
     create_first_trip:'Crear mi primer viaje',import_backup:'Importar copia',
     hide_planned:'Ocultar programados',hide_unplaced:'Ocultar sin ubicar',unplaced_btn:'📍 {n} sin ubicar',
     empty_day:'Sin visitas previstas — añade actividades desde el mapa o Explorar.',
-    explore_title:'Explorar {dest}',explore_source:'Estilo de recomendaciones',
-    explore_wiki:'🏛 Lo imprescindible',explore_osm:'🎡 Ocio y actividades',
+    explore_title:'Explorar {dest}',explore_source:'Fuente de recomendaciones',
+    explore_wiki:'🏛 Wikipedia',explore_osm:'🎡 OSM',explore_otm:'🌍 OpenTripMap',
     search_placeholder:'Buscar actividad en {dest}…',find:'Buscar',
     cat_all:'✨ Ver todo',cat_attraction:'🎡 Parques y atracciones',cat_culture:'🏛 Patrimonio y museos',cat_nature:'🌿 Naturaleza y vistas',cat_food:'🍽 Gastronomía local',
     itinerary:'Ruta',read_more:'Leer resumen completo',open_web:'Abrir sitio web ↗',book_ticket:'Reservar entradas',
     view_details:'Ver ficha',remove_trip:'Quitar del viaje',add_places:'Guardar en mis lugares',
     about_title:'Acerca de {name}:',no_info:'No hay información adicional disponible.',
-    loading_ideas:'⏳ Buscando las mejores ideas para {dest}…',no_ideas:'No se encontraron sugerencias. Prueba con otro filtro o término.',
+    loading_ideas:'Buscando las mejores ideas para {dest}…',no_ideas:'No se encontraron sugerencias. Prueba con otro filtro o término.',
     saved_places:'Lugares guardados y deseos',search_places:'Buscar lugares o notas…',add_btn:'＋ Añadir',bulk_btn:'En lote',
     filter_all:'Todos',filter_fav:'♥ Favoritos',filter_unp:'📍 Por ubicar',
     filter_v:'🏛 Visitas',filter_a:'⚡ Actividades',filter_f:'🍽 Restaurantes',filter_n:'🎭 Ocio nocturno',
@@ -253,14 +258,14 @@ const I18N={
     create_first_trip:'إنشاء رحلتي الأولى',import_backup:'استيراد نسخة احتياطية',
     hide_planned:'إخفاء المجدولة',hide_unplaced:'إخفاء غير المحددة',unplaced_btn:'📍 {n} بدون موقع',
     empty_day:'لا توجد زيارات مقررة — أضف من الخريطة أو من تبويب استكشف.',
-    explore_title:'استكشف {dest}',explore_source:'نوع الاقتراحات',
-    explore_wiki:'🏛 أبرز المعالم والثقافة',explore_osm:'🎡 أنشطة وترفيه',
+    explore_title:'استكشف {dest}',explore_source:'مصدر الاقتراحات',
+    explore_wiki:'🏛 ويكيبيديا',explore_osm:'🎡 OSM',explore_otm:'🌍 OpenTripMap',
     search_placeholder:'ابحث عن نشاط في {dest}…',find:'بحث',
     cat_all:'✨ عرض الكل',cat_attraction:'🎡 مدن الملاهي والترفيه',cat_culture:'🏛 التراث والمتاحف',cat_nature:'🌿 الطبيعة والإطلالات',cat_food:'🍽 أطعمة وتذوق',
     itinerary:'الاتجاهات',read_more:'قراءة الملخص الكامل',open_web:'فتح الموقع الأصلي ↗',book_ticket:'حجز تذاكر',
     view_details:'عرض التفاصيل',remove_trip:'إزالة من الرحلة',add_places:'حفظ في قائمة الأماكن',
     about_title:'حول {name}:',no_info:'لا توجد معلومات إضافية متوفرة.',
-    loading_ideas:'⏳ جاري اختيار أفضل الاقتراحات لـ {dest}…',no_ideas:'لم يتم العثور على اقتراحات. حاول تغيير الفلتر أو كلمة البحث.',
+    loading_ideas:'جاري اختيار أفضل الاقتراحات لـ {dest}…',no_ideas:'لم يتم العثور على اقتراحات. حاول تغيير الفلتر أو كلمة البحث.',
     saved_places:'أماكني ورغباتي',search_places:'بحث في الأماكن أو الملاحظات…',add_btn:'＋ إضافة',bulk_btn:'بالجملة',
     filter_all:'الكل',filter_fav:'♥ المفضلة',filter_unp:'📍 بانتظار التحديد',
     filter_v:'🏛 زيارات',filter_a:'⚡ أنشطة',filter_f:'🍽 مطاعم',filter_n:'🎭 سهرات',
@@ -379,7 +384,7 @@ function loadDB(){
   return{db:{v:2,trips:[],cur:''}}}
 let DB,S=null,undo=[],redo=[],day=0,fs=new Set(),fc=new Set(),hideO=false,hideU=false,placing=null,map,layer,PTS=[],tabNow='map',AIM=[],aiBusy=false,GR=[],SR=[],SRadd=new Set(),bulkBusy=false,infoSub='apercu';
 let filterOpen=false,destSugTimer=null,lastChosenCoords=null;
-let discEngine='otm',discType='all',discList=[],discLoading=false;
+let discEngine='wiki',discType='all',discList=[],discLoading=false;
 let listSearchQuery='',listFilterCat='all';
 let curGallery=[],curGalIdx=0;
 
@@ -600,10 +605,8 @@ async function fetchOsmActivities(center,dest,type='all',query=''){
     }catch(e){}
   }
 
-  // Limitation pour éviter trop de requêtes vers Wikipedia d'un coup
   results = results.slice(0, 15);
   
-  // Option 1 : Fallback Wikipedia pour les images manquantes
   await Promise.all(results.map(async (it) => {
     if(!it.thumb) {
         it.thumb = await fetchWikiImageFallback(it.name, false);
@@ -624,7 +627,7 @@ async function fetchOtmActivities(center, dest, type='all', query='', loadMore=f
   else if (type === 'nature') { catMapping = 'a'; }
   else if (type === 'food') { catMapping = 'f'; }
 
-  const lang = 'en'; // OTM n'accepte que 'en' ou 'ru' pour les recherches
+  const lang = 'en';
 
   if (!loadMore) {
     otmRawPlaces = [];
@@ -680,7 +683,6 @@ async function fetchOtmActivities(center, dest, type='all', query='', loadMore=f
           if(m) wikiTitle = decodeURIComponent(m[1]);
         }
 
-        // Option 1 : Fallback Wikipedia rapide
         if (!thumbUrl && wikiTitle) {
           thumbUrl = await fetchWikiImageFallback(wikiTitle, true);
         }
@@ -779,7 +781,7 @@ function renderTL(){const es=dayEntries(Math.min(day,S.n-1));
     if(e.k==='act')return`<div class="tk" data-open="${e.a.id}" style="--c:${COL[e.a.c]}"><small>${e.t}</small><b>${EM[e.a.c]} ${esc(e.a.n)}</b><small>${e.leg?legTxt(e.leg):(e.a.rate?'★'.repeat(e.a.rate):(I18N[curLang].cat_names[e.a.c]||e.a.c))}</small></div>`;
     if(e.k==='note')return`<div class="tk" data-item="${e.it.id}" style="--c:var(--gold)"><small>${e.t}</small><b>📝 ${esc(e.it.note)}</b></div>`;
     return`<div class="tk" data-resid="${e.r.id}" style="--c:var(--mu)"><small>${e.r.time||'—'}</small><b>${RT[e.r.k][1]} ${esc(e.r.t)}</b></div>`}).join('')
-  :`<div class="tk ghost">${S.acts.length?t('empty_day'):'Commencez par ＋ pour créer étapes.'}</div>`}
+  :`<div class="tk ghost">${S.acts.length?t('empty_day'):'Commencez par ＋ pour créer des étapes.'}</div>`}
 function initMap(){map=L.map('map',{zoomControl:false}).setView([20,0],2);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);layer=L.layerGroup().addTo(map);
   map.on('click',e=>{if(!placing||!S)return;const a=get(placing);if(!a){placing=null;return}
     mut(()=>{a.lat=+e.latlng.lat.toFixed(6);a.lng=+e.latlng.lng.toFixed(6)});placing=null;toast('📍 Emplacement enregistré');afterPos()})}
@@ -1024,16 +1026,18 @@ function renderDiscover(){
   </div>
   <div class="row" style="padding-bottom:12px">${types.map(([k,l])=>`<button class="chip ${discType===k?'on':''}" data-disctype="${k}">${l}</button>`).join('')}</div>`;
 
-  if(discLoading && !discList.length){
-    h+=`<div class="empty" style="text-align:center;padding:40px 0">${t('loading_ideas',{dest:esc(S.dest)})}</div>`;
-  } else if(!discList.length && !discLoading){
+  if(discLoading){
+    h+=`<div class="disc-loader">
+          <div class="disc-spinner"></div>
+          <span>${t('loading_ideas',{dest:esc(S.dest)})}</span>
+        </div>`;
+  } else if(!discList.length){
     h+=`<div class="note" style="cursor:default">${t('no_ideas')}</div>`;
   } else {
     h+=`<div class="near-list">`+discList.map((item,i)=>{
       const existing=findExistingAct(item);
       const gMapsUrl=`https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
       
-      // OPTION 4: Fallback visuel dégradé pour les lieux sans image
       const gradColor = COL[item.cat] || '#888';
       const grad = `background: linear-gradient(135deg, ${gradColor}, color-mix(in srgb, ${gradColor} 30%, #000)); color: #fff; box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);`;
       const thumbHtml=item.thumb?`<img class="act-thumb" src="${esc(item.thumb)}" data-opnegal="${i}" alt="${esc(item.name)}">`
@@ -1072,11 +1076,7 @@ function renderDiscover(){
     }).join('')+`</div>`;
     
     if (discEngine === 'otm' && otmOffset < otmRawPlaces.length) {
-      if(discLoading) {
-         h += `<button class="btn s" style="width:100%;margin-top:10px;" disabled>Chargement...</button>`;
-      } else {
-         h += `<button class="btn s" data-otmmore style="width:100%;margin-top:10px;">Charger plus d'idées (${otmRawPlaces.length - otmOffset} restantes)</button>`;
-      }
+      h += `<button class="btn s" data-otmmore style="width:100%;margin-top:10px;">Charger plus d'idées (${otmRawPlaces.length - otmOffset} restantes)</button>`;
     }
   }
   $('#discover').innerHTML=h;
@@ -1365,10 +1365,29 @@ function onClick(e){
   if(d.savetrip!==undefined){saveTrip(d.savetrip);return}
   if(!S)return;
   
-  if(d.discengine){discEngine=d.discengine;loadDiscover(true);return}
-  if(d.disctype){discType=d.disctype;loadDiscover(true);return}
-  if('discsearch' in d){const q=($('#discq')||{}).value||'';loadDiscover(true,q);return}
-  if('otmmore' in d){const q=($('#discq')||{}).value||'';loadDiscover(true,q,true);return}
+  if(d.discengine){
+    discEngine=d.discengine;
+    discList=[];
+    loadDiscover(true);
+    return;
+  }
+  if(d.disctype){
+    discType=d.disctype;
+    discList=[];
+    loadDiscover(true);
+    return;
+  }
+  if('discsearch' in d){
+    const q=($('#discq')||{}).value||'';
+    discList=[];
+    loadDiscover(true,q);
+    return;
+  }
+  if('otmmore' in d){
+    const q=($('#discq')||{}).value||'';
+    loadDiscover(true,q,true);
+    return;
+  }
   if(d.adddisc!==undefined){addActivityFromDisc(+d.adddisc);return}
   if(d.theme){setTheme(d.theme);return}
   if(d.sub){infoSub=d.sub;renderInfo();return}
@@ -1455,7 +1474,7 @@ document.addEventListener('keydown',e=>{
   }
   if(e.key!=='Enter')return;
   if(e.target.id==='aiq'){e.preventDefault();aiSend(e.target.value)}
-  else if(e.target.id==='discq'){e.preventDefault();loadDiscover(true,e.target.value)}
+  else if(e.target.id==='discq'){e.preventDefault();discList=[];loadDiscover(true,e.target.value)}
   else if(e.target.dataset&&e.target.dataset.li){e.preventDefault();const b=document.querySelector(`[data-addli="${e.target.dataset.li}"]`);if(b)b.click()}
   else if(e.target.id==='pn'){e.preventDefault();const b=$('[data-addperson]');if(b)b.click()}
   else if(e.target.id==='sq'){e.preventDefault();clearTimeout(sqT);runSearch()}});
