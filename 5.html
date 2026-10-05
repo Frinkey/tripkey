@@ -35,7 +35,7 @@ button{font-family:inherit}
 #tl{display:flex;gap:8px;overflow-x:auto;padding:0 12px 10px;scrollbar-width:none}#tl::-webkit-scrollbar{display:none}
 .tk{flex:none;min-width:150px;max-width:220px;border-radius:16px;padding:9px 12px;background:var(--sf);border:1px solid var(--ln);border-inline-start:4px solid var(--c,var(--gold));box-shadow:var(--shs);cursor:pointer}.tk b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tk small{color:var(--mu);font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tk.ghost{border:1px dashed var(--ln);border-inline-start:1px dashed var(--ln);color:var(--mu);font-size:14px;min-width:240px;white-space:normal;background:transparent;box-shadow:none;cursor:default}
-#nav{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));z-index:700;display:flex;align-items:center;gap:3px;padding:5px;border-radius:22px}
+#nav{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));z-index:700;display:flex;align-items:center;gap:2px;padding:5px;border-radius:22px}
 #nav button{flex:1;border:0;background:none;border-radius:16px;padding:6px 0 4px;font:700 9px ui-rounded,system-ui;color:var(--mu);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
 #nav svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 #nav button.on{color:var(--accTx);background:var(--acc)}
@@ -109,6 +109,31 @@ input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=c
 .inline-article{display:none;background:var(--sf2);border-radius:14px;padding:12px;margin-top:10px;font-size:13.5px;line-height:1.55;color:var(--tx);border:1px solid var(--ln)}
 .inline-article.on{display:block}
 
+/* Loader d'exploration */
+.disc-loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 0;gap:14px;color:var(--mu);font-weight:600;font-size:14px}
+.disc-spinner{width:36px;height:36px;border:3px solid var(--ln);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Vue carte dans Explorer */
+#disc-map-wrap{display:none;width:100%;height:calc(100vh - 330px);min-height:360px;border-radius:20px;overflow:hidden;border:1px solid var(--ln);position:relative;box-shadow:var(--shs);margin-bottom:14px}
+#disc-map-wrap.on{display:block}
+#disc-map{width:100%;height:100%}
+.disc-popup{min-width:190px;max-width:240px;font-family:inherit}
+.disc-popup b{display:block;font-size:14px;margin-bottom:4px;color:var(--tx)}
+.disc-popup p{font-size:12px;color:var(--mu);margin:0 0 10px;line-height:1.35;max-height:90px;overflow-y:auto}
+.disc-popup img{width:100%;height:100px;object-fit:cover;border-radius:10px;margin-bottom:6px}
+.disc-popup-thumb{width:100%;height:75px;border-radius:10px;margin-bottom:6px;display:flex;align-items:center;justify-content:center;font-size:28px}
+
+/* Nav défilante + boutons globaux fixes */
+#nav{gap:4px}
+#navw{position:relative;flex:1;min-width:0}
+#navs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}#navs::-webkit-scrollbar{display:none}
+#navs button{flex:none;min-width:60px;padding-inline:4px}
+#navw:before,#navw:after{content:"";position:absolute;top:0;bottom:0;width:24px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:2}
+#navw:before{left:0;background:linear-gradient(90deg,var(--bg),transparent)}
+#navw:after{right:0;background:linear-gradient(270deg,var(--bg),transparent)}
+#navw.sl:before,#navw.sr:after{opacity:.95}
+#navg{display:flex;align-items:center;gap:4px;flex:none}
 @media print{html,body{height:auto!important;overflow:visible!important;background:#fff!important;color:#000!important}body>*:not(#printarea){display:none!important}#printarea{display:block!important;padding:16px;font:14px/1.5 system-ui}#printarea h1{font-size:22px;margin:0 0 4px}#printarea h2{font-size:16px;margin:16px 0 4px;border-bottom:1px solid #999;padding-bottom:2px}#printarea p{margin:2px 0}}
 </style></head><body>
 <div id="map"></div>
@@ -126,18 +151,17 @@ input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=c
 <div class="pane" id="plan"></div><div class="pane" id="list"></div><div class="pane" id="discover"></div><div class="pane" id="info"></div><div class="pane" id="ai"></div>
 <div id="dock" class="glass"><div id="days"></div><div id="tl"></div></div>
 <div id="nav" class="glass">
-  <button data-t="map" class="on"><svg viewBox="0 0 24 24"><path d="M9 4 3 6.5V20l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span data-i18n="nav_map">Carte</span></button>
+  <div id="navw"><div id="navs"><button data-t="map" class="on"><svg viewBox="0 0 24 24"><path d="M9 4 3 6.5V20l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span data-i18n="nav_map">Carte</span></button>
   <button data-t="plan"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg><span data-i18n="nav_plan">Planning</span></button>
   <button data-t="list"><svg viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><span data-i18n="nav_places">Lieux</span></button>
   <button data-t="discover"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg><span data-i18n="nav_explore">Explorer</span></button>
   <button data-t="info"><svg viewBox="0 0 24 24"><rect x="3.5" y="7" width="17" height="12.5" rx="3"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3.5 12.5h17"/></svg><span data-i18n="nav_trip">Voyage</span></button>
-  <button data-t="ai"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16v4M17 18h4"/></svg><span data-i18n="nav_assistant">Assistant</span></button>
+  <button data-t="ai"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16v4M17 18h4"/></svg><span data-i18n="nav_assistant">IA</span></button></div></div>
   <span class="sep"></span>
-  <button class="ib" id="langbtn" title="Langue">🇫🇷</button>
+  <div id="navg"><button class="ib" id="langbtn" title="Langue">🇫🇷</button>
   <button class="ib" id="themebtn" title="Thème"></button>
-  <span class="sep"></span>
-  <button class="ib" id="undo" aria-label="Annuler"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
-  <button class="ib" id="redo" aria-label="Rétablir"><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
+  
+  <button class="ib" id="undo" aria-label="Annuler"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button></div>
 </div>
 <div class="pane" id="welcome"><div class="hero"><h2>🌍 Trip Planner</h2><p data-i18n="welcome_desc">Planifie n’importe quel voyage sur une carte : tes lieux, tes journées, tes réservations et ton budget. Chaque destination démarre vierge.</p><button class="btn g" data-newtrip data-i18n="create_first_trip">Créer mon premier voyage</button><label class="btn s"><span data-i18n="import_backup">Importer une sauvegarde</span><input type="file" data-imp accept="application/json" hidden></label></div></div>
 <div id="sheet"></div><div id="toast"></div>
@@ -160,20 +184,20 @@ input[type=time]{width:auto;margin:0;padding:8px;border-radius:10px}input[type=c
 const I18N={
   fr:{
     code:'fr',dir:'ltr',name:'Français',flag:'🇫🇷',
-    nav_map:'Carte',nav_plan:'Planning',nav_places:'Lieux',nav_explore:'Explorer',nav_trip:'Voyage',nav_assistant:'Assistant',
+    nav_map:'Carte',nav_plan:'Planning',nav_places:'Lieux',nav_explore:'Explorer',nav_trip:'Voyage',nav_assistant:'IA',
     filters_down:'Filtres ▾',filters_up:'Filtres ▴',
     welcome_desc:'Planifie n’importe quel voyage sur une carte : tes lieux, tes journées, tes réservations et ton budget. Chaque destination démarre vierge.',
     create_first_trip:'Créer mon premier voyage',import_backup:'Importer une sauvegarde',
     hide_planned:'Masquer déjà prévues',hide_unplaced:'Masquer à planifier',unplaced_btn:'📍 {n} sans position',
     empty_day:'Aucune visite prévue — ajoutez-en depuis la carte ou l’onglet Explorer.',
-    explore_title:'Explorer {dest}',explore_source:'Style de recommandations',
-    explore_wiki:'🏛 Les incontournables',explore_osm:'🎡 Sorties & loisirs',
+    explore_title:'Explorer {dest}',explore_source:'Source des recommandations',
+    explore_wiki:'🏛 Wikipedia',explore_osm:'🎡 OSM',explore_otm:'🌍 OpenTripMap',
     search_placeholder:'Chercher une idée à {dest}…',find:'Trouver',
     cat_all:'✨ Tout voir',cat_attraction:'🎡 Parcs & Attractions',cat_culture:'🏛 Patrimoine & Musées',cat_nature:'🌿 Balades & Panoramas',cat_food:'🍽 Saveurs locales',
     itinerary:'Itinéraire',read_more:'Lire le résumé complet',open_web:'Ouvrir le site web ↗',book_ticket:'Réserver des billets',
     view_details:'Consulter la fiche',remove_trip:'Retirer de mon voyage',add_places:'Ajouter à mes lieux',
     about_title:'À propos de {name} :',no_info:'Aucune information supplémentaire disponible.',
-    loading_ideas:'⏳ Sélection des meilleures idées pour {dest}…',no_ideas:'Aucune suggestion trouvée. Modifiez votre filtre ou cherchez un autre terme.',
+    loading_ideas:'Sélection des meilleures idées pour {dest}…',no_ideas:'Aucune suggestion trouvée. Modifiez votre filtre ou cherchez un autre terme.',
     saved_places:'Mes adresses & envies',search_places:'Rechercher une adresse, une note…',add_btn:'＋ Ajouter',bulk_btn:'En lot',
     filter_all:'Tous',filter_fav:'♥ Mes coups de cœur',filter_unp:'📍 À positionner',
     filter_v:'🏛 Visites',filter_a:'⚡ Activités',filter_f:'🍽 Bonnes tables',filter_n:'🎭 Sorties',
@@ -186,20 +210,20 @@ const I18N={
   },
   en:{
     code:'en',dir:'ltr',name:'English',flag:'🇬🇧',
-    nav_map:'Map',nav_plan:'Schedule',nav_places:'Places',nav_explore:'Explore',nav_trip:'Trip',nav_assistant:'Assistant',
+    nav_map:'Map',nav_plan:'Schedule',nav_places:'Places',nav_explore:'Explore',nav_trip:'Trip',nav_assistant:'AI',
     filters_down:'Filters ▾',filters_up:'Filters ▴',
     welcome_desc:'Plan any journey on an interactive map: places, days, bookings and budget. Every destination starts fresh.',
     create_first_trip:'Create my first trip',import_backup:'Import backup',
     hide_planned:'Hide already scheduled',hide_unplaced:'Hide unplaced',unplaced_btn:'📍 {n} unlocated',
     empty_day:'No visits planned — add some from the map or the Explore tab.',
     explore_title:'Explore {dest}',explore_source:'Recommendation style',
-    explore_wiki:'🏛 Highlights & Culture',explore_osm:'🎡 Leisure & Activities',
+    explore_wiki:'🏛 Highlights & Culture',explore_osm:'🎡 Leisure & Activities',explore_otm:'🌍 OpenTripMap',
     search_placeholder:'Search an activity in {dest}…',find:'Find',
     cat_all:'✨ View all',cat_attraction:'🎡 Parks & Fun',cat_culture:'🏛 Heritage & Museums',cat_nature:'🌿 Nature & Views',cat_food:'🍽 Local Food',
     itinerary:'Directions',read_more:'Read full summary',open_web:'Open website ↗',book_ticket:'Book tickets',
     view_details:'View details',remove_trip:'Remove from trip',add_places:'Save to places',
     about_title:'About {name}:',no_info:'No additional information available.',
-    loading_ideas:'⏳ Finding best suggestions for {dest}…',no_ideas:'No suggestions found. Try adjusting your filter or search query.',
+    loading_ideas:'Finding best suggestions for {dest}…',no_ideas:'No suggestions found. Try adjusting your filter or search query.',
     saved_places:'Saved Places & Wishlist',search_places:'Search saved places or notes…',add_btn:'＋ Add',bulk_btn:'Bulk',
     filter_all:'All',filter_fav:'♥ Favorites',filter_unp:'📍 Needs location',
     filter_v:'🏛 Sights',filter_a:'⚡ Activities',filter_f:'🍽 Dining',filter_n:'🎭 Nightlife',
@@ -212,20 +236,20 @@ const I18N={
   },
   es:{
     code:'es',dir:'ltr',name:'Español',flag:'🇪🇸',
-    nav_map:'Mapa',nav_plan:'Itinerario',nav_places:'Lugares',nav_explore:'Explorar',nav_trip:'Viaje',nav_assistant:'Asistente',
+    nav_map:'Mapa',nav_plan:'Itinerario',nav_places:'Lugares',nav_explore:'Explorar',nav_trip:'Viaje',nav_assistant:'IA',
     filters_down:'Filtros ▾',filters_up:'Filtros ▴',
     welcome_desc:'Planifica cualquier viaje en un mapa interactivo: lugares, días, reservas y presupuesto. Cada viaje empieza en blanco.',
     create_first_trip:'Crear mi primer viaje',import_backup:'Importar copia',
     hide_planned:'Ocultar programados',hide_unplaced:'Ocultar sin ubicar',unplaced_btn:'📍 {n} sin ubicar',
     empty_day:'Sin visitas previstas — añade actividades desde el mapa o Explorar.',
-    explore_title:'Explorar {dest}',explore_source:'Estilo de recomendaciones',
-    explore_wiki:'🏛 Lo imprescindible',explore_osm:'🎡 Ocio y actividades',
+    explore_title:'Explorar {dest}',explore_source:'Fuente de recomendaciones',
+    explore_wiki:'🏛 Wikipedia',explore_osm:'🎡 OSM',explore_otm:'🌍 OpenTripMap',
     search_placeholder:'Buscar actividad en {dest}…',find:'Buscar',
     cat_all:'✨ Ver todo',cat_attraction:'🎡 Parques y atracciones',cat_culture:'🏛 Patrimonio y museos',cat_nature:'🌿 Naturaleza y vistas',cat_food:'🍽 Gastronomía local',
     itinerary:'Ruta',read_more:'Leer resumen completo',open_web:'Abrir sitio web ↗',book_ticket:'Reservar entradas',
     view_details:'Ver ficha',remove_trip:'Quitar del viaje',add_places:'Guardar en mis lugares',
     about_title:'Acerca de {name}:',no_info:'No hay información adicional disponible.',
-    loading_ideas:'⏳ Buscando las mejores ideas para {dest}…',no_ideas:'No se encontraron sugerencias. Prueba con otro filtro o término.',
+    loading_ideas:'Buscando las mejores ideas para {dest}…',no_ideas:'No se encontraron sugerencias. Prueba con otro filtro o término.',
     saved_places:'Lugares guardados y deseos',search_places:'Buscar lugares o notas…',add_btn:'＋ Añadir',bulk_btn:'En lote',
     filter_all:'Todos',filter_fav:'♥ Favoritos',filter_unp:'📍 Por ubicar',
     filter_v:'🏛 Visitas',filter_a:'⚡ Actividades',filter_f:'🍽 Restaurantes',filter_n:'🎭 Ocio nocturno',
@@ -238,20 +262,20 @@ const I18N={
   },
   ar:{
     code:'ar',dir:'rtl',name:'العربية',flag:'🇸🇦',
-    nav_map:'الخريطة',nav_plan:'البرنامج',nav_places:'الأماكن',nav_explore:'استكشف',nav_trip:'الرحلة',nav_assistant:'المساعد',
+    nav_map:'الخريطة',nav_plan:'البرنامج',nav_places:'الأماكن',nav_explore:'استكشف',nav_trip:'الرحلة',nav_assistant:'ذكاء',
     filters_down:'التصنيفات ▾',filters_up:'التصنيفات ▴',
     welcome_desc:'خطط لأي رحلة على خريطة تفاعلية: أماكنك، أيامك، حجوزاتك وميزانيتك.',
     create_first_trip:'إنشاء رحلتي الأولى',import_backup:'استيراد نسخة احتياطية',
     hide_planned:'إخفاء المجدولة',hide_unplaced:'إخفاء غير المحددة',unplaced_btn:'📍 {n} بدون موقع',
     empty_day:'لا توجد زيارات مقررة — أضف من الخريطة أو من تبويب استكشف.',
-    explore_title:'استكشف {dest}',explore_source:'نوع الاقتراحات',
-    explore_wiki:'🏛 أبرز المعالم والثقافة',explore_osm:'🎡 أنشطة وترفيه',
+    explore_title:'استكشف {dest}',explore_source:'مصدر الاقتراحات',
+    explore_wiki:'🏛 ويكيبيديا',explore_osm:'🎡 OSM',explore_otm:'🌍 OpenTripMap',
     search_placeholder:'ابحث عن نشاط في {dest}…',find:'بحث',
     cat_all:'✨ عرض الكل',cat_attraction:'🎡 مدن الملاهي والترفيه',cat_culture:'🏛 التراث والمتاحف',cat_nature:'🌿 الطبيعة والإطلالات',cat_food:'🍽 أطعمة وتذوق',
     itinerary:'الاتجاهات',read_more:'قراءة الملخص الكامل',open_web:'فتح الموقع الأصلي ↗',book_ticket:'حجز تذاكر',
     view_details:'عرض التفاصيل',remove_trip:'إزالة من الرحلة',add_places:'حفظ في قائمة الأماكن',
     about_title:'حول {name}:',no_info:'لا توجد معلومات إضافية متوفرة.',
-    loading_ideas:'⏳ جاري اختيار أفضل الاقتراحات لـ {dest}…',no_ideas:'لم يتم العثور على اقتراحات. حاول تغيير الفلتر أو كلمة البحث.',
+    loading_ideas:'جاري اختيار أفضل الاقتراحات لـ {dest}…',no_ideas:'لم يتم العثور على اقتراحات. حاول تغيير الفلتر أو كلمة البحث.',
     saved_places:'أماكني ورغباتي',search_places:'بحث في الأماكن أو الملاحظات…',add_btn:'＋ إضافة',bulk_btn:'بالجملة',
     filter_all:'الكل',filter_fav:'♥ المفضلة',filter_unp:'📍 بانتظار التحديد',
     filter_v:'🏛 زيارات',filter_a:'⚡ أنشطة',filter_f:'🍽 مطاعم',filter_n:'🎭 سهرات',
@@ -294,6 +318,8 @@ function applyLang(lang){
 }
 
 /* ================= Constantes & utilitaires ================= */
+const OTM_API_KEY = '5ae2e3f221c38a28845f05b60d69059f50b8de59fa1d8bd95d907662';
+
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const K='tripkit_v1',KL='egmap26d',KT='tripkit_theme',MAXD=60;
 const uid=()=>Math.random().toString(36).slice(2,9);
@@ -330,6 +356,7 @@ const X=(n,c='v',s='',o={})=>Object.assign({id:uid(),n,c,s:Array.isArray(s)?s:St
 const mkCal=(name,n)=>({id:uid(),name,days:Array.from({length:n},()=>({hotel:'',items:[]}))});
 function mkTrip(o){const t={id:o.id||uid(),name:o.name,flag:o.flag||'🌍',dest:o.dest||o.name,start:o.start,n:o.n,center:o.center||null,zoom:o.zoom||11,acts:[],cals:[],cur:'',notes:[],money:o.money||'€',budget:null,people:[],exp:[],res:[],lists:[]};const c=mkCal('Planning principal',t.n);t.cals.push(c);t.cur=c.id;return t}
 const fin=v=>Number.isFinite(+v)&&v!==''&&v!==null;
+const num=v=>{const x=parseFloatString(v).replace(',','.').replace(/\s/g,''));return Number.isFinite(x)?x:NaN};
 function norm(t){
   if(!t||typeof t!=='object')return null;
   t.id=t.id||uid();t.name=String(t.name||'Voyage');t.flag=t.flag||'🌍';t.dest=t.dest||t.name;
@@ -367,7 +394,8 @@ function loadDB(){
   return{db:{v:2,trips:[],cur:''}}}
 let DB,S=null,undo=[],redo=[],day=0,fs=new Set(),fc=new Set(),hideO=false,hideU=false,placing=null,map,layer,PTS=[],tabNow='map',AIM=[],aiBusy=false,GR=[],SR=[],SRadd=new Set(),bulkBusy=false,infoSub='apercu';
 let filterOpen=false,destSugTimer=null,lastChosenCoords=null;
-let discEngine='wiki',discType='all',discList=[],discLoading=false;
+let discEngine='wiki',discView='list',discType='all',discList=[],discLoading=false;
+let discMapInstance=null,discLayerInstance=null;
 let listSearchQuery='',listFilterCat='all';
 let curGallery=[],curGalIdx=0;
 
@@ -435,7 +463,28 @@ function hav(a,b){if(!a||!b||a.lat==null||b.lat==null)return null;const r=x=>x*M
 function leg(a,b){const d=hav(a,b);if(d==null)return null;const km=d*1.3,w=km<=1.5,min=Math.max(1,Math.round(km/(w?4.8:25)*60));return{km,min,w}}
 const legTxt=l=>(l.w?'🚶 ':'🚗 ')+fmtMin(l.min)+' · '+fmtKm(l.km);
 
+/* ================= Helper Photo Wikipedia ================= */
+async function fetchWikiImageFallback(query, exact=false) {
+  if(!query) return null;
+  try {
+    const langSub = ['fr','en','es','ar'].includes(curLang) ? curLang : 'fr';
+    const url = exact 
+        ? `https://${langSub}.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(query)}&prop=pageimages&pithumbsize=400&format=json&origin=*`
+        : `https://${langSub}.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query)}&gsrlimit=1&prop=pageimages&pithumbsize=400&format=json&origin=*`;
+    
+    const wRes = await fetchT(url, 3000);
+    if (wRes.ok) {
+        const wJson = await wRes.json();
+        const pages = Object.values((wJson.query && wJson.query.pages) || {});
+        if (pages[0] && pages[0].thumbnail) return pages[0].thumbnail.source;
+    }
+  } catch(e) {}
+  return null;
+}
+
 /* ================= Sources de Découverte ================= */
+
+// === WIKIPEDIA ===
 async function fetchWikiActivities(dest,type='all',query=''){
   if(!dest)return[];
   const target=query?`${query} ${dest}`:dest;
@@ -483,32 +532,191 @@ async function fetchWikiActivities(dest,type='all',query=''){
   }catch(e){console.error(e);return[]}
 }
 
+// === OPEN STREET MAP ===
 async function fetchOsmActivities(center,dest,type='all',query=''){
-  if(!dest)return[];
-  let keywords='';
-  if(type==='attraction') keywords='attraction theme park zoo aquarium';
-  else if(type==='culture') keywords='museum monument castle';
-  else if(type==='nature') keywords='park viewpoint garden beach';
-  else if(type==='food') keywords='restaurant cafe';
-  else keywords='tourism attraction park museum restaurant';
+  let lat=center&&center[0],lng=center&&center[1];
+  if(!lat||!lng){
+    try{
+      const geo=await geocodeDest(dest);
+      if(geo&&geo[0]){lat=geo[0].lat;lng=geo[0].lng;}
+    }catch(e){}
+  }
+  if(!lat||!lng)return[];
 
-  const fullQuery=query?`${query} ${dest}`:`${keywords} ${dest}`;
+  let tags=['node["tourism"~"attraction|museum|viewpoint|zoo|theme_park"](around:15000,'+lat+','+lng+');',
+            'node["historic"](around:15000,'+lat+','+lng+');',
+            'node["leisure"~"park|water_park"](around:15000,'+lat+','+lng+');'];
+
+  if(type==='attraction'){
+    tags=['node["tourism"~"attraction|theme_park|zoo|aquarium"](around:15000,'+lat+','+lng+');','node["leisure"="water_park"](around:15000,'+lat+','+lng+');'];
+  }else if(type==='culture'){
+    tags=['node["tourism"="museum"](around:15000,'+lat+','+lng+');','node["historic"](around:15000,'+lat+','+lng+');'];
+  }else if(type==='nature'){
+    tags=['node["tourism"="viewpoint"](around:15000,'+lat+','+lng+');','node["leisure"="park"](around:15000,'+lat+','+lng+');'];
+  }else if(type==='food'){
+    tags=['node["amenity"~"restaurant|cafe"](around:10000,'+lat+','+lng+');'];
+  }
+
+  const ql=`[out:json][timeout:10];(${tags.join('')});out center 25;`;
+  let results = [];
   try{
-    const rs=await geocode(fullQuery,24,false);
-    return rs.map((item,i)=>({
-      id:'osm-item-'+i,
-      name:item.short,
-      desc:item.name,
-      lat:item.lat,
-      lng:item.lng,
-      cat:item.cat||'a',
-      source:t('explore_osm'),
-      sourceUrl:`https://www.openstreetmap.org/search?query=${encodeURIComponent(item.name)}`,
-      bookingUrl:null,
-      thumb:null,
-      pageTitle:item.short
-    }));
-  }catch(e){console.error(e);return[]}
+    const r=await fetchT('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(ql),9000);
+    if(r.ok){
+      const j=await r.json();
+      if(j&&j.elements&&j.elements.length){
+        results=j.elements.map(el=>{
+          const tg=el.tags||{};
+          const name=tg['name:'+curLang]||tg.name||tg['name:en']||tg['name:fr'];
+          if(!name)return null;
+          const elLat=el.lat||(el.center&&el.center.lat);
+          const elLng=el.lon||(el.center&&el.center.lon);
+          if(!elLat||!elLng)return null;
+          let cat='v';
+          if(tg.amenity==='restaurant'||tg.amenity==='cafe')cat='f';
+          else if(tg.tourism==='theme_park'||tg.leisure==='water_park'||tg.tourism==='zoo')cat='a';
+          return {
+            id:'osm-'+el.id,
+            name:name,
+            desc:tg.opening_hours?('🕒 '+tg.opening_hours):(tg.tourism||tg.historic||tg.amenity||'Lieu'),
+            lat:+elLat.toFixed(6),
+            lng:+elLng.toFixed(6),
+            cat:cat,
+            source:t('explore_osm'),
+            sourceUrl:`https://www.openstreetmap.org/${el.type}/${el.id}`,
+            bookingUrl:tg.website||tg['contact:website']||null,
+            thumb:tg.image||null,
+            pageTitle:name
+          };
+        }).filter(Boolean);
+        if(query){
+          const qNorm=query.toLowerCase().trim();
+          results=results.filter(x=>x.name.toLowerCase().includes(qNorm));
+        }
+      }
+    }
+  }catch(e){}
+
+  if(!results.length) {
+    const kw=query?`${query} ${dest}`:(type==='food'?`restaurant ${dest}`:`tourism ${dest}`);
+    try{
+      const rs=await geocode(kw,20,false);
+      results = rs.map((it,i)=>({
+        id:'nom-'+i,
+        name:it.short,
+        desc:it.name,
+        lat:it.lat,
+        lng:it.lng,
+        cat:it.cat||'v',
+        source:t('explore_osm'),
+        sourceUrl:`https://www.openstreetmap.org/search?query=${encodeURIComponent(it.name)}`,
+        bookingUrl:null,
+        thumb:null,
+        pageTitle:it.short
+      }));
+    }catch(e){}
+  }
+
+  results = results.slice(0, 15);
+  
+  await Promise.all(results.map(async (it) => {
+    if(!it.thumb) {
+        it.thumb = await fetchWikiImageFallback(it.name, false);
+    }
+  }));
+
+  return results;
+}
+
+// === OPEN TRIP MAP ===
+let otmRawPlaces = [];
+let otmOffset = 0;
+
+async function fetchOtmActivities(center, dest, type='all', query='', loadMore=false) {
+  let catMapping = 'v';
+  if (type === 'attraction') { catMapping = 'a'; }
+  else if (type === 'culture') { catMapping = 'v'; }
+  else if (type === 'nature') { catMapping = 'a'; }
+  else if (type === 'food') { catMapping = 'f'; }
+
+  const lang = 'en';
+
+  if (!loadMore) {
+    otmRawPlaces = [];
+    otmOffset = 0;
+
+    let lat = center && center[0], lng = center && center[1];
+    if(!lat || !lng){
+      try{
+        const geo = await geocodeDest(dest);
+        if(geo && geo[0]){ lat = geo[0].lat; lng = geo[0].lng; }
+        else return [];
+      } catch(e){ return []; }
+    }
+
+    let kinds = 'interesting_places';
+    if (type === 'attraction') { kinds = 'amusements,sport'; }
+    else if (type === 'culture') { kinds = 'cultural,historic,architecture'; }
+    else if (type === 'nature') { kinds = 'natural,nature_reserves'; }
+    else if (type === 'food') { kinds = 'foods'; }
+
+    try {
+      const radiusUrl = `https://api.opentripmap.com/0.1/${lang}/places/radius?radius=15000&lon=${lng}&lat=${lat}&kinds=${kinds}&rate=1&format=geojson&limit=50&apikey=${OTM_API_KEY}`;
+      const r = await fetchT(radiusUrl, 8000);
+      if (!r.ok) return [];
+      
+      const data = await r.json();
+      let places = (data && data.features) ? data.features.map(f => f.properties) : [];
+      places = places.filter(p => p.name && p.name.trim() !== '');
+
+      if (query) {
+        const qNorm = query.toLowerCase().trim();
+        places = places.filter(p => p.name.toLowerCase().includes(qNorm));
+      }
+      otmRawPlaces = places;
+    } catch (e) { return []; }
+  }
+
+  const detailedPlaces = [];
+  const batch = otmRawPlaces.slice(otmOffset, otmOffset + 10);
+
+  for (const p of batch) {
+    try {
+      const detailUrl = `https://api.opentripmap.com/0.1/${lang}/places/xid/${p.xid}?apikey=${OTM_API_KEY}`;
+      const res = await fetchT(detailUrl, 4000);
+      
+      if (res.ok) {
+        const details = await res.json();
+        let thumbUrl = details.preview ? details.preview.source : null;
+        let wikiTitle = (details.wikipedia_extracts && details.wikipedia_extracts.title) ? details.wikipedia_extracts.title : null;
+        
+        if(!wikiTitle && details.wikipedia) {
+          const m = details.wikipedia.match(/wikipedia\.org\/wiki\/(.+)$/);
+          if(m) wikiTitle = decodeURIComponent(m[1]);
+        }
+
+        if (!thumbUrl && wikiTitle) {
+          thumbUrl = await fetchWikiImageFallback(wikiTitle, true);
+        }
+
+        detailedPlaces.push({
+          id: 'otm-' + p.xid,
+          name: details.name || p.name,
+          desc: (details.wikipedia_extracts && details.wikipedia_extracts.text) || (details.info && details.info.descr) || p.kinds.replace(/_/g, ' '),
+          lat: details.point.lat,
+          lng: details.point.lon,
+          cat: catMapping,
+          source: 'OpenTripMap',
+          sourceUrl: details.wikipedia || details.url || `https://opentripmap.com/en/card/${p.xid}`,
+          bookingUrl: details.url || null,
+          thumb: thumbUrl,
+          pageTitle: wikiTitle || details.name || p.name
+        });
+      }
+    } catch (e) {}
+  }
+  
+  otmOffset += 10;
+  return detailedPlaces;
 }
 
 /* ================= Visionneuse Galerie (Lightbox) ================= */
@@ -572,7 +780,7 @@ function findItem(id){const c=cal();for(let i=0;i<c.days.length;i++){const it=c.
 /* ================= Barres, carte ================= */
 function bars(){ if(!S)return; const c=cal();
   $('#brand').innerHTML=`${esc(S.flag)} ${esc(S.name)}<small>${esc(c.name)} ▾</small>`;
-  $('#undo').disabled=!undo.length;$('#redo').disabled=!redo.length;
+  $('#undo').disabled=!undo.length;
   $('#days').innerHTML=c.days.map((d,i)=>{const tDate=dayDate(i);return`<button class="dt ${i===day?'on':''}" data-day="${i}"><small>${I18N[curLang].days_short[tDate.getDay()]}</small><b>${tDate.getDate()}</b><small class="mo">${I18N[curLang].months_short[tDate.getMonth()]}</small>${d.items.length?'<i></i>':''}</button>`}).join('');
   $('#flt').innerHTML=Object.entries(I18N[curLang].slots).map(([k,v])=>`<button class="chip ${fs.has(k)?'on':''}" data-s="${k}">${SE[k]} ${v}</button>`).join('')+Object.entries(I18N[curLang].cat_names).map(([k,v])=>`<button class="chip ${fc.has(k)?'on':''}" data-c="${k}">${EM[k]} ${v}</button>`).join('');
   $('#tg').innerHTML=`<button class="sw ${hideO?'on':''}" data-tg="o"><i></i>${t('hide_planned')}</button><button class="sw ${hideU?'on':''}" data-tg="u"><i></i>${t('hide_unplaced')}</button>`;
@@ -602,7 +810,7 @@ function sheet(h){$('#sheet').innerHTML='<div>'+h+'</div>';$('#sheet').classList
 const close=()=>$('#sheet').classList.remove('on');
 const gm=a=>a.maps&&/^https?:\/\//.test(a.maps)?a.maps:`https://www.google.com/maps/search/?api=1&query=${a.lat!=null?a.lat+','+a.lng:encodeURIComponent(a.n)}`;
 function actSheet(id){const a=get(id);if(!a)return;const inD=dayO().items.some(i=>i.aid===id);
-  sheet(`<h2 style="font-size:22px;margin-top:0">${esc(a.n)}</h2><p><span class="chip on">${I18N[curLang].cat_names[a.c]||a.c}</span>${a.sub?` <span class="chip">${esc(a.sub)}</span>`:''} ${a.s.map(x=>`<span class="chip">${I18N[curLang].slots[x]||esc(x)}</span>`).join(' ')}</p>
+  sheet(`${a.img&&/^https?:/.test(a.img)?`<img src="${esc(a.img)}" alt="" style="width:100%;max-height:180px;object-fit:cover;border-radius:16px;margin-bottom:8px">`:''}<h2 style="font-size:22px;margin-top:0">${esc(a.n)}</h2><p><span class="chip on">${I18N[curLang].cat_names[a.c]||a.c}</span>${a.sub?` <span class="chip">${esc(a.sub)}</span>`:''} ${a.s.map(x=>`<span class="chip">${I18N[curLang].slots[x]||esc(x)}</span>`).join(' ')}</p>
   <div class="stars">${[1,2,3,4,5].map(n=>`<button class="${n<=a.rate?'on':''}" data-rate="${id}|${n}">★</button>`).join('')} <button data-fav="${id}" style="color:${a.fav?'var(--gold)':'var(--ln)'}">♥</button></div>
   ${a.ar&&!a.n.includes(a.ar)?`<p dir="rtl">${esc(a.ar)}</p>`:''}${a.price?`<p>💶 ${esc(a.price)}</p>`:''}${a.hrs?`<p>🕒 ${esc(a.hrs)}</p>`:''}${a.note?`<p>📝 ${esc(a.note)}</p>`:''}<small style="color:var(--mu)">Source : ${esc(a.src)}${a.lat==null?' · 📍 position à préciser':''}</small>
   <div class="row wrap" style="margin-top:14px"><button class="btn ${inD?'r':'g'}" data-${inD?'rmday':'add'}="${id}">${inD?'✕ Retirer':'＋ Ajouter'}</button><button class="btn s" data-edit="${id}">Modifier</button><a class="btn s" target="_blank" rel="noopener" href="${esc(gm(a))}">Itinéraire</a>${a.maps&&a.maps!==gm(a)?`<a class="btn s" target="_blank" rel="noopener" href="${esc(a.maps)}">🎟 Réserver</a>`:''}${a.lat==null?`<button class="btn s" data-place="${id}">📍 Placer sur la carte</button><button class="btn s" data-edit="${id}">🔗 Lien / GPS</button>`:''}</div>`)}
@@ -776,20 +984,97 @@ function renderList(){
 }
 
 /* ================= Onglet Explorer ================= */
-async function loadDiscover(force=false,query=''){
+async function loadDiscover(force=false, query='', loadMore=false){
   if(!S)return;
-  if(discList.length&&!force&&!query)return;
-  discLoading=true;renderDiscover();
-  if(discEngine==='osm'){
-    discList=await fetchOsmActivities(S.center,S.dest,discType,query);
+  if(!loadMore && discList.length && !force && !query)return;
+  
+  discLoading=true; 
+  renderDiscover();
+  
+  let newPlaces = [];
+  if (discEngine === 'otm') {
+    newPlaces = await fetchOtmActivities(S.center, S.dest, discType, query, loadMore);
+  } else if (discEngine === 'osm') {
+    newPlaces = await fetchOsmActivities(S.center, S.dest, discType, query);
   } else {
-    discList=await fetchWikiActivities(S.dest,discType,query);
+    newPlaces = await fetchWikiActivities(S.dest, discType, query);
   }
-  discLoading=false;renderDiscover();
+  
+  if (loadMore && discEngine === 'otm') {
+    discList.push(...newPlaces);
+  } else {
+    discList = newPlaces;
+  }
+  
+  discLoading=false; 
+  renderDiscover();
+  if(discView==='map') renderDiscoverMap();
 }
 
 function findExistingAct(item){
   return S.acts.find(a=>(a.lat!=null&&hav(a,item)!=null&&hav(a,item)<.04)||a.n.toLowerCase()===item.name.toLowerCase());
+}
+
+function renderDiscoverMap() {
+  const wrap = $('#disc-map-wrap');
+  if (!wrap || discView !== 'map') return;
+
+  if (!discMapInstance) {
+    discMapInstance = L.map('disc-map', { zoomControl: false }).setView(S.center || [20, 0], S.zoom || 12);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+      maxZoom: 19
+    }).addTo(discMapInstance);
+    discLayerInstance = L.layerGroup().addTo(discMapInstance);
+  }
+
+  discLayerInstance.clearLayers();
+  const validPts = [];
+
+  discList.forEach((item, i) => {
+    if (item.lat == null || item.lng == null) return;
+    validPts.push([item.lat, item.lng]);
+    const existing = findExistingAct(item);
+
+    const m = L.marker([item.lat, item.lng], {
+      icon: L.divIcon({
+        className: '',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+        html: `<div class="pin" style="--c:${COL[item.cat] || '#888'};width:36px;height:36px"><b>${EM[item.cat]}</b></div>`
+      })
+    }).addTo(discLayerInstance);
+
+    const gradColor = COL[item.cat] || '#888';
+    const grad = `background: linear-gradient(135deg, ${gradColor}, color-mix(in srgb, ${gradColor} 30%, #000)); color: #fff;`;
+
+    const popupHtml = `
+      <div class="disc-popup">
+        ${item.thumb 
+          ? `<img src="${esc(item.thumb)}" alt="${esc(item.name)}">` 
+          : `<div class="disc-popup-thumb" style="${grad}">${EM[item.cat]}</div>`
+        }
+        <b>${esc(item.name)}</b>
+        <p>${esc(item.desc || 'Aucune description disponible.')}</p>
+        <div style="display:flex;gap:6px;margin-top:6px">
+          ${existing 
+            ? `<button class="btn s sm" data-open="${existing.id}" style="width:100%">👁 Consulter</button>`
+            : `<button class="btn g sm" data-adddisc="${i}" style="width:100%">＋ Ajouter</button>`
+          }
+        </div>
+      </div>
+    `;
+    m.bindPopup(popupHtml);
+  });
+
+  setTimeout(() => {
+    discMapInstance.invalidateSize();
+    if (validPts.length) {
+      discMapInstance.fitBounds(validPts, { padding: [40, 40], maxZoom: 15 });
+    } else if (S.center) {
+      discMapInstance.setView(S.center, 12);
+    }
+  }, 100);
 }
 
 function renderDiscover(){
@@ -801,28 +1086,44 @@ function renderDiscover(){
     ['nature',t('cat_nature')],
     ['food',t('cat_food')]
   ];
+  
   let h=`<h2>${t('explore_title',{dest:esc(S.dest||S.name)})}</h2>
   <label class="lb">${t('explore_source')}</label>
-  <div class="seg" style="margin:6px 0 12px">
+  <div class="seg" style="margin:6px 0 10px">
     <button class="${discEngine==='wiki'?'on':''}" data-discengine="wiki">${t('explore_wiki')}</button>
     <button class="${discEngine==='osm'?'on':''}" data-discengine="osm">${t('explore_osm')}</button>
+    <button class="${discEngine==='otm'?'on':''}" data-discengine="otm">${t('explore_otm')}</button>
   </div>
-  <div class="sp" style="margin-bottom:8px">
+  
+  <div class="seg" style="margin:0 0 10px">
+    <button class="${discView==='list'?'on':''}" data-discview="list">📋 Liste</button>
+    <button class="${discView==='map'?'on':''}" data-discview="map">🗺 Carte</button>
+  </div>
+
+  <div class="sp" style="margin-bottom:8px;">
     <input id="discq" placeholder="${t('search_placeholder',{dest:esc(S.dest)})}" autocomplete="off" enterkeyhint="search">
     <button class="btn s" data-discsearch>${t('find')}</button>
   </div>
   <div class="row" style="padding-bottom:12px">${types.map(([k,l])=>`<button class="chip ${discType===k?'on':''}" data-disctype="${k}">${l}</button>`).join('')}</div>`;
 
+  h += `<div id="disc-map-wrap" class="${discView === 'map' && !discLoading ? 'on' : ''}"><div id="disc-map"></div></div>`;
+
   if(discLoading){
-    h+=`<div class="empty" style="text-align:center;padding:40px 0">${t('loading_ideas',{dest:esc(S.dest)})}</div>`;
+    h+=`<div class="disc-loader">
+          <div class="disc-spinner"></div>
+          <span>${t('loading_ideas',{dest:esc(S.dest)})}</span>
+        </div>`;
   } else if(!discList.length){
     h+=`<div class="note" style="cursor:default">${t('no_ideas')}</div>`;
-  } else {
+  } else if(discView === 'list') {
     h+=`<div class="near-list">`+discList.map((item,i)=>{
       const existing=findExistingAct(item);
       const gMapsUrl=`https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
+      
+      const gradColor = COL[item.cat] || '#888';
+      const grad = `background: linear-gradient(135deg, ${gradColor}, color-mix(in srgb, ${gradColor} 30%, #000)); color: #fff; box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);`;
       const thumbHtml=item.thumb?`<img class="act-thumb" src="${esc(item.thumb)}" data-opnegal="${i}" alt="${esc(item.name)}">`
-        :`<div class="act-thumb" style="display:flex;align-items:center;justify-content:center;font-size:26px" data-opnegal="${i}">${EM[item.cat]}</div>`;
+        :`<div class="act-thumb" style="${grad} display:flex;align-items:center;justify-content:center;font-size:32px" data-opnegal="${i}">${EM[item.cat]}</div>`;
 
       return `<div class="card blk" style="margin-bottom:12px;padding:12px">
         <div style="display:flex;gap:12px;align-items:flex-start">
@@ -845,7 +1146,7 @@ function renderDiscover(){
               <button class="btn s ic" data-open="${existing.id}" title="${t('view_details')}">👁</button>
               <button class="btn r ic" data-deldisc="${existing.id}" title="${t('remove_trip')}">✕</button>
             `:`
-              <button class="btn ic" data-addwiki="${i}" title="${t('add_places')}">＋</button>
+              <button class="btn ic" data-adddisc="${i}" title="${t('add_places')}">＋</button>
             `}
           </div>
         </div>
@@ -855,23 +1156,31 @@ function renderDiscover(){
         </div>
       </div>`;
     }).join('')+`</div>`;
+    
+    if (discEngine === 'otm' && otmOffset < otmRawPlaces.length) {
+      h += `<button class="btn s" data-otmmore style="width:100%;margin-top:10px;">Charger plus d'idées (${otmRawPlaces.length - otmOffset} restantes)</button>`;
+    }
   }
   $('#discover').innerHTML=h;
+  if(discView === 'map' && !discLoading && discList.length) {
+    renderDiscoverMap();
+  }
 }
 
-function addActivityFromWiki(idx){
+function addActivityFromDisc(idx){
   const item=discList[idx];if(!item)return;
   const a=X(item.name,item.cat,'',{
     lat:item.lat,
     lng:item.lng,
     maps:item.bookingUrl||item.sourceUrl||null,
     note:(item.desc||'')+(item.bookingUrl?'\nBilletterie : '+item.bookingUrl:''),
-    src:item.source
+    src:item.source,img:item.thumb||null
   });
   mut(()=>{
     S.acts.push(a);
   });
   renderDiscover();
+  if(discView==='map') renderDiscoverMap();
   toast('✓ Enregistré');
   afterPos();
 }
@@ -883,8 +1192,10 @@ function removeActivityFromDiscover(actId){
     S.cals.forEach(c=>c.days.forEach(x=>x.items=x.items.filter(i=>i.aid!==actId)));
   });
   renderDiscover();
+  if(discView==='map') renderDiscoverMap();
   toast('Activité retirée');
 }
+
 
 /* ================= Onglet Voyage ================= */
 const SUBS=[['apercu','Aperçu'],['res','Réservations'],['bud','Budget'],['lists','Listes'],['notes','Notes']];
@@ -1070,8 +1381,10 @@ function renderAI(){const k=aiKey();$('#ai').innerHTML=`<h2>${t('nav_assistant')
   <details class="note" style="margin-top:12px;cursor:default"><summary><b>Connexion IA personnalisée ${k?'(activée)':'(optionnelle)'}</b></summary><p style="font-size:14px">Sans configuration, l’assistant intégré répond directement sur vos lieux et vos distances.</p><input id="aik" type="password" placeholder="sk-ant-…" value="${esc(k)}"><button class="btn s" data-aisave>Enregistrer</button> <button class="btn s" data-aiclear>Retirer</button></details>`;$('#ai').scrollTo(0,1e6)}
 
 /* ================= Navigation & clics ================= */
+function navShadow(){const n=$('#navs'),w=$('#navw');if(!n||!w)return;w.classList.toggle('sl',n.scrollLeft>4);w.classList.toggle('sr',n.scrollWidth-n.clientWidth-Math.abs(n.scrollLeft)>4)}
 function tab(tName){tabNow=tName;$('#dock').classList.toggle('hide',tName!=='map');$('#top').style.display=tName==='map'?'':'none';
   $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tName));['plan','list','discover','info','ai'].forEach(p=>$('#'+p).classList.toggle('on',p===tName));
+  {const b=$('#nav [data-t="'+tName+'"]'),n=$('#navs');if(b&&n)n.scrollTo({left:b.offsetLeft-n.clientWidth/2+b.clientWidth/2,behavior:'smooth'})}
   $('#new').style.display=tName==='map'?'':'none';$('#unp').style.display=tName==='map'&&S&&unp().length?'':'none';
   if(!S)return;if(tName==='plan')renderPlan();if(tName==='list')renderList();if(tName==='discover')loadDiscover();if(tName==='info')renderInfo();if(tName==='ai')renderAI();
   if(tName==='map')setTimeout(()=>{map.invalidateSize();drawMap()},60)}
@@ -1088,6 +1401,9 @@ function onClick(e){
     return;
   }
   if(e.target.closest('a'))return;
+  if(e.target.closest('#gal-close')||e.target.id==='gallery-modal'){closeGallery();return}
+  if(e.target.closest('#gal-prev')){if(curGallery.length){curGalIdx=(curGalIdx-1+curGallery.length)%curGallery.length;updateGalUI()}return}
+  if(e.target.closest('#gal-next')){if(curGallery.length){curGalIdx=(curGalIdx+1)%curGallery.length;updateGalUI()}return}
 
   const sug=e.target.closest('[data-destll]');
   if(sug){
@@ -1117,11 +1433,7 @@ function onClick(e){
   if(tEl.id==='new'){if(!S)return;addSheet();return}
   if(tEl.id==='brand'){tripsSheet();return}
   if(tEl.id==='unp'){sheet(`<h2 style="font-size:20px;margin-top:0">Lieux à positionner</h2><p class="empty">Choisissez un lieu pour lui associer une position sur la carte.</p>${unp().map(a=>`<div class="near" data-open="${a.id}"><div><b>${esc(a.n)}</b><small>${I18N[curLang].cat_names[a.c]||a.c} · ${a.s.map(x=>I18N[curLang].slots[x]||'').join(', ')}</small></div><span>›</span></div>`).join('')}`);return}
-  if(tEl.id==='undo'){if(undo.length){redo.push(snap());restore(undo.pop());save();refresh()}return}
-  if(tEl.id==='redo'){if(redo.length){undo.push(snap());restore(redo.pop());save();refresh()}return}
-  if(tEl.id==='gal-close'){closeGallery();return}
-  if(tEl.id==='gal-prev'){if(curGallery.length){curGalIdx=(curGalIdx-1+curGallery.length)%curGallery.length;updateGalUI()}return}
-  if(tEl.id==='gal-next'){if(curGallery.length){curGalIdx=(curGalIdx+1)%curGallery.length;updateGalUI()}return}
+  if(tEl.id==='undo'){if(undo.length){restore(undo.pop());save();refresh()}return}
   if(d.opnegal!==undefined){
     const item=discList[+d.opnegal];
     if(item)openGallery(item.pageTitle||item.name,item.thumb,item.name);
@@ -1139,10 +1451,37 @@ function onClick(e){
   if(d.trip){if(d.trip!==DB.cur)setTrip(d.trip);close();return}
   if(d.savetrip!==undefined){saveTrip(d.savetrip);return}
   if(!S)return;
-  if(d.discengine){discEngine=d.discengine;loadDiscover(true);return}
-  if(d.disctype){discType=d.disctype;loadDiscover(true);return}
-  if('discsearch' in d){const q=($('#discq')||{}).value||'';loadDiscover(true,q);return}
-  if(d.addwiki!==undefined){addActivityFromWiki(+d.addwiki);return}
+  
+  if(d.discengine){
+    discEngine=d.discengine;
+    discList=[];
+    loadDiscover(true);
+    return;
+  }
+  if(d.discview){
+    discView=d.discview;
+    renderDiscover();
+    if(discView==='map') renderDiscoverMap();
+    return;
+  }
+  if(d.disctype){
+    discType=d.disctype;
+    discList=[];
+    loadDiscover(true);
+    return;
+  }
+  if('discsearch' in d){
+    const q=($('#discq')||{}).value||'';
+    discList=[];
+    loadDiscover(true,q);
+    return;
+  }
+  if('otmmore' in d){
+    const q=($('#discq')||{}).value||'';
+    loadDiscover(true,q,true);
+    return;
+  }
+  if(d.adddisc!==undefined){addActivityFromDisc(+d.adddisc);return}
   if(d.theme){setTheme(d.theme);return}
   if(d.sub){infoSub=d.sub;renderInfo();return}
   if('edittrip' in d){tripForm(S.id);return}
@@ -1228,7 +1567,7 @@ document.addEventListener('keydown',e=>{
   }
   if(e.key!=='Enter')return;
   if(e.target.id==='aiq'){e.preventDefault();aiSend(e.target.value)}
-  else if(e.target.id==='discq'){e.preventDefault();loadDiscover(true,e.target.value)}
+  else if(e.target.id==='discq'){e.preventDefault();discList=[];loadDiscover(true,e.target.value)}
   else if(e.target.dataset&&e.target.dataset.li){e.preventDefault();const b=document.querySelector(`[data-addli="${e.target.dataset.li}"]`);if(b)b.click()}
   else if(e.target.id==='pn'){e.preventDefault();const b=$('[data-addperson]');if(b)b.click()}
   else if(e.target.id==='sq'){e.preventDefault();clearTimeout(sqT);runSearch()}});
@@ -1249,7 +1588,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
 /* ================= Démarrage ================= */
 const boot=loadDB();DB=boot.db;S=curTrip();AIM=aiWelcome();applyTheme();applyLang(curLang);
 try{localStorage.setItem(K+'_t','1');localStorage.removeItem(K+'_t')}catch(e){setTimeout(()=>toast('⚠ Pensez à exporter régulièrement votre sauvegarde'),800)}
-initMap();show();
+initMap();show();{const n=$('#navs');if(n){n.addEventListener('scroll',navShadow,{passive:true});window.addEventListener('resize',navShadow);setTimeout(navShadow,100)}}
 if(!S)setTimeout(tripForm,300);
 window.__tp={get DB(){return DB},get S(){return S},parseGPS,fromHtml,nameFromUrl,norm,resolveLink,budgetData,leg,tripText,optimizeDay,dayEntries,get themePref(){return themePref},applyLang};
 })();
