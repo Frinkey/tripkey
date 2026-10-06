@@ -27,8 +27,8 @@ try{
   --tx: #0f172a;
   --tx-muted: #64748b;
   --ln: #e2e8f0;
-  --glass: rgba(255, 255, 255, 0.92);
-  --glass-border: rgba(226, 232, 240, 0.85);
+  --glass: rgba(255, 255, 255, 0.94);
+  --glass-border: rgba(226, 232, 240, 0.9);
   --primary: #0284c7;
   --primary-rgb: 2, 132, 199;
   --primary-tx: #ffffff;
@@ -37,8 +37,8 @@ try{
   --ok: #059669;
   --bad: #e11d48;
   --sh-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
-  --sh-md: 0 6px 16px -2px rgba(15, 23, 42, 0.08);
-  --sh-lg: 0 16px 36px -6px rgba(15, 23, 42, 0.16);
+  --sh-md: 0 6px 18px -2px rgba(15, 23, 42, 0.09);
+  --sh-lg: 0 16px 36px -6px rgba(15, 23, 42, 0.18);
   --radius-sm: 10px;
   --radius-md: 16px;
   --radius-lg: 22px;
@@ -57,8 +57,8 @@ try{
   --tx: #f8fafc;
   --tx-muted: #94a3b8;
   --ln: #24304c;
-  --glass: rgba(19, 27, 46, 0.92);
-  --glass-border: rgba(36, 48, 76, 0.85);
+  --glass: rgba(19, 27, 46, 0.94);
+  --glass-border: rgba(36, 48, 76, 0.9);
   --primary: #38bdf8;
   --primary-rgb: 56, 189, 248;
   --primary-tx: #0b0f19;
@@ -335,18 +335,50 @@ button, input, select, textarea { font-family: inherit; }
   scrollbar-width: none;
 }
 #tl::-webkit-scrollbar { display: none; }
+
+/* Timeline cards with quick remove button */
 .tk {
   flex: none;
-  min-width: 160px;
-  max-width: 220px;
+  min-width: 170px;
+  max-width: 230px;
   border-radius: var(--radius-md);
-  padding: 10px 14px;
+  padding: 9px 12px;
   background: var(--sf);
   border: 1px solid var(--ln);
   border-inline-start: 4px solid var(--c, var(--primary));
   box-shadow: var(--sh-sm);
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
+.tk-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+.tk-header small {
+  color: var(--tx-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.tk-rm-btn {
+  border: 0;
+  background: var(--sf2);
+  color: var(--tx-muted);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+.tk-rm-btn:hover { background: var(--bad); color: #ffffff; }
+.tk-rm-btn:active { transform: scale(0.9); }
 .tk b {
   display: flex;
   align-items: center;
@@ -356,8 +388,9 @@ button, input, select, textarea { font-family: inherit; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-top: 3px;
 }
-.tk small {
+.tk .tk-sub {
   color: var(--tx-muted);
   font-size: 11.5px;
   display: block;
@@ -375,6 +408,7 @@ button, input, select, textarea { font-family: inherit; }
   background: transparent;
   box-shadow: none;
   cursor: default;
+  padding: 12px;
 }
 
 #nav {
@@ -417,14 +451,36 @@ button, input, select, textarea { font-family: inherit; }
 #nav button svg { width: 22px; height: 22px; stroke-width: 2.1; }
 #nav button.on { color: var(--primary); }
 
+/* Floating action buttons above dock */
+#recenter-map {
+  position: fixed;
+  right: 18px;
+  bottom: calc(336px + var(--safe-bottom));
+  z-index: 520;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  box-shadow: var(--sh-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sf);
+  color: var(--tx);
+  border: 1px solid var(--glass-border);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+#recenter-map:active { transform: scale(0.92); }
+
 #new {
   position: fixed;
   right: 18px;
   bottom: calc(275px + var(--safe-bottom));
   z-index: 520;
   border-radius: 50%;
-  width: 54px;
-  height: 54px;
+  width: 52px;
+  height: 52px;
   padding: 0;
   box-shadow: var(--sh-lg);
   display: flex;
@@ -437,6 +493,7 @@ button, input, select, textarea { font-family: inherit; }
   transition: transform 0.15s ease;
 }
 #new:active { transform: scale(0.94); }
+
 #unp {
   position: fixed;
   left: 18px;
@@ -512,27 +569,73 @@ h3 {
   color: var(--tx-muted);
   font-weight: 700;
 }
-.dh {
-  display: flex;
-  flex-direction: column;
-  margin: 24px 0 8px;
+
+/* Collapsible Planning Day Accordions */
+.day-acc {
+  background: var(--sf-card);
+  border: 1px solid var(--ln);
+  border-radius: var(--radius-lg);
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: var(--sh-sm);
+  transition: border-color 0.2s ease;
 }
-.dh b {
-  font-size: 18px;
+.day-acc-head {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  background: var(--sf);
+  user-select: none;
+}
+.day-acc-info {
+  flex: 1;
+  min-width: 0;
+}
+.day-acc-info b {
+  font-size: 16.5px;
   font-weight: 800;
   letter-spacing: -0.02em;
+  display: block;
 }
-.dh small {
+.day-acc-info small {
   color: var(--tx-muted);
   font-size: 12.5px;
   margin-top: 2px;
+  display: block;
 }
+.day-acc-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--sf2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tx-muted);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  flex: none;
+}
+.day-acc.open .day-acc-icon {
+  transform: rotate(180deg);
+  background: var(--primary-surface);
+  color: var(--primary);
+}
+.day-acc-body {
+  display: none;
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--ln);
+  background: var(--sf-card);
+}
+.day-acc.open .day-acc-body { display: block; }
 
 .card {
   background: var(--sf-card);
   border: 1px solid var(--ln);
   border-radius: var(--radius-md);
-  padding: 14px;
+  padding: 12px 14px;
   margin-bottom: 10px;
   display: flex;
   gap: 12px;
@@ -541,8 +644,8 @@ h3 {
 }
 .card.blk { display: block; }
 .card .nm { flex: 1; min-width: 0; }
-.card .nm b { font-size: 15px; font-weight: 700; display: block; }
-.card small { display: block; color: var(--tx-muted); font-size: 12.5px; margin-top: 2px; }
+.card .nm b { font-size: 14.5px; font-weight: 700; display: block; }
+.card small { display: block; color: var(--tx-muted); font-size: 12px; margin-top: 2px; }
 .card.tint { background: var(--primary-surface); border-color: rgba(var(--primary-rgb), 0.2); }
 
 .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
@@ -662,7 +765,7 @@ input[type=checkbox] { width: auto; margin: 0 6px 0 0; }
 .kv { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; font-size: 14px; }
 .kv span:last-child { font-weight: 700; }
 
-/* Pin Markers with Highlight Beacon */
+/* Pin Markers with Radar Beacon */
 .pin-wrap {
   position: relative;
   width: 38px;
@@ -707,7 +810,6 @@ input[type=checkbox] { width: auto; margin: 0 6px 0 0; }
   padding: 0 4px;
 }
 
-/* Pulsating Radar Beacon Animation */
 .pin-beacon {
   position: absolute;
   inset: -14px;
@@ -730,7 +832,7 @@ input[type=checkbox] { width: auto; margin: 0 6px 0 0; }
   100% { transform: scale(2.4); opacity: 0; }
 }
 
-/* Modal Bottom Sheets */
+/* Modal Bottom Sheets with Close Header */
 #sheet {
   position: fixed;
   inset: 0;
@@ -765,7 +867,6 @@ input[type=checkbox] { width: auto; margin: 0 6px 0 0; }
   margin: 0 auto 12px;
 }
 
-/* Top bar inside sheets with Title & Close 'X' Button */
 .sheet-header {
   display: flex;
   align-items: center;
@@ -775,7 +876,7 @@ input[type=checkbox] { width: auto; margin: 0 6px 0 0; }
 }
 .sheet-header h2 {
   margin: 0;
-  font-size: 21px;
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.02em;
   flex: 1;
@@ -1194,6 +1295,7 @@ input[type=checkbox] { width: auto; margin: 0 6px 0 0; }
 
 <div id="map"></div>
 
+<!-- Top floating bar -->
 <div id="top">
   <div id="brandrow">
     <button id="brand" class="glass-panel" aria-label="Choisir un voyage"></button>
@@ -1215,7 +1317,12 @@ input[type=checkbox] { width: auto; margin: 0 6px 0 0; }
   </div>
 </div>
 
-<button class="btn" id="new" aria-label="Ajouter un lieu">
+<!-- Floating Action Buttons -->
+<button class="glass-panel" id="recenter-map" aria-label="Recentrer la carte" title="Recentrer">
+  <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+</button>
+
+<button class="btn" id="new" aria-label="Ajouter un lieu" title="Ajouter un lieu">
   <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
 </button>
 <button class="btn s glass-panel" id="unp" style="display:none"></button>
@@ -1226,11 +1333,13 @@ input[type=checkbox] { width: auto; margin: 0 6px 0 0; }
 <div class="pane" id="info"></div>
 <div class="pane" id="ai"></div>
 
+<!-- Bottom timeline dock -->
 <div id="dock" class="glass-panel">
   <div id="days"></div>
   <div id="tl"></div>
 </div>
 
+<!-- Bottom Navigation Bar -->
 <div id="nav" class="glass-panel">
   <div id="navw">
     <div id="navs">
@@ -1286,6 +1395,7 @@ input[type=checkbox] { width: auto; margin: 0 6px 0 0; }
 <div id="sheet"></div>
 <div id="toast"></div>
 
+<!-- Image Lightbox Modal -->
 <div id="gallery-modal">
   <button id="gal-close" aria-label="Fermer la galerie">
     <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -1339,7 +1449,9 @@ const ICONS = {
   share: '<svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
   print: '<svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>',
   sparkles: '<svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>',
-  link: '<svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>'
+  link: '<svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+  copy: '<svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  chevronDown: '<svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>'
 };
 
 const CAT_ICONS = { v: ICONS.sight, a: ICONS.activity, f: ICONS.food, n: ICONS.night };
@@ -1528,10 +1640,11 @@ let undo = [], redo = [], day = 0;
 let fs = new Set(), fc = new Set();
 let hideO = false, hideU = false, placing = null;
 let map = null, layer = null, PTS = [];
-let markerMap = new Map(); // id -> L.marker
+let markerMap = new Map();
 let activeBeaconId = null;
 let beaconTimer = null;
 let tabNow = 'map';
+let openDays = new Set([0]); // Set of open accordion day indices
 let AIM = [], aiBusy = false, GR = [], SR = [], SRadd = new Set(), bulkBusy = false, infoSub = 'apercu';
 let filterOpen = false, destSugTimer = null, lastChosenCoords = null;
 let discEngine = 'wiki', discView = 'list', discType = 'all', discList = [], discLoading = false, discQuery = '';
@@ -1861,9 +1974,7 @@ function focusPlaceOnMap(lat, lng, actId){
         animate: true,
         duration: 0.8
       });
-      drawMap(); // updates highlight classes on pins
-      
-      // Keep pulsing beacon for 6 seconds, then gently reset
+      drawMap();
       beaconTimer = setTimeout(()=>{
         activeBeaconId = null;
         drawMap();
@@ -1921,9 +2032,32 @@ function renderTL(){
   if(!S)return;
   const es=dayEntries(Math.min(day,S.n-1));
   $('#tl').innerHTML=es.length?es.map(e=>{
-    if(e.k==='act')return`<div class="tk" data-open="${e.a.id}" style="--c:${COL[e.a.c]}"><small>${e.t}</small><b>${CAT_ICONS[e.a.c]} ${esc(e.a.n)}</b><small>${e.leg?legTxt(e.leg):(e.a.rate?`Note ${e.a.rate}/5`:I18N[curLang].cat_names[e.a.c])}</small></div>`;
-    if(e.k==='note')return`<div class="tk" data-item="${e.it.id}" style="--c:var(--primary)"><small>${e.t}</small><b>${ICONS.note} ${esc(e.it.note)}</b></div>`;
-    return`<div class="tk" data-resid="${e.r.id}" style="--c:var(--tx-muted)"><small>${e.r.time||'—'}</small><b>${RT[e.r.k][1]} ${esc(e.r.t)}</b></div>`;
+    if(e.k==='act') {
+      return `
+        <div class="tk" style="--c:${COL[e.a.c]}">
+          <div class="tk-header">
+            <small>${e.t}</small>
+            <button class="tk-rm-btn" data-rmitem="${e.it.id}" title="Retirer du jour" aria-label="Retirer">${ICONS.cross}</button>
+          </div>
+          <b data-open="${e.a.id}">${CAT_ICONS[e.a.c]} ${esc(e.a.n)}</b>
+          <span class="tk-sub" data-open="${e.a.id}">${e.leg?legTxt(e.leg):(e.a.rate?`Note ${e.a.rate}/5`:I18N[curLang].cat_names[e.a.c])}</span>
+        </div>`;
+    }
+    if(e.k==='note') {
+      return `
+        <div class="tk" style="--c:var(--primary)">
+          <div class="tk-header">
+            <small>${e.t}</small>
+            <button class="tk-rm-btn" data-rmitem="${e.it.id}" title="Retirer du jour" aria-label="Retirer">${ICONS.cross}</button>
+          </div>
+          <b data-item="${e.it.id}">${ICONS.note} ${esc(e.it.note)}</b>
+        </div>`;
+    }
+    return `
+      <div class="tk" data-resid="${e.r.id}" style="--c:var(--tx-muted)">
+        <small>${e.r.time||'—'}</small>
+        <b>${RT[e.r.k][1]} ${esc(e.r.t)}</b>
+      </div>`;
   }).join(''):`<div class="tk ghost">${S.acts.length?t('empty_day'):'Appuyez sur + pour ajouter des étapes.'}</div>`;
 }
 
@@ -1981,7 +2115,6 @@ const fit=()=>{if(map&&PTS.length)map.fitBounds(PTS,{padding:[60,60],maxZoom:14}
 function centerMap(){if(!map||!S)return;map.invalidateSize();drawMap();if(PTS.length)fit();else if(S.center)map.setView(S.center,S.zoom||11);else map.setView([20,0],2)}
 function afterPos(){if(S.acts.filter(a=>a.lat!=null).length<=1)setTimeout(()=>{drawMap();fit()},60)}
 
-/* Sheet with standardized Header + Corner Close 'X' Button */
 function sheet(title, bodyHtml){
   const h = `
     <div class="sheet-header">
@@ -2256,10 +2389,10 @@ function renderPlan(){
       ${S.cals.map(x=>`<button class="chip ${x.id===c.id?'on':''}" data-cal="${x.id}">${esc(x.name)}</button>`).join('')}
       <button class="chip" data-newcal>${ICONS.plus} Programme</button>
     </div>
-    <div class="row" style="padding-bottom:12px;gap:6px">
-      <button class="btn s sm" data-ren title="Renommer">${ICONS.edit} Renommer</button>
-      <button class="btn s sm" data-dup title="Dupliquer">Dupliquer</button>
-      <button class="btn s sm" data-delcal title="Supprimer">${ICONS.trash}</button>
+    <div class="row" style="padding-bottom:14px;gap:8px">
+      <button class="btn s ic" data-ren title="Renommer" aria-label="Renommer">${ICONS.edit}</button>
+      <button class="btn s ic" data-dup title="Dupliquer" aria-label="Dupliquer">${ICONS.copy}</button>
+      <button class="btn s ic" data-delcal title="Supprimer" aria-label="Supprimer">${ICONS.trash}</button>
     </div>`+
     c.days.map((d,i)=>{
       const es=dayEntries(i),s=dayStats(i),sum=[];
@@ -2269,48 +2402,61 @@ function renderPlan(){
       if(s.vis)sum.push('visites '+fmtMin(s.vis));
       if(s.spent)sum.push(fm(s.spent));
       const url=dirURL(i);
-      return`
-        <div class="dh">
-          <b>${dl(i)}</b>
-          <small>${sum.join(' · ')||'Journée libre'}</small>
-        </div>
-        <input data-hotel="${i}" value="${esc(d.hotel)}" placeholder="Hôtel ou hébergement du soir…">
-        ${es.map(e=>{
-          if(e.k==='res')return`
-            <div class="card tint">
-              <span>${RT[e.r.k][1]}</span>
-              <div class="nm" data-resid="${e.r.id}">
-                <b>${esc(e.r.t)}</b>
-                <small>${e.r.time||'Journée'}${e.r.ref?' · Réf. '+esc(e.r.ref):''}</small>
-              </div>
-            </div>`;
-          const mv=`<div class="mv"><button data-mv="${e.it.id}|-1" aria-label="Monter">▲</button><button data-mv="${e.it.id}|1" aria-label="Descendre">▼</button></div>`;
-          if(e.k==='note')return`
-            <div class="card">
-              <span>${ICONS.note}</span>
-              <input type="time" value="${e.it.t}" data-time="${e.it.id}">
-              <div class="nm" data-item="${e.it.id}"><b style="white-space:pre-wrap">${esc(e.it.note)}</b></div>
-              ${mv}
-              <button class="btn s sm" data-item="${e.it.id}">•••</button>
-            </div>`;
-          return(e.leg?`<div class="leg">${legTxt(e.leg)}</div>`:'')+`
-            <div class="card">
-              <span class="dot" style="background:${COL[e.a.c]}"></span>
-              <input type="time" value="${e.it.t}" data-time="${e.it.id}">
-              <div class="nm" data-open="${e.a.id}">
-                <b>${esc(e.a.n)}</b>
-                <small>${I18N[curLang].cat_names[e.a.c]||e.a.c}${e.a.d?' · '+fmtMin(e.a.d):''}${e.a.rate?' · '+e.a.rate+'/5':''}</small>
-              </div>
-              ${e.a.lat!=null?`<button class="btn s ic" data-focusmap="${e.a.lat}|${e.a.lng}|${e.a.id}" title="Sur la carte">${ICONS.mapTarget}</button>`:''}
-              ${mv}
-              <button class="btn s sm" data-item="${e.it.id}">•••</button>
-            </div>`;
-        }).join('')||`<div class="empty">${t('empty_day')}</div>`}
-        <div class="row" style="padding:6px 0 16px;gap:6px">
-          <button class="btn s sm" data-day="${i}" data-go title="Voir la journée sur la carte">${ICONS.mapTarget} Sur la carte</button>
-          <button class="btn s sm" data-addnote="${i}">${ICONS.plus} Note</button>
-          <button class="btn s sm" data-autofill="${i}">${ICONS.sparkles} Suggérer</button>
-          ${url?`<a class="btn s sm" target="_blank" rel="noopener" href="${esc(url)}">${ICONS.pin} Itinéraire</a>`:''}
+      const isOpen=openDays.has(i);
+
+      return `
+        <div class="day-acc ${isOpen?'open':''}" id="day-acc-${i}">
+          <div class="day-acc-head" data-toggleacc="${i}">
+            <div class="day-acc-info">
+              <b>${dl(i)}</b>
+              <small>${sum.join(' · ')||'Journée libre'}</small>
+            </div>
+            <div class="day-acc-icon">
+              ${ICONS.chevronDown}
+            </div>
+          </div>
+          <div class="day-acc-body">
+            <input data-hotel="${i}" value="${esc(d.hotel)}" placeholder="Hôtel ou hébergement du soir…">
+            ${es.map(e=>{
+              if(e.k==='res')return`
+                <div class="card tint">
+                  <span style="color:var(--primary)">${RT[e.r.k][1]}</span>
+                  <div class="nm" data-resid="${e.r.id}">
+                    <b>${esc(e.r.t)}</b>
+                    <small>${e.r.time||'Journée'}${e.r.ref?' · Réf. '+esc(e.r.ref):''}</small>
+                  </div>
+                </div>`;
+              const mv=`<div class="mv"><button data-mv="${e.it.id}|-1" aria-label="Monter">▲</button><button data-mv="${e.it.id}|1" aria-label="Descendre">▼</button></div>`;
+              if(e.k==='note')return`
+                <div class="card">
+                  <span>${ICONS.note}</span>
+                  <input type="time" value="${e.it.t}" data-time="${e.it.id}">
+                  <div class="nm" data-item="${e.it.id}"><b style="white-space:pre-wrap">${esc(e.it.note)}</b></div>
+                  ${mv}
+                  <button class="btn s ic" data-rmitem="${e.it.id}" title="Retirer">${ICONS.cross}</button>
+                  <button class="btn s sm" data-item="${e.it.id}">•••</button>
+                </div>`;
+              return(e.leg?`<div class="leg">${legTxt(e.leg)}</div>`:'')+`
+                <div class="card">
+                  <span class="dot" style="background:${COL[e.a.c]}"></span>
+                  <input type="time" value="${e.it.t}" data-time="${e.it.id}">
+                  <div class="nm" data-open="${e.a.id}">
+                    <b>${esc(e.a.n)}</b>
+                    <small>${I18N[curLang].cat_names[e.a.c]||e.a.c}${e.a.d?' · '+fmtMin(e.a.d):''}${e.a.rate?' · '+e.a.rate+'/5':''}</small>
+                  </div>
+                  ${e.a.lat!=null?`<button class="btn s ic" data-focusmap="${e.a.lat}|${e.a.lng}|${e.a.id}" title="Sur la carte">${ICONS.mapTarget}</button>`:''}
+                  ${mv}
+                  <button class="btn s ic" data-rmitem="${e.it.id}" title="Retirer du jour">${ICONS.cross}</button>
+                  <button class="btn s sm" data-item="${e.it.id}">•••</button>
+                </div>`;
+            }).join('')||`<div class="empty">${t('empty_day')}</div>`}
+            <div class="row" style="padding:8px 0 4px;gap:6px">
+              <button class="btn s ic" data-day="${i}" data-go title="Voir la journée sur la carte">${ICONS.mapTarget}</button>
+              <button class="btn s ic" data-addnote="${i}" title="Ajouter une note">${ICONS.note}</button>
+              <button class="btn s ic" data-autofill="${i}" title="Suggérer des visites">${ICONS.sparkles}</button>
+              ${url?`<a class="btn s ic" target="_blank" rel="noopener" href="${esc(url)}" title="Itinéraire Maps">${ICONS.pin}</a>`:''}
+            </div>
+          </div>
         </div>`;
     }).join('');
 }
@@ -2921,7 +3067,7 @@ async function saveTrip(id){
 }
 
 function setTrip(id){
-  discFlt=newFlt();DB.cur=id;S=curTrip();undo=[];redo=[];day=0;fs.clear();fc.clear();
+  discFlt=newFlt();DB.cur=id;S=curTrip();undo=[];redo=[];day=0;openDays=new Set([0]);fs.clear();fc.clear();
   hideO=false;hideU=false;placing=null;infoSub='apercu';discList=[];listSearchQuery='';listFilterCat='all';AIM=aiWelcome();save();show();
 }
 
@@ -2936,7 +3082,7 @@ function deleteTrip(){
   if(!S)return;
   DB.trips=DB.trips.filter(tTrip=>tTrip.id!==S.id);
   DB.cur=DB.trips[0]?DB.trips[0].id:'';
-  S=curTrip();undo=[];redo=[];day=0;AIM=aiWelcome();save();show();toast('Voyage supprimé');
+  S=curTrip();undo=[];redo=[];day=0;openDays=new Set([0]);AIM=aiWelcome();save();show();toast('Voyage supprimé');
 }
 
 function download(name,obj){
@@ -2975,7 +3121,7 @@ function findAct(q){
 }
 function dayFrom(q){const m=NF(q).match(/(?:jour|journee|j|le)\s*(\d{1,2})/);return m&&+m[1]>=1&&+m[1]<=S.n?+m[1]-1:Math.min(day,S.n-1)}
 const mini=(id,n,l)=>`<button class="mini" data-aiadd="${id}|${n}">${esc(l)}</button>`;
-function addAt(id,n){day=n;if(!cal().days[n].items.some(i=>i.aid===id))addToDay(id)}
+function addAt(id,n){day=n;openDays.add(n);if(!cal().days[n].items.some(i=>i.aid===id))addToDay(id)}
 
 function localAI(text){
   const q=NF(text),n=dayFrom(text),a=findAct(text),D=cal().days[n];
@@ -3129,10 +3275,33 @@ document.addEventListener('click',e=>{try{onClick(e)}catch(err){console.error(er
 
 function onClick(e){
   const inlineBtn=e.target.closest('[data-toggleinline]');
-  const CLK='button,[data-open],[data-geopick],[data-trip],[data-note],[data-item],[data-resid],[data-expid],[data-opnegal],[data-focusmap],[data-toggleacc],#sheet';
+  if(inlineBtn){
+    const idx=+inlineBtn.dataset.toggleinline;
+    const box=$('#inline-'+idx);
+    if(box)box.classList.toggle('on');
+    return;
+  }
+
+  if(e.target.closest('a'))return;
+  if(e.target.closest('#gal-close')||e.target.id==='gallery-modal'){closeGallery();return}
+  if(e.target.closest('#gal-prev')){if(curGallery.length){curGalIdx=(curGalIdx-1+curGallery.length)%curGallery.length;updateGalUI()}return}
+  if(e.target.closest('#gal-next')){if(curGallery.length){curGalIdx=(curGalIdx+1)%curGallery.length;updateGalUI()}return}
+
+  const sug=e.target.closest('[data-destll]');
+  if(sug){
+    const d=sug.dataset;
+    const inp=$('#td');if(inp)inp.value=d.destname;
+    const [la,lo]=d.destll.split(',');
+    lastChosenCoords=[+la,+lo];
+    const list=$('#td-sug');if(list){list.style.display='none';list.innerHTML=''}
+    return;
+  }
+
+  const CLK='button,[data-open],[data-geopick],[data-trip],[data-note],[data-item],[data-resid],[data-expid],[data-opnegal],[data-focusmap],[data-toggleacc],[data-rmitem],#sheet';
   const tEl=e.target.closest(CLK);if(!tEl)return;const d=tEl.dataset;
   if(tEl.id==='sheet'){if(e.target===tEl)close();return}
 
+  // Floating Recenter Button
   if(tEl.id==='recenter-map'){
     if(map){
       if(PTS.length){
@@ -3145,6 +3314,20 @@ function onClick(e){
     return;
   }
 
+  // Quick remove from current day (Timeline "X" button)
+  if(d.rmitem){
+    const itemId=d.rmitem;
+    const f=findItem(itemId);
+    if(f){
+      mut(()=>{
+        f.d.items=f.d.items.filter(x=>x.id!==itemId);
+      });
+      toast('Retiré du jour');
+    }
+    return;
+  }
+
+  // Accordion toggle in planning view
   if(d.toggleacc!==undefined){
     const dayIdx=+d.toggleacc;
     if(openDays.has(dayIdx)) openDays.delete(dayIdx);
@@ -3154,7 +3337,14 @@ function onClick(e){
     return;
   }
 
+  // Direct focus on map pin with ripple beacon
   if(d.focusmap){
+    const parts=d.focusmap.split('|');
+    const lat=+parts[0], lng=+parts[1], actId=parts[2]||null;
+    focusPlaceOnMap(lat, lng, actId);
+    return;
+  }
+
   if(d.day!==undefined){
     day=Math.min(+d.day,S.n-1);
     openDays.add(day);
@@ -3287,7 +3477,6 @@ function onClick(e){
   if(d.geopick!==undefined){pickGeo(d.geopick);return}
   if('bulk' in d){bulkSheet();return}
   if('bulkgo' in d){bulkGo();return}
-  if(d.day!==undefined){day=Math.min(+d.day,S.n-1);bars();drawMap();if('go' in d)tab('map');return}
   if(d.send!==undefined){aiSend($('#aiq').value);return}
   if(d.ask){aiSend(d.ask);return}
   if(d.aiadd){const[i,n]=d.aiadd.split('|');addAt(i,+n);toast('Ajouté au '+dl(+n));return}
@@ -3309,7 +3498,7 @@ function onClick(e){
   if(d.place!==undefined){let id=d.place;if($('#en')){const r=readForm(id||'');if(!r)return;id=r.id}placing=id;close();tab('map');toast('Touchez la carte pour placer');return}
   if(d.del){mut(()=>{S.acts=S.acts.filter(a=>a.id!==d.del);S.cals.forEach(c=>c.days.forEach(x=>x.items=x.items.filter(i=>i.aid!==d.del)))});close();return}
   if(d.rm){mut(()=>cal().days.forEach(x=>x.items=x.items.filter(i=>i.id!==d.rm)));close();return}
-  if(d.cal){S.cur=d.cal;day=Math.min(day,S.n-1);save();refresh();return}
+  if(d.cal){S.cur=d.cal;day=Math.min(day,S.n-1);openDays.add(day);save();refresh();return}
   if('newcal' in d){const n=prompt('Nom du programme :');if(n&&n.trim())mut(()=>{const c=mkCal(n.trim(),S.n);S.cals.push(c);S.cur=c.id});return}
   if('ren' in d){const n=prompt('Renommer le programme :',cal().name);if(n&&n.trim())mut(()=>{cal().name=n.trim()});return}
   if('dup' in d){mut(()=>{const c=JSON.parse(JSON.stringify(cal()));c.id=uid();c.name+=' (copie)';c.days.forEach(x=>x.items.forEach(i=>i.id=uid()));S.cals.push(c);S.cur=c.id});return}
@@ -3351,6 +3540,7 @@ document.addEventListener('input',e=>{
 window.addEventListener('pagehide',save);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
 
+// Bootstrap application
 const boot=loadDB();
 DB=boot.db;
 S=curTrip();
@@ -3362,7 +3552,7 @@ show();
 if(!S)setTimeout(tripForm,300);
 
 window.__tp={get DB(){return DB},get S(){return S},save,norm,loadDB,applyLang,focusPlaceOnMap};
-}();
+})();
 </script>
 </body>
 </html>
