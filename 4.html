@@ -3,10 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Trip Planner">
 <meta name="theme-color" content="#f2f4f9">
 <title>Trip Planner</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2'><circle cx='12' cy='12' r='10'/><polygon points='16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76'/></svg>">
 <script>
 try{
   var p=localStorage.getItem('tripkit_theme')||'light';
@@ -237,7 +239,7 @@ h3{margin:18px 0 8px;font-size:13px;color:var(--mu);font-weight:700;text-transfo
 .day-body{display:none;padding:0 14px 14px;border-top:1px solid var(--ln);background:var(--inp)}
 .day-acc.open .day-body{display:block}
 
-/* Cartes réorganisées dans le planning */
+/* Cartes dans le planning */
 .plan-card{
   background:var(--sf);border:1px solid var(--ln);border-radius:14px;
   padding:12px;margin:10px 0;box-shadow:var(--shs);display:flex;flex-direction:column;gap:8px;
@@ -474,7 +476,6 @@ const ICONS = {
   chevron: '<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>',
   plus: '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
   note: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>',
-  route: '<svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>',
   close: '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
 };
 
@@ -486,8 +487,6 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const CT = {v:'Visite',a:'Activité',f:'Food',n:'Sortie'};
 const COL = {v:'#0284c7',a:'#f97316',f:'#8b5cf6',n:'#ec4899'};
 const SLOTS = {m:'Matin',a:'Après-midi',s:'Coucher de soleil',e:'Soirée'};
-const EXC = {h:['Hébergement','🏨'],t:['Transport','🚕'],f:['Nourriture','🍽'],a:['Activités','🎟'],s:['Shopping','🛍'],o:['Autre','💬']};
-const RT = {f:['Vol','✈️'],h:['Hôtel','🏨'],t:['Train / bus','🚆'],c:['Location voiture','🚗'],r:['Restaurant','🍽'],a:['Activité','🎟'],o:['Autre','📌']};
 
 const tm = t => {const[a,b]=t.split(':');return+a*60+ +b};
 const mt = m => String(Math.floor(Math.max(0,Math.min(1439,m))/60)).padStart(2,'0')+':'+String(Math.max(0,Math.min(1439,m))%60).padStart(2,'0');
@@ -566,7 +565,7 @@ let fs = new Set(), fc = new Set(), hideO = false, hideU = false, placing = null
 let map, layer, PTS = [], tabNow = 'map';
 let filterOpen = false;
 let discEngine = 'wiki', discType = 'all', discList = [], discLoading = false;
-let openDays = new Set(); // Accordéons fermés par défaut
+let openDays = new Set();
 
 const curTrip = () => DB.trips.find(t=>t.id===DB.cur) || null;
 const cal = () => S.cals.find(c=>c.id===S.cur) || S.cals[0];
@@ -597,7 +596,6 @@ const vis = a => {
   return true;
 };
 const unp = () => S.acts.filter(a=>a.lat==null&&vis(a));
-const fm = n => Number(n).toLocaleString('fr-FR',{maximumFractionDigits:2})+' '+S.money;
 
 /* --- Géolocalisation & distances --- */
 function hav(a,b){if(!a||!b||a.lat==null||b.lat==null)return null;const r=x=>x*Math.PI/180,p=r(b.lat-a.lat),q=r(b.lng-a.lng),h=Math.sin(p/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(q/2)**2;return 12742*Math.asin(Math.sqrt(h))}
@@ -775,7 +773,6 @@ function addPlaceSheet(){
     <div id="sres"></div>
     <div class="row wrap" style="margin-top:10px">
       <button class="btn s" data-addman>Saisie manuelle</button>
-      <button class="btn s" data-bulk>Ajout par lot</button>
     </div>
   `);
   setTimeout(()=>{const q=$('#sq');if(q)q.focus()},300);
@@ -888,7 +885,7 @@ function show(){
   setTimeout(()=>{fitMap();drawMap()},120);
 }
 
-/* --- Rendu : Planning (Accordéons fermés par défaut) --- */
+/* --- Planning (Accordéons fermés par défaut) --- */
 function renderPlan(){
   const c = cal();
   $('#plan').innerHTML = `
@@ -956,7 +953,7 @@ function renderPlan(){
   `;
 }
 
-/* --- Rendu : Onglet Lieux (sans bouton "...") --- */
+/* --- Lieux (Ouverture directe au clic, sans "...") --- */
 function renderList(){
   $('#list').innerHTML = `
     <h2>Mes adresses</h2>
@@ -976,7 +973,7 @@ function renderList(){
   `;
 }
 
-/* --- Rendu : Onglet Explorer --- */
+/* --- Explorer --- */
 async function loadDiscover(){
   if(discList.length||discLoading)return;
   discLoading=true;
@@ -1020,7 +1017,7 @@ function renderDiscover(){
   `;
 }
 
-/* --- Onglet Voyage & Assistant --- */
+/* --- Voyage & Assistant --- */
 function renderInfo(){
   $('#info').innerHTML = `
     <h2>Mon Voyage</h2>
